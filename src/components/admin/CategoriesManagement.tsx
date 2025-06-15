@@ -11,10 +11,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useCategories } from '@/hooks/useCategories';
+import { useCategories, useDeleteCategory } from '@/hooks/useCategories';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { CategoryForm } from './CategoryForm';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export const CategoriesManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,11 +33,25 @@ export const CategoriesManagement = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: categories, isLoading } = useCategories();
+  const deleteCategory = useDeleteCategory();
 
   const filteredCategories = categories?.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEditCategory = (category) => {
+    setSelectedCategory(category);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteCategory.mutateAsync(categoryId);
+    } catch (error) {
+      console.error('Erro ao excluir categoria:', error);
+    }
+  };
 
   if (isLoading) {
     return <div className="p-6">Carregando categorias...</div>;
@@ -71,8 +96,10 @@ export const CategoriesManagement = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Imagem</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
+                <TableHead>Ordem</TableHead>
                 <TableHead>Data de Criação</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -80,8 +107,25 @@ export const CategoriesManagement = () => {
             <TableBody>
               {filteredCategories?.map((category) => (
                 <TableRow key={category.id}>
+                  <TableCell>
+                    {category.image_url ? (
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span className="text-xs text-gray-400">Sem foto</span>
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.description || '-'}</TableCell>
+                  <TableCell>{category.sort_order || 0}</TableCell>
                   <TableCell>
                     {category.created_at 
                       ? new Date(category.created_at).toLocaleDateString('pt-BR')
@@ -93,16 +137,35 @@ export const CategoriesManagement = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setSelectedCategory(category);
-                          setIsFormOpen(true);
-                        }}
+                        onClick={() => handleEditCategory(category)}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Categoria</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir a categoria "{category.name}"? 
+                              Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteCategory(category.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

@@ -7,6 +7,8 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
+  image_url?: string;
+  sort_order?: number;
   created_at?: string;
 }
 
@@ -17,7 +19,7 @@ export const useCategories = () => {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .order('name');
+        .order('sort_order', { ascending: true });
       
       if (error) throw error;
       return data as Category[];

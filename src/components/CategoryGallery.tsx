@@ -2,68 +2,81 @@
 import { useState } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryStats } from '@/hooks/useProductsByCategory';
+import { useNavigate } from 'react-router-dom';
 
 const CategoryGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { data: categoryStats, isLoading } = useCategoryStats();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { data: categoryStats, isLoading: statsLoading } = useCategoryStats();
+  const navigate = useNavigate();
 
   // Fallback para categorias padrão enquanto não há dados
   const defaultCategories = [
     {
       id: 'default-1',
       name: "Vestido de Noiva",
-      image: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       description: "Modelos únicos para o seu grande dia",
-      productCount: 0
+      productCount: 0,
+      sort_order: 1
     },
     {
       id: 'default-2',
       name: "Terno Masculino", 
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       description: "Elegância e sofisticação",
-      productCount: 0
+      productCount: 0,
+      sort_order: 2
     },
     {
       id: 'default-3',
       name: "Vestido de Festa",
-      image: "https://images.unsplash.com/photo-1566479179817-65e64c5b8b13?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", 
+      image_url: "https://images.unsplash.com/photo-1566479179817-65e64c5b8b13?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", 
       description: "Para ocasiões especiais",
-      productCount: 0
+      productCount: 0,
+      sort_order: 3
     },
     {
       id: 'default-4',
       name: "Vestido Leve",
-      image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       description: "Conforto e estilo",
-      productCount: 0
+      productCount: 0,
+      sort_order: 4
     },
     {
       id: 'default-5',
       name: "Traje Chinês",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       description: "Tradição oriental",
-      productCount: 0
+      productCount: 0,
+      sort_order: 5
     },
     {
       id: 'default-6',
       name: "Vestido para Mães",
-      image: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       description: "Elegância para mães especiais",
-      productCount: 0
+      productCount: 0,
+      sort_order: 6
     }
   ];
 
-  const categories = categoryStats && categoryStats.length > 0 ? categoryStats : defaultCategories;
+  // Combinar dados reais com estatísticas, ordenados por sort_order
+  const displayCategories = categories && categories.length > 0 
+    ? categoryStats?.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)) || []
+    : defaultCategories;
 
   const handleCategoryClick = (categoryId: string) => {
-    if (selectedCategory === categoryId) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(categoryId);
-    }
+    // Navegar para o catálogo com filtro da categoria
+    navigate(`/catalogo?category=${categoryId}`);
   };
 
-  if (isLoading) {
+  const handleViewAllProducts = () => {
+    navigate('/catalogo');
+  };
+
+  if (categoriesLoading || statsLoading) {
     return (
       <section id="categorias" className="py-20 bg-asa-white">
         <div className="container mx-auto px-4">
@@ -90,32 +103,32 @@ const CategoryGallery = () => {
           <p className="text-lg text-asa-gray max-w-2xl mx-auto">
             Descubra nossa seleção exclusiva de peças para cada ocasião especial
           </p>
-          {selectedCategory && (
-            <div className="mt-4">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className="text-asa-blush hover:text-asa-dark transition-colors"
-              >
-                ← Voltar para todas as categorias
-              </button>
-            </div>
-          )}
+          
+          <div className="mt-8">
+            <button
+              onClick={handleViewAllProducts}
+              className="bg-asa-blush text-white px-8 py-3 rounded-full font-medium hover:bg-asa-dark transition-colors"
+            >
+              Ver Todos os Produtos
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category) => (
+          {displayCategories.map((category) => (
             <div 
               key={category.id}
-              className={`group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105 ${
-                selectedCategory === category.id ? 'ring-2 ring-asa-blush' : ''
-              }`}
+              className="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105"
               onClick={() => handleCategoryClick(category.id)}
             >
               <div className="aspect-[3/4] overflow-hidden">
                 <img
-                  src={category.image || "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                  src={category.image_url || "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
                   alt={category.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
               <div className="p-6">
@@ -129,31 +142,16 @@ const CategoryGallery = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-asa-gray text-sm">
+                <p className="text-asa-gray text-sm mb-4">
                   {category.description || 'Categoria sem descrição'}
                 </p>
-                {selectedCategory === category.id && (
-                  <div className="mt-4 pt-4 border-t border-asa-gray-light">
-                    <p className="text-sm text-asa-blush font-medium">
-                      Clique para ver produtos desta categoria
-                    </p>
-                  </div>
-                )}
+                <div className="text-asa-blush font-medium text-sm group-hover:text-asa-dark transition-colors">
+                  Ver produtos desta categoria →
+                </div>
               </div>
             </div>
           ))}
         </div>
-
-        {selectedCategory && (
-          <div className="mt-16 p-8 bg-asa-gray-light rounded-2xl">
-            <h3 className="text-2xl font-serif font-bold text-asa-dark mb-4 text-center">
-              Produtos da Categoria Selecionada
-            </h3>
-            <p className="text-center text-asa-gray">
-              Funcionalidade de exibição de produtos em desenvolvimento...
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );
