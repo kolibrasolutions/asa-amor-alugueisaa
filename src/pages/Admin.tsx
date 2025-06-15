@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardStats } from '@/hooks/useDashboard';
-import { Package, Users, Calendar, LogOut, ArrowLeft } from 'lucide-react';
+import { Package, Users, Calendar, LogOut, ArrowLeft, Folder } from 'lucide-react';
 import { ProductsManagement } from '@/components/admin/ProductsManagement';
 import { CustomersManagement } from '@/components/admin/CustomersManagement';
+import { CategoriesManagement } from '@/components/admin/CategoriesManagement';
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
@@ -44,6 +45,8 @@ const Admin = () => {
         return <ProductsManagement />;
       case 'customers':
         return <CustomersManagement />;
+      case 'categories':
+        return <CategoriesManagement />;
       case 'rentals':
         return (
           <div className="p-6">
@@ -110,6 +113,17 @@ const Admin = () => {
 
               <Card 
                 className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setActiveSection('categories')}
+              >
+                <CardContent className="p-6 text-center">
+                  <Folder className="w-8 h-8 mx-auto mb-2 text-asa-blush" />
+                  <h3 className="font-semibold mb-1">Gerenciar Categorias</h3>
+                  <p className="text-sm text-gray-600">Criar e organizar categorias</p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => setActiveSection('customers')}
               >
                 <CardContent className="p-6 text-center">
@@ -127,17 +141,6 @@ const Admin = () => {
                   <Calendar className="w-8 h-8 mx-auto mb-2 text-asa-blush" />
                   <h3 className="font-semibold mb-1">Novo Aluguel</h3>
                   <p className="text-sm text-gray-600">Criar novo contrato de aluguel</p>
-                </CardContent>
-              </Card>
-
-              <Card 
-                className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setActiveSection('calendar')}
-              >
-                <CardContent className="p-6 text-center">
-                  <Calendar className="w-8 h-8 mx-auto mb-2 text-asa-blush" />
-                  <h3 className="font-semibold mb-1">Agenda</h3>
-                  <p className="text-sm text-gray-600">Visualizar agenda de eventos</p>
                 </CardContent>
               </Card>
             </div>
@@ -187,6 +190,7 @@ const Admin = () => {
             <h1 className="text-2xl font-serif">
               {activeSection === 'dashboard' ? 'Painel Administrativo - Asa Amor' : 
                activeSection === 'products' ? 'Gestão de Produtos' :
+               activeSection === 'categories' ? 'Gestão de Categorias' :
                activeSection === 'customers' ? 'Gestão de Clientes' :
                activeSection === 'rentals' ? 'Gestão de Aluguéis' :
                'Agenda'}
