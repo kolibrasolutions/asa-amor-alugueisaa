@@ -1,4 +1,3 @@
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateProduct, useUpdateProduct, Product } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
+import { ProductStatusBadge } from './ProductStatusBadge';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -107,9 +107,14 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">
-        {product ? 'Editar Produto' : 'Novo Produto'}
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">
+          {product ? 'Editar Produto' : 'Novo Produto'}
+        </h2>
+        {product && (
+          <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />
+        )}
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -173,9 +178,24 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="available">Disponível</SelectItem>
-                <SelectItem value="rented">Alugado</SelectItem>
-                <SelectItem value="maintenance">Manutenção</SelectItem>
+                <SelectItem value="available">
+                  <div className="flex items-center space-x-2">
+                    <ProductStatusBadge status="available" />
+                    <span>Disponível</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="rented">
+                  <div className="flex items-center space-x-2">
+                    <ProductStatusBadge status="rented" />
+                    <span>Alugado</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="maintenance">
+                  <div className="flex items-center space-x-2">
+                    <ProductStatusBadge status="maintenance" />
+                    <span>Manutenção</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

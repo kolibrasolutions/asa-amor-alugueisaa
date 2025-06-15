@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
+import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -12,131 +11,213 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useProducts } from '@/hooks/useProducts';
-import { useCategories } from '@/hooks/useCategories';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { ProductForm } from './ProductForm';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { ProductStatusBadge } from './ProductStatusBadge';
+import { Plus, Edit, Trash } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const ProductsManagement = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
   const { data: products, isLoading } = useProducts();
-  const { data: categories } = useCategories();
+  const deleteProduct = useDeleteProduct();
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const filteredProducts = products?.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brand?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available': return 'bg-green-500';
-      case 'rented': return 'bg-red-500';
-      case 'maintenance': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
-    }
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    setShowForm(true);
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'available': return 'Disponível';
-      case 'rented': return 'Alugado';
-      case 'maintenance': return 'Manutenção';
-      default: return 'Desconhecido';
-    }
+  const handleDelete = (productId: string) => {
+    deleteProduct.mutate(productId);
   };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingProduct(null);
+  };
+
+  const formatCurrency = (value: number | null | undefined) => {
+    if (!value) return '-';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const filteredProducts = products?.filter(product => {
+    if (statusFilter === 'all') return true;
+    return product.status === statusFilter;
+  });
+
+  const statusCounts = products?.reduce((acc, product) => {
+    const status = product.status || 'available';
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) || {};
 
   if (isLoading) {
-    return <div className="p-6">Carregando produtos...</div>;
+    return (
+      <div className="p-6">
+        <p>Carregando produtos...</p>
+      </div>
+    );
+  }
+
+  if (showForm) {
+    return (
+      <div className="p-6">
+        <ProductForm product={editingProduct} onClose={handleCloseForm} />
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestão de Produtos</h1>
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setSelectedProduct(null)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Produto
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <ProductForm 
-              product={selectedProduct} 
-              onClose={() => setIsFormOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Produto
+        </Button>
+      </div>
+
+      {/* Status Summary */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold">{products?.length || 0}</div>
+            <p className="text-sm text-gray-500">Total de Produtos</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-green-600">{statusCounts.available || 0}</div>
+            <p className="text-sm text-gray-500">Disponíveis</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-red-600">{statusCounts.rented || 0}</div>
+            <p className="text-sm text-gray-500">Alugados</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-yellow-600">{statusCounts.maintenance || 0}</div>
+            <p className="text-sm text-gray-500">Em Manutenção</p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Lista de Produtos</CardTitle>
-            <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar produtos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
+            <CardTitle>Produtos Cadastrados</CardTitle>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                <SelectItem value="available">Disponíveis</SelectItem>
+                <SelectItem value="rented">Alugados</SelectItem>
+                <SelectItem value="maintenance">Em Manutenção</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Preço Aluguel</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts?.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.brand || '-'}</TableCell>
-                  <TableCell>
-                    {categories?.find(cat => cat.id === product.category_id)?.name || '-'}
-                  </TableCell>
-                  <TableCell>
-                    {product.rental_price ? `R$ ${product.rental_price}` : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(product.status || 'available')}>
-                      {getStatusText(product.status || 'available')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setIsFormOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {!filteredProducts || filteredProducts.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">
+              {statusFilter === 'all' 
+                ? 'Nenhum produto cadastrado ainda.' 
+                : `Nenhum produto ${statusFilter === 'available' ? 'disponível' : statusFilter === 'rented' ? 'alugado' : 'em manutenção'} encontrado.`
+              }
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Marca</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Preço Aluguel</TableHead>
+                  <TableHead>Preço Compra</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">
+                      {product.name}
+                      {product.description && (
+                        <p className="text-sm text-gray-500">{product.description}</p>
+                      )}
+                    </TableCell>
+                    <TableCell>{product.brand || '-'}</TableCell>
+                    <TableCell>
+                      <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />
+                    </TableCell>
+                    <TableCell>{formatCurrency(product.rental_price)}</TableCell>
+                    <TableCell>{formatCurrency(product.purchase_price)}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(product.id)}
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

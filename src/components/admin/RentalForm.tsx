@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,11 +33,14 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useProducts } from '@/hooks/useProducts';
 import { useCreateRental, useUpdateRental, useRental } from '@/hooks/useRentals';
 import { useCreateRentalItem, useRentalItems, useDeleteRentalItem } from '@/hooks/useRentalItems';
+import { useBulkUpdateProductStatus } from '@/hooks/useProductAvailability';
+import { ProductStatusBadge } from './ProductStatusBadge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { CalendarIcon, ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const rentalSchema = z.object({
   customer_id: z.string().min(1, 'Cliente é obrigatório'),
@@ -73,6 +75,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   const updateRental = useUpdateRental();
   const createRentalItem = useCreateRentalItem();
   const deleteRentalItem = useDeleteRentalItem();
+  const bulkUpdateProductStatus = useBulkUpdateProductStatus();
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [newProduct, setNewProduct] = useState({
@@ -119,6 +122,13 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     }
   }, [rentalItems]);
 
+  // Filtrar produtos disponíveis
+  const availableProducts = products?.filter(product => 
+    product.status === 'available' || 
+    // Se estamos editando, permitir produtos que já estão no aluguel
+    (rentalId && selectedProducts.some(sp => sp.product_id === product.id))
+  );
+
   // Calcular total automaticamente
   useEffect(() => {
     const total = selectedProducts.reduce(
@@ -131,20 +141,41 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   const addProduct = () => {
     if (!newProduct.product_id) return;
 
-    const product = products?.find(p => p.id === newProduct.product_id);
+    const product = availableProducts?.find(p => p.id === newProduct.product_id);
     if (!product) return;
 
-    const productToAdd = {
-      ...newProduct,
-      unit_price: newProduct.unit_price || product.rental_price || 0,
-    };
-
-    setSelectedProducts(prev => [...prev, productToAdd]);
+    // Verificar se o produto já foi selecionado
+    const alreadySelected = selectedProducts.find(sp => sp.product_id === newProduct.product_id);
+    if (alreadySelected) {
+      // Atualizar quantidade do produto existente
+      setSelectedProducts(prev => 
+        prev.map(item => 
+          item.product_id === newProduct.product_id
+            ? { ...item, quantity: item.quantity + newProduct.quantity }
+            : item
+        )
+      );
+    } else {
+      // Adicionar novo produto
+      const productToAdd = {
+        ...newProduct,
+        unit_price: newProduct.unit_price || product.rental_price || 0,
+      };
+      setSelectedProducts(prev => [...prev, productToAdd]);
+    }
+    
     setNewProduct({ product_id: '', quantity: 1, unit_price: 0 });
   };
 
   const removeProduct = (index: number) => {
     setSelectedProducts(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateProductStatuses = async (status: 'rented' | 'available') => {
+    if (selectedProducts.length === 0) return;
+    
+    const productIds = selectedProducts.map(item => item.product_id);
+    await bulkUpdateProductStatus.mutateAsync({ productIds, status });
   };
 
   const onSubmit = async (data: RentalFormData) => {
@@ -187,6 +218,13 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
             ...product,
           });
         }
+
+        // Atualizar status dos produtos baseado no status do aluguel
+        if (data.status === 'confirmed' || data.status === 'in_progress') {
+          await updateProductStatuses('rented');
+        } else if (data.status === 'completed' || data.status === 'cancelled') {
+          await updateProductStatuses('available');
+        }
       }
 
       onClose();
@@ -198,6 +236,11 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   const getProductName = (productId: string) => {
     const product = products?.find(p => p.id === productId);
     return product ? product.name : 'Produto não encontrado';
+  };
+
+  const getProductStatus = (productId: string) => {
+    const product = products?.find(p => p.id === productId);
+    return product?.status || 'available';
   };
 
   return (
@@ -406,57 +449,71 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
               <CardTitle>Produtos do Aluguel</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-4 gap-4 items-end">
-                <div>
-                  <label className="text-sm font-medium">Produto</label>
-                  <Select
-                    value={newProduct.product_id}
-                    onValueChange={(value) =>
-                      setNewProduct(prev => ({ ...prev, product_id: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um produto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products?.map((product) => (
-                        <SelectItem key={product.id} value={product.id}>
-                          {product.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {(!availableProducts || availableProducts.length === 0) && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Não há produtos disponíveis para aluguel no momento.
+                  </AlertDescription>
+                </Alert>
+              )}
 
-                <div>
-                  <label className="text-sm font-medium">Quantidade</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={newProduct.quantity}
-                    onChange={(e) =>
-                      setNewProduct(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))
-                    }
-                  />
-                </div>
+              {availableProducts && availableProducts.length > 0 && (
+                <div className="grid md:grid-cols-4 gap-4 items-end">
+                  <div>
+                    <label className="text-sm font-medium">Produto</label>
+                    <Select
+                      value={newProduct.product_id}
+                      onValueChange={(value) =>
+                        setNewProduct(prev => ({ ...prev, product_id: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um produto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableProducts.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>{product.name}</span>
+                              <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <label className="text-sm font-medium">Preço Unitário (R$)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={newProduct.unit_price}
-                    onChange={(e) =>
-                      setNewProduct(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))
-                    }
-                  />
-                </div>
+                  <div>
+                    <label className="text-sm font-medium">Quantidade</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={newProduct.quantity}
+                      onChange={(e) =>
+                        setNewProduct(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))
+                      }
+                    />
+                  </div>
 
-                <Button type="button" onClick={addProduct}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar
-                </Button>
-              </div>
+                  <div>
+                    <label className="text-sm font-medium">Preço Unitário (R$)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={newProduct.unit_price}
+                      onChange={(e) =>
+                        setNewProduct(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))
+                      }
+                    />
+                  </div>
+
+                  <Button type="button" onClick={addProduct} disabled={!newProduct.product_id}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar
+                  </Button>
+                </div>
+              )}
 
               {selectedProducts.length > 0 && (
                 <div className="border rounded-lg">
@@ -464,6 +521,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Produto</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Quantidade</TableHead>
                         <TableHead>Preço Unit.</TableHead>
                         <TableHead>Total</TableHead>
@@ -474,6 +532,9 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                       {selectedProducts.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell>{getProductName(item.product_id)}</TableCell>
+                          <TableCell>
+                            <ProductStatusBadge status={getProductStatus(item.product_id) as 'available' | 'rented' | 'maintenance'} />
+                          </TableCell>
                           <TableCell>{item.quantity}</TableCell>
                           <TableCell>R$ {item.unit_price.toFixed(2)}</TableCell>
                           <TableCell>R$ {(item.quantity * item.unit_price).toFixed(2)}</TableCell>
