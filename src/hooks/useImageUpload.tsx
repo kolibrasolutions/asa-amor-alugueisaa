@@ -12,12 +12,12 @@ export const useImageUpload = () => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const uploadImage = async (file: File, folder: string = 'categories'): Promise<UploadedImage | null> => {
+  const uploadImage = async (file: File | Blob, folder: string = 'categories'): Promise<UploadedImage | null> => {
     try {
       setUploading(true);
 
-      // Validar arquivo
-      if (!file.type.startsWith('image/')) {
+      // Se for um File, validar tipo
+      if (file instanceof File && !file.type.startsWith('image/')) {
         toast({
           title: "Erro de upload",
           description: "Por favor, selecione apenas arquivos de imagem.",
@@ -37,7 +37,7 @@ export const useImageUpload = () => {
       }
 
       // Gerar nome único para o arquivo
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file instanceof File ? file.name.split('.').pop() : 'webp';
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       console.log('Uploading file:', fileName);

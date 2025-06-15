@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCreateCategory, useUpdateCategory, Category } from '@/hooks/useCategories';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Crop } from 'lucide-react';
+import { ImageCrop } from './ImageCrop';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -30,6 +31,8 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
   const { uploadImage, deleteImage, uploading } = useImageUpload();
   const [imagePreview, setImagePreview] = useState<string | null>(category?.image_url || null);
   const [imagePath, setImagePath] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showCrop, setShowCrop] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -49,20 +52,27 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
     },
   });
 
-  const handleImageSelect = async (file: File) => {
-    console.log('Image selected:', file.name);
+  const handleFileSelect = (file: File) => {
+    console.log('File selected for crop:', file.name);
+    setSelectedFile(file);
+    setShowCrop(true);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    console.log('Crop completed, uploading image...');
     
-    const result = await uploadImage(file, 'categories');
+    const result = await uploadImage(croppedBlob, 'categories');
     if (result) {
       setImagePreview(result.url);
       setImagePath(result.path);
+      setSelectedFile(null);
     }
   };
 
   const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      handleImageSelect(file);
+      handleFileSelect(file);
     }
   };
 
@@ -70,7 +80,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      handleImageSelect(file);
+      handleFileSelect(file);
     }
   };
 
@@ -152,7 +162,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
         </div>
 
         <div>
-          <Label>Imagem Principal</Label>
+          <Label>Imagem Principal (3:4)</Label>
           
           {!imagePreview ? (
             <div
@@ -162,12 +172,15 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="flex flex-col items-center space-y-2">
-                <ImageIcon className="h-12 w-12 text-gray-400" />
+                <div className="flex items-center space-x-2">
+                  <ImageIcon className="h-12 w-12 text-gray-400" />
+                  <Crop className="h-8 w-8 text-gray-500" />
+                </div>
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Clique para selecionar</span> ou arraste uma imagem aqui
                 </div>
                 <div className="text-xs text-gray-500">
-                  PNG, JPG, WebP até 5MB
+                  PNG, JPG, WebP até 5MB • Será ajustada para proporção 3:4
                 </div>
               </div>
               <input
@@ -184,7 +197,8 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-32 h-32 object-cover rounded-lg border"
+                className="w-32 h-40 object-cover rounded-lg border"
+                style={{ aspectRatio: '3/4' }}
               />
               <Button
                 type="button"
@@ -202,7 +216,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
           {uploading && (
             <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
               <Upload className="h-4 w-4 animate-spin" />
-              <span>Enviando imagem...</span>
+              <span>Processando imagem...</span>
             </div>
           )}
         </div>
@@ -222,6 +236,19 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
           </Button>
         </div>
       </form>
+
+      {/* Modal de Crop */}
+      {selectedFile && (
+        <ImageCrop
+          isOpen={showCrop}
+          onClose={() => {
+            setShowCrop(false);
+            setSelectedFile(null);
+          }}
+          onCropComplete={handleCropComplete}
+          imageFile={selectedFile}
+        />
+      )}
     </div>
   );
 };
