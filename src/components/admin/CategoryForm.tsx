@@ -7,13 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCategory, useUpdateCategory, Category } from '@/hooks/useCategories';
-import { useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { useState, useRef } from 'react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().optional(),
-  image_url: z.string().url('URL de imagem inválida').optional().or(z.literal('')),
   sort_order: z.number().min(0, 'Ordem deve ser positiva').optional(),
 });
 
@@ -27,37 +27,74 @@ interface CategoryFormProps {
 export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
+  const { uploadImage, deleteImage, uploading } = useImageUpload();
   const [imagePreview, setImagePreview] = useState<string | null>(category?.image_url || null);
+  const [imagePath, setImagePath] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: category ? {
       name: category.name,
       description: category.description || '',
-      image_url: category.image_url || '',
       sort_order: category.sort_order || 0,
     } : {
       name: '',
       description: '',
-      image_url: '',
       sort_order: 0,
     },
   });
 
-  const imageUrl = watch('image_url');
+  const handleImageSelect = async (file: File) => {
+    console.log('Image selected:', file.name);
+    
+    const result = await uploadImage(file, 'categories');
+    if (result) {
+      setImagePreview(result.url);
+      setImagePath(result.path);
+    }
+  };
+
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleImageSelect(file);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageSelect(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const clearImage = async () => {
+    if (imagePath) {
+      await deleteImage(imagePath);
+    }
+    setImagePreview(null);
+    setImagePath(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
       const cleanData: Omit<Category, 'id' | 'created_at'> = {
         name: data.name,
         description: data.description || undefined,
-        image_url: data.image_url || undefined,
+        image_url: imagePreview || undefined,
         sort_order: data.sort_order || 0,
       };
 
@@ -70,16 +107,6 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
     } catch (error) {
       console.error('Erro ao salvar categoria:', error);
     }
-  };
-
-  const handleImageUrlChange = (url: string) => {
-    setValue('image_url', url);
-    setImagePreview(url);
-  };
-
-  const clearImage = () => {
-    setValue('image_url', '');
-    setImagePreview(null);
   };
 
   return (
@@ -125,21 +152,35 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
         </div>
 
         <div>
-          <Label htmlFor="image_url">URL da Imagem Principal</Label>
-          <div className="space-y-2">
-            <Input
-              id="image_url"
-              {...register('image_url')}
-              placeholder="https://exemplo.com/imagem.jpg"
-              onChange={(e) => handleImageUrlChange(e.target.value)}
-            />
-            {errors.image_url && (
-              <p className="text-sm text-red-500">{errors.image_url.message}</p>
-            )}
-          </div>
+          <Label>Imagem Principal</Label>
           
-          {imagePreview && (
-            <div className="mt-2 relative inline-block">
+          {!imagePreview ? (
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="flex flex-col items-center space-y-2">
+                <ImageIcon className="h-12 w-12 text-gray-400" />
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Clique para selecionar</span> ou arraste uma imagem aqui
+                </div>
+                <div className="text-xs text-gray-500">
+                  PNG, JPG, WebP até 5MB
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileInputChange}
+                disabled={uploading}
+              />
+            </div>
+          ) : (
+            <div className="relative inline-block">
               <img
                 src={imagePreview}
                 alt="Preview"
@@ -151,9 +192,17 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
                 size="sm"
                 className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
                 onClick={clearImage}
+                disabled={uploading}
               >
                 <X className="h-3 w-3" />
               </Button>
+            </div>
+          )}
+          
+          {uploading && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+              <Upload className="h-4 w-4 animate-spin" />
+              <span>Enviando imagem...</span>
             </div>
           )}
         </div>
@@ -164,9 +213,9 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
           </Button>
           <Button 
             type="submit" 
-            disabled={createCategory.isPending || updateCategory.isPending}
+            disabled={createCategory.isPending || updateCategory.isPending || uploading}
           >
-            {(createCategory.isPending || updateCategory.isPending)
+            {(createCategory.isPending || updateCategory.isPending || uploading)
               ? 'Salvando...'
               : category ? 'Atualizar' : 'Criar'
             }

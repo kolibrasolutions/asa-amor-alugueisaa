@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Category {
   id: string;
@@ -33,6 +33,8 @@ export const useCreateCategory = () => {
 
   return useMutation({
     mutationFn: async (category: Omit<Category, 'id' | 'created_at'>) => {
+      console.log('Creating category with data:', category);
+      
       const { data, error } = await supabase
         .from('categories')
         .insert([category])
@@ -51,6 +53,7 @@ export const useCreateCategory = () => {
       });
     },
     onError: (error) => {
+      console.error('Error creating category:', error);
       toast({
         title: "Erro",
         description: "Erro ao criar categoria: " + error.message,
@@ -66,6 +69,8 @@ export const useUpdateCategory = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...category }: Partial<Category> & { id: string }) => {
+      console.log('Updating category with data:', { id, ...category });
+      
       const { data, error } = await supabase
         .from('categories')
         .update(category)
@@ -85,6 +90,7 @@ export const useUpdateCategory = () => {
       });
     },
     onError: (error) => {
+      console.error('Error updating category:', error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar categoria: " + error.message,
@@ -116,6 +122,7 @@ export const useDeleteCategory = () => {
       });
     },
     onError: (error) => {
+      console.error('Error deleting category:', error);
       toast({
         title: "Erro",
         description: "Erro ao excluir categoria: " + error.message,
