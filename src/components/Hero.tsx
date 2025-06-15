@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 const Hero = () => {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image - Using placeholder for now */}
+      {/* Background Image - Casal elegante em casamento */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')"
+          backgroundImage: "url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')"
         }}
       >
         <div className="absolute inset-0 bg-black/20"></div>
@@ -42,3 +42,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

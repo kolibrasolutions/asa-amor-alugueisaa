@@ -15,7 +15,7 @@ const CategoryGallery = () => {
     {
       id: 'default-1',
       name: "Vestido de Noiva",
-      image_url: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Noiva elegante
       description: "Modelos únicos para o seu grande dia",
       productCount: 0,
       sort_order: 1
@@ -23,7 +23,7 @@ const CategoryGallery = () => {
     {
       id: 'default-2',
       name: "Terno Masculino", 
-      image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1464983953574-0892a716854b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Terno clássico
       description: "Elegância e sofisticação",
       productCount: 0,
       sort_order: 2
@@ -31,7 +31,7 @@ const CategoryGallery = () => {
     {
       id: 'default-3',
       name: "Vestido de Festa",
-      image_url: "https://images.unsplash.com/photo-1566479179817-65e64c5b8b13?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", 
+      image_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Festa glamourosa
       description: "Para ocasiões especiais",
       productCount: 0,
       sort_order: 3
@@ -39,7 +39,7 @@ const CategoryGallery = () => {
     {
       id: 'default-4',
       name: "Vestido Leve",
-      image_url: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Vestido casual elegante
       description: "Conforto e estilo",
       productCount: 0,
       sort_order: 4
@@ -47,7 +47,7 @@ const CategoryGallery = () => {
     {
       id: 'default-5',
       name: "Traje Chinês",
-      image_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Traje oriental tradicional
       description: "Tradição oriental",
       productCount: 0,
       sort_order: 5
@@ -55,7 +55,7 @@ const CategoryGallery = () => {
     {
       id: 'default-6',
       name: "Vestido para Mães",
-      image_url: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image_url: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Vestido elegante maduro
       description: "Elegância para mães especiais",
       productCount: 0,
       sort_order: 6
