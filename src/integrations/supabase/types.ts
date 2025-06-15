@@ -85,6 +85,7 @@ export type Database = {
           purchase_price: number | null
           rental_price: number | null
           size: string | null
+          sku: string | null
           status: string | null
           updated_at: string | null
         }
@@ -100,6 +101,7 @@ export type Database = {
           purchase_price?: number | null
           rental_price?: number | null
           size?: string | null
+          sku?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -115,6 +117,7 @@ export type Database = {
           purchase_price?: number | null
           rental_price?: number | null
           size?: string | null
+          sku?: string | null
           status?: string | null
           updated_at?: string | null
         }

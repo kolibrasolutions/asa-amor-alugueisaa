@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
@@ -157,6 +156,7 @@ export const ProductsManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>Código</TableHead>
                   <TableHead>Marca</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Preço Aluguel</TableHead>
@@ -173,6 +173,7 @@ export const ProductsManagement = () => {
                         <p className="text-sm text-gray-500">{product.description}</p>
                       )}
                     </TableCell>
+                    <TableCell>{product.sku || '-'}</TableCell>
                     <TableCell>{product.brand || '-'}</TableCell>
                     <TableCell>
                       <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />

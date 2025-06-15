@@ -18,6 +18,7 @@ import { ProductStatusBadge } from './ProductStatusBadge';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
+  sku: z.string().optional(),
   description: z.string().optional(),
   brand: z.string().optional(),
   color: z.string().optional(),
@@ -45,6 +46,7 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
     if (product) {
       return {
         name: product.name,
+        sku: product.sku || '',
         description: product.description || '',
         brand: product.brand || '',
         color: product.color || '',
@@ -57,6 +59,7 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
     }
     return {
       name: '',
+      sku: '',
       description: '',
       brand: '',
       color: '',
@@ -84,6 +87,7 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
       // Ensure name is present and convert empty strings to undefined for optional fields
       const cleanData: Omit<Product, 'id' | 'created_at' | 'updated_at'> = {
         name: data.name,
+        sku: data.sku || null,
         description: data.description || undefined,
         brand: data.brand || undefined,
         color: data.color || undefined,
@@ -129,14 +133,45 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
-
           <div>
+            <Label htmlFor="sku">Código (SKU)</Label>
+            <Input
+              id="sku"
+              {...register('sku')}
+              placeholder="Opcional. Ex: VST-AZL-01"
+            />
+             {errors.sku && (
+              <p className="text-sm text-red-500">{errors.sku.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+           <div>
             <Label htmlFor="brand">Marca</Label>
             <Input
               id="brand"
               {...register('brand')}
               placeholder="Marca do produto"
             />
+          </div>
+          <div>
+            <Label htmlFor="category_id">Categoria</Label>
+            <Select
+              value={watch('category_id')}
+              onValueChange={(value) => setValue('category_id', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories?.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -223,25 +258,6 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
               placeholder="0.00"
             />
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="category_id">Categoria</Label>
-          <Select
-            value={watch('category_id')}
-            onValueChange={(value) => setValue('category_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione uma categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="flex justify-end space-x-2">

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -17,6 +16,7 @@ export interface Product {
   images?: string[];
   created_at?: string;
   updated_at?: string;
+  sku?: string | null;
 }
 
 export const useProducts = () => {
@@ -56,10 +56,12 @@ export const useCreateProduct = () => {
         description: "Produto adicionado com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Erro ao criar produto: " + error.message,
+        description: error.message.includes('duplicate key value violates unique constraint')
+          ? 'Este código (SKU) já está em uso. Por favor, utilize outro.'
+          : "Erro ao criar produto: " + error.message,
         variant: "destructive",
       });
     },
@@ -89,10 +91,12 @@ export const useUpdateProduct = () => {
         description: "Produto atualizado com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Erro ao atualizar produto: " + error.message,
+        description: error.message.includes('duplicate key value violates unique constraint')
+          ? 'Este código (SKU) já está em uso. Por favor, utilize outro.'
+          : "Erro ao atualizar produto: " + error.message,
         variant: "destructive",
       });
     },
