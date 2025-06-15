@@ -23,6 +23,8 @@ export interface RentalWithDetails extends Rental {
     full_name: string;
     email?: string;
     phone?: string;
+    address?: string;
+    document_number?: string;
   };
   rental_items: Array<{
     id: string;
@@ -32,7 +34,11 @@ export interface RentalWithDetails extends Rental {
     product: {
       id: string;
       name: string;
+      description?: string;
       images?: string[];
+      brand?: string;
+      size?: string;
+      color?: string;
     };
   }>;
 }
@@ -61,7 +67,10 @@ export const useRentals = () => {
       return data.map(rental => ({
         ...rental,
         customer: rental.customers,
-        rental_items: rental.rental_items || []
+        rental_items: rental.rental_items?.map(item => ({
+          ...item,
+          product: item.products
+        })) || []
       })) as RentalWithDetails[];
     },
   });
@@ -92,7 +101,10 @@ export const useRental = (id: string) => {
       return {
         ...data,
         customer: data.customers,
-        rental_items: data.rental_items || []
+        rental_items: data.rental_items?.map(item => ({
+          ...item,
+          product: item.products
+        })) || []
       } as RentalWithDetails;
     },
     enabled: !!id,

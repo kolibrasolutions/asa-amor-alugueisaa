@@ -8,6 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Form,
   FormControl,
   FormField,
@@ -143,10 +151,19 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     try {
       let rentalResult;
 
+      // Convert dates to strings for the database
+      const rentalData = {
+        ...data,
+        event_date: data.event_date.toISOString().split('T')[0],
+        rental_start_date: data.rental_start_date.toISOString().split('T')[0],
+        rental_end_date: data.rental_end_date.toISOString().split('T')[0],
+        status: data.status || 'pending',
+      };
+
       if (rentalId) {
-        rentalResult = await updateRental.mutateAsync({ id: rentalId, ...data });
+        rentalResult = await updateRental.mutateAsync({ id: rentalId, ...rentalData });
       } else {
-        rentalResult = await createRental.mutateAsync(data);
+        rentalResult = await createRental.mutateAsync(rentalData);
       }
 
       // Gerenciar itens do aluguel

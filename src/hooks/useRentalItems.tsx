@@ -37,7 +37,11 @@ export const useRentalItems = (rentalId: string) => {
         .eq('rental_id', rentalId);
       
       if (error) throw error;
-      return data as RentalItemWithProduct[];
+      
+      return data.map(item => ({
+        ...item,
+        product: item.products
+      })) as RentalItemWithProduct[];
     },
     enabled: !!rentalId,
   });
