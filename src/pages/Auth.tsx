@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -17,7 +17,9 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('Auth page - Current user:', user);
     if (user) {
+      console.log('User is logged in, redirecting to admin');
       navigate('/admin');
     }
   }, [user, navigate]);
@@ -25,21 +27,31 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    console.log('Attempting login with email:', email);
 
     try {
       const { error } = await signIn(email, password);
 
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Erro de autenticação",
-          description: "Email ou senha incorretos.",
+          description: error.message || "Email ou senha incorretos.",
           variant: "destructive",
+        });
+      } else {
+        console.log('Login successful');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Redirecionando para o painel administrativo...",
         });
       }
     } catch (error) {
+      console.error('Unexpected error during login:', error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro inesperado.",
+        description: "Ocorreu um erro inesperado durante o login.",
         variant: "destructive",
       });
     } finally {
@@ -68,6 +80,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -78,6 +91,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <Button 
@@ -94,6 +108,7 @@ const Auth = () => {
               type="button"
               onClick={() => navigate('/')}
               className="text-sm text-gray-600 hover:underline"
+              disabled={loading}
             >
               Voltar ao site
             </button>
