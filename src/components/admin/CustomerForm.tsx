@@ -1,4 +1,3 @@
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,9 +38,9 @@ export const CustomerForm = ({ customer, onClose }: CustomerFormProps) => {
 
   const onSubmit = async (data: CustomerFormData) => {
     try {
-      // Convert empty strings to undefined for optional fields
-      const cleanData = {
-        ...data,
+      // Convert empty strings to undefined for optional fields, but keep full_name
+      const cleanData: Omit<Customer, 'id' | 'created_at' | 'updated_at'> = {
+        full_name: data.full_name,
         email: data.email || undefined,
         phone: data.phone || undefined,
         address: data.address || undefined,

@@ -40,6 +40,34 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
+  // Create proper default values that match the form schema
+  const getDefaultValues = (): ProductFormData => {
+    if (product) {
+      return {
+        name: product.name,
+        description: product.description || '',
+        brand: product.brand || '',
+        color: product.color || '',
+        size: product.size || '',
+        rental_price: product.rental_price || undefined,
+        purchase_price: product.purchase_price || undefined,
+        category_id: product.category_id || '',
+        status: (product.status as 'available' | 'rented' | 'maintenance') || 'available',
+      };
+    }
+    return {
+      name: '',
+      description: '',
+      brand: '',
+      color: '',
+      size: '',
+      rental_price: undefined,
+      purchase_price: undefined,
+      category_id: '',
+      status: 'available',
+    };
+  };
+
   const {
     register,
     handleSubmit,
@@ -48,15 +76,28 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: product || {},
+    defaultValues: getDefaultValues(),
   });
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      // Ensure name is present and convert empty strings to undefined for optional fields
+      const cleanData: Omit<Product, 'id' | 'created_at' | 'updated_at'> = {
+        name: data.name,
+        description: data.description || undefined,
+        brand: data.brand || undefined,
+        color: data.color || undefined,
+        size: data.size || undefined,
+        rental_price: data.rental_price || undefined,
+        purchase_price: data.purchase_price || undefined,
+        category_id: data.category_id || undefined,
+        status: data.status,
+      };
+
       if (product) {
-        await updateProduct.mutateAsync({ id: product.id, ...data });
+        await updateProduct.mutateAsync({ id: product.id, ...cleanData });
       } else {
-        await createProduct.mutateAsync(data);
+        await createProduct.mutateAsync(cleanData);
       }
       onClose();
     } catch (error) {

@@ -12,7 +12,7 @@ export interface Product {
   size?: string;
   rental_price?: number;
   purchase_price?: number;
-  status?: string;
+  status?: 'available' | 'rented' | 'maintenance';
   category_id?: string;
   images?: string[];
   created_at?: string;
