@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
@@ -7,18 +6,28 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Copy } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { useToast } from '@/components/ui/use-toast';
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
+  const { toast } = useToast();
 
   const { data: products, isLoading: productsLoading } = useProducts();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+
+  const handleCopyId = (id: string, name:string) => {
+    navigator.clipboard.writeText(id);
+    toast({
+      title: "Código copiado!",
+      description: `O código do produto "${name}" foi copiado.`,
+    });
+  };
 
   const filteredProducts = products?.filter(product => {
     // Filtro por busca
@@ -169,7 +178,7 @@ const Catalog = () => {
         {/* Grid de produtos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts?.map((product) => (
-            <Card key={product.id} className="group hover:shadow-xl transition-shadow duration-300">
+            <Card key={product.id} className="group hover:shadow-xl transition-shadow duration-300 flex flex-col">
               <div className="aspect-[3/4] overflow-hidden rounded-t-lg">
                 {product.images && product.images.length > 0 ? (
                   <img
@@ -195,39 +204,64 @@ const Catalog = () => {
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0">
-                {product.description && (
-                  <p className="text-sm text-asa-gray mb-2 line-clamp-2">
-                    {product.description}
-                  </p>
-                )}
-                
-                <div className="space-y-1 text-sm">
-                  {product.brand && (
-                    <p><span className="font-medium">Marca:</span> {product.brand}</p>
-                  )}
-                  {product.size && (
-                    <p><span className="font-medium">Tamanho:</span> {product.size}</p>
-                  )}
-                  {product.color && (
-                    <p><span className="font-medium">Cor:</span> {product.color}</p>
-                  )}
-                </div>
-                
-                {product.rental_price && (
-                  <div className="mt-3 pt-3 border-t">
-                    <p className="text-lg font-bold text-asa-blush">
-                      R$ {Number(product.rental_price).toFixed(2)}
-                      <span className="text-sm font-normal text-asa-gray ml-1">
-                        /aluguel
-                      </span>
+              <CardContent className="pt-0 flex flex-col flex-grow">
+                <div className="flex-grow">
+                  {product.description && (
+                    <p className="text-sm text-asa-gray mb-2 line-clamp-2">
+                      {product.description}
                     </p>
+                  )}
+                  
+                  <div className="space-y-1 text-sm">
+                    {product.brand && (
+                      <p><span className="font-medium">Marca:</span> {product.brand}</p>
+                    )}
+                    {product.size && (
+                      <p><span className="font-medium">Tamanho:</span> {product.size}</p>
+                    )}
+                    {product.color && (
+                      <p><span className="font-medium">Cor:</span> {product.color}</p>
+                    )}
                   </div>
-                )}
-                
-                <Button className="w-full mt-3" variant="outline">
-                  Ver Detalhes
-                </Button>
+                </div>
+
+                <div className="mt-auto">
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm">
+                        <p className="text-asa-gray">Código do produto</p>
+                        <p className="font-mono text-xs text-gray-500" title={product.sku || product.id}>
+                          {product.sku || `${product.id.substring(0, 8)}...`}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-600 hover:text-gray-900"
+                        onClick={() => handleCopyId(product.sku || product.id, product.name)}
+                        title="Copiar código"
+                      >
+                        <Copy className="h-4 w-4" />
+                        <span className="sr-only">Copiar código</span>
+                      </Button>
+                    </div>
+
+                    {product.rental_price && (
+                      <div className="mt-2">
+                        <p className="text-lg font-bold text-asa-blush">
+                          R$ {Number(product.rental_price).toFixed(2)}
+                          <span className="text-sm font-normal text-asa-gray ml-1">
+                            /aluguel
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button className="w-full mt-4" variant="outline">
+                    Ver Detalhes
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
