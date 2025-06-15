@@ -1,4 +1,3 @@
-
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product } from './useProducts';
@@ -54,7 +53,10 @@ const checkProductAvailability = async (searchTerm: string): Promise<Availabilit
   
   const activeRental = rentalItems
     ?.map(item => item.rentals)
-    .find(rental => rental && ['pending', 'confirmed', 'in_progress'].includes(rental.status || ''));
+    .filter(rental => rental && ['pending', 'confirmed', 'in_progress'].includes(rental.status || ''))
+    .sort((a, b) => new Date(b!.rental_end_date).getTime() - new Date(a!.rental_end_date).getTime())
+    [0] || null;
+
 
   if (activeRental) {
     return {
