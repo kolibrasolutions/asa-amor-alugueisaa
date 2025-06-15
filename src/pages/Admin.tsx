@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -10,6 +9,7 @@ import { CategoriesManagement } from '@/components/admin/CategoriesManagement';
 import { RentalsManagement } from '@/components/admin/RentalsManagement';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { RentalsCalendar } from '@/components/admin/RentalsCalendar';
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
@@ -60,12 +60,7 @@ const Admin = () => {
       case 'rentals':
         return <RentalsManagement />;
       case 'calendar':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold">Agenda</h1>
-            <p className="text-gray-600 mt-2">Em desenvolvimento...</p>
-          </div>
-        );
+        return <RentalsCalendar />;
       default:
         return <AdminDashboard stats={stats} onSectionChange={setActiveSection} />;
     }
