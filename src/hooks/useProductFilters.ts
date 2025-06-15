@@ -5,7 +5,6 @@ import { Product } from '@/hooks/useProducts';
 export const useProductFilters = (products: Product[] | undefined) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   const filteredProducts = useMemo(() => {
     return products?.filter(product => {
@@ -15,19 +14,15 @@ export const useProductFilters = (products: Product[] | undefined) => {
 
       const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
 
-      const matchesStatus = selectedStatus === 'all' || product.status === selectedStatus;
-
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory;
     });
-  }, [products, searchTerm, selectedCategory, selectedStatus]);
+  }, [products, searchTerm, selectedCategory]);
 
   return {
     searchTerm,
     setSearchTerm,
     selectedCategory,
     setSelectedCategory,
-    selectedStatus,
-    setSelectedStatus,
     filteredProducts,
   };
 };

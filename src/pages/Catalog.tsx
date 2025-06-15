@@ -20,8 +20,6 @@ const Catalog = () => {
     setSearchTerm,
     selectedCategory,
     setSelectedCategory,
-    selectedStatus,
-    setSelectedStatus,
     filteredProducts,
   } = useProductFilters(products);
 
@@ -57,8 +55,6 @@ const Catalog = () => {
           setSearchTerm={setSearchTerm}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
           categories={categories}
         />
 

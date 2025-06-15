@@ -9,8 +9,6 @@ interface CatalogFiltersProps {
   setSearchTerm: (value: string) => void;
   selectedCategory: string;
   setSelectedCategory: (value: string) => void;
-  selectedStatus: string;
-  setSelectedStatus: (value: string) => void;
   categories: Category[] | undefined;
 }
 
@@ -19,14 +17,12 @@ const CatalogFilters = ({
   setSearchTerm,
   selectedCategory,
   setSelectedCategory,
-  selectedStatus,
-  setSelectedStatus,
   categories
 }: CatalogFiltersProps) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-2">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -49,18 +45,6 @@ const CatalogFilters = ({
                 {category.name}
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="available">Disponível</SelectItem>
-            <SelectItem value="rented">Alugado</SelectItem>
-            <SelectItem value="maintenance">Manutenção</SelectItem>
           </SelectContent>
         </Select>
       </div>
