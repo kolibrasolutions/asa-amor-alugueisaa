@@ -10,6 +10,7 @@ export const productSchema = z.object({
   size: z.string().optional(),
   category_id: z.string().optional(),
   status: z.enum(['available', 'rented', 'maintenance']).default('available'),
+  images: z.array(z.any()).optional().default([]),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

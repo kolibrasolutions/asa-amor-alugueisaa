@@ -1,3 +1,4 @@
+
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCategories } from '@/hooks/useCategories';
 import { ProductStatusBadge } from '../ProductStatusBadge';
 import { ProductFormData } from './productSchema';
+import { ProductImageUpload } from './ProductImageUpload';
 
 export const ProductFormFields = () => {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ProductFormData>();
@@ -54,6 +56,8 @@ export const ProductFormFields = () => {
         <Label htmlFor="description">Descrição</Label>
         <Textarea id="description" {...register('description')} placeholder="Descrição do produto" />
       </div>
+
+      <ProductImageUpload />
 
       <div className="grid grid-cols-3 gap-4">
         <div>
