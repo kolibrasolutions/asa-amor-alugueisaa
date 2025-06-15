@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-asa-dark text-white py-16">
+    <footer className="bg-asa-dark text-white py-16 relative">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8">
           {/* Logo and Description */}
@@ -29,13 +29,6 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5 text-asa-dark" />
               </a>
-              <Link 
-                to="/auth" 
-                className="w-10 h-10 bg-asa-blush rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300"
-                title="Painel Administrativo"
-              >
-                <Settings className="w-5 h-5 text-asa-dark" />
-              </Link>
             </div>
           </div>
 
@@ -96,6 +89,15 @@ const Footer = () => {
           </p>
         </div>
       </div>
+
+      {/* Admin Access - Discrete gear icon in bottom right */}
+      <Link 
+        to="/auth" 
+        className="absolute bottom-4 right-4 w-8 h-8 bg-gray-700 bg-opacity-50 rounded-full flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity duration-300"
+        title="Acesso Administrativo"
+      >
+        <Settings className="w-4 h-4 text-gray-300" />
+      </Link>
     </footer>
   );
 };
