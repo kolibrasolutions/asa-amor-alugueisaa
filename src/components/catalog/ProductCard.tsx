@@ -1,7 +1,7 @@
+
 import * as React from 'react';
 import { Product } from '@/hooks/useProducts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
 import {
@@ -17,32 +17,6 @@ interface ProductCardProps {
   product: Product;
   onCopyId: (id: string, name: string) => void;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'available':
-      return 'bg-green-100 text-green-800';
-    case 'rented':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'maintenance':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'available':
-      return 'Disponível';
-    case 'rented':
-      return 'Alugado';
-    case 'maintenance':
-      return 'Manutenção';
-    default:
-      return status;
-  }
-};
 
 const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
   const [api, setApi] = React.useState<CarouselApi>();
@@ -113,33 +87,24 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
         )}
       </div>
       
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-lg font-serif line-clamp-2 flex-1">
+      <CardContent className="py-4 px-4 flex-grow flex items-center justify-center">
+        <div className="flex justify-center items-center text-center relative w-full">
+          <CardTitle className="text-xl font-serif text-asa-dark line-clamp-2">
             {product.name}
           </CardTitle>
-          <Badge className={`${getStatusColor(product.status || 'available')} flex-shrink-0`}>
-            {getStatusLabel(product.status || 'available')}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0 flex flex-col flex-grow">
-        <div className="mt-auto">
-          <div className="mt-3 pt-3 border-t">
-            <div className="flex justify-end items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-gray-600 hover:text-gray-900"
-                onClick={() => onCopyId(product.sku || product.id, product.name)}
-                title="Copiar código do produto"
-              >
-                <Copy className="h-4 w-4" />
-                <span className="sr-only">Copiar código do produto</span>
-              </Button>
-            </div>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 h-8 w-8 text-gray-400 hover:text-asa-dark opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopyId(product.sku || product.id, product.name);
+            }}
+            title="Copiar código do produto"
+          >
+            <Copy className="h-4 w-4" />
+            <span className="sr-only">Copiar código do produto</span>
+          </Button>
         </div>
       </CardContent>
     </Card>
