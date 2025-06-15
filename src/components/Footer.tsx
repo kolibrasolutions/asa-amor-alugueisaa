@@ -1,5 +1,6 @@
 
-import { Instagram, Facebook, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, Facebook, MapPin, Phone, Mail, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -28,6 +29,13 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5 text-asa-dark" />
               </a>
+              <Link 
+                to="/auth" 
+                className="w-10 h-10 bg-asa-blush rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300"
+                title="Painel Administrativo"
+              >
+                <Settings className="w-5 h-5 text-asa-dark" />
+              </Link>
             </div>
           </div>
 
