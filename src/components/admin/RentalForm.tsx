@@ -151,13 +151,16 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     try {
       let rentalResult;
 
-      // Convert dates to strings for the database
+      // Convert dates to strings and ensure all required fields are present
       const rentalData = {
-        ...data,
+        customer_id: data.customer_id,
         event_date: data.event_date.toISOString().split('T')[0],
         rental_start_date: data.rental_start_date.toISOString().split('T')[0],
         rental_end_date: data.rental_end_date.toISOString().split('T')[0],
-        status: data.status || 'pending',
+        total_amount: data.total_amount,
+        deposit_amount: data.deposit_amount || 0,
+        status: data.status,
+        notes: data.notes || '',
       };
 
       if (rentalId) {
