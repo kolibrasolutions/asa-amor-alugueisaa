@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Logo and Description */}
           <div>
             <h3 className="text-2xl font-serif font-bold mb-4">
-              Asa Amor
+              Noivas Cirlene
             </h3>
             <p className="text-gray-300 leading-relaxed mb-6">
               Transformando sonhos em realidade através de peças únicas e atendimento personalizado. 
@@ -54,7 +54,7 @@ const Footer = () => {
               <div className="flex items-center">
                 <Mail className="w-5 h-5 text-asa-blush mr-3 flex-shrink-0" />
                 <span className="text-gray-300">
-                  contato@asaamor.com.br
+                  contato@noivascirlene.com.br
                 </span>
               </div>
             </div>
@@ -85,7 +85,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-12 pt-8 text-center">
           <p className="text-gray-400">
-            © 2024 Asa Amor Aluguéis. Todos os direitos reservados.
+            © 2024 Noivas Cirlene. Todos os direitos reservados.
           </p>
         </div>
       </div>

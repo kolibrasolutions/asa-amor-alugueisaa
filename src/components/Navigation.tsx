@@ -36,7 +36,7 @@ const Navigation = () => {
             className="text-2xl font-serif font-bold text-asa-dark cursor-pointer"
             onClick={() => window.location.href = '/'}
           >
-            ASA Vestidos
+            Noivas Cirlene
           </div>
 
           {/* Desktop Navigation */}

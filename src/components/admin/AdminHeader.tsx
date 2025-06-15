@@ -12,7 +12,7 @@ interface AdminHeaderProps {
 export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: AdminHeaderProps) => {
   const getSectionTitle = (section: string) => {
     switch (section) {
-      case 'dashboard': return 'Painel Administrativo - Asa Amor';
+      case 'dashboard': return 'Painel Administrativo - Noivas Cirlene';
       case 'products': return 'Gestão de Produtos';
       case 'categories': return 'Gestão de Categorias';
       case 'customers': return 'Gestão de Clientes';

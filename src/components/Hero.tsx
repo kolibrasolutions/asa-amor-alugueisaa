@@ -17,9 +17,9 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white animate-fade-in">
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold mb-6 tracking-wide">
-          Aluguel de Vestidos
+          Noivas Cirlene
           <br />
-          <span className="text-asa-blush">e Ternos</span>
+          <span className="text-asa-blush">Vestidos & Ternos</span>
         </h1>
         <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto font-light leading-relaxed">
           Para momentos únicos e inesquecíveis. Peças cuidadosamente selecionadas 
@@ -42,4 +42,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

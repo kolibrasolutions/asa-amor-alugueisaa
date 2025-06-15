@@ -8,7 +8,7 @@ const IntroSection = () => {
             Realize o Sonho do seu Dia Especial
           </h2>
           <p className="text-lg text-asa-gray leading-relaxed mb-8">
-            Na Asa Amor, acreditamos que cada momento especial merece ser vivido com elegância e sofisticação. 
+            Na Noivas Cirlene, acreditamos que cada momento especial merece ser vivido com elegância e sofisticação. 
             Nossa coleção cuidadosamente curada oferece vestidos de noiva deslumbrantes, ternos impecáveis 
             e trajes de festa que fazem você brilhar.
           </p>
