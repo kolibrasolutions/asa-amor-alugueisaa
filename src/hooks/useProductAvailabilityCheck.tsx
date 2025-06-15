@@ -58,13 +58,13 @@ const checkProductAvailability = async (searchTerm: string): Promise<Availabilit
 
   if (activeRental) {
     return {
-      product,
+      product: product as Product,
       rental: activeRental as RentalWithCustomer,
       isAvailable: false,
     };
   }
 
-  return { product, rental: null, isAvailable: true };
+  return { product: product as Product, rental: null, isAvailable: true };
 };
 
 export const useProductAvailabilityCheck = () => {
