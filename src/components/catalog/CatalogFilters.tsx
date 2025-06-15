@@ -11,8 +11,6 @@ interface CatalogFiltersProps {
   setSelectedCategory: (value: string) => void;
   selectedStatus: string;
   setSelectedStatus: (value: string) => void;
-  priceRange: string;
-  setPriceRange: (value: string) => void;
   categories: Category[] | undefined;
 }
 
@@ -23,13 +21,11 @@ const CatalogFilters = ({
   setSelectedCategory,
   selectedStatus,
   setSelectedStatus,
-  priceRange,
-  setPriceRange,
   categories
 }: CatalogFiltersProps) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -65,18 +61,6 @@ const CatalogFilters = ({
             <SelectItem value="available">Disponível</SelectItem>
             <SelectItem value="rented">Alugado</SelectItem>
             <SelectItem value="maintenance">Manutenção</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={priceRange} onValueChange={setPriceRange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Preço" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os preços</SelectItem>
-            <SelectItem value="low">Até R$ 100</SelectItem>
-            <SelectItem value="medium">R$ 100 - R$ 300</SelectItem>
-            <SelectItem value="high">Acima de R$ 300</SelectItem>
           </SelectContent>
         </Select>
       </div>

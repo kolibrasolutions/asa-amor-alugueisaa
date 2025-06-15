@@ -1,4 +1,3 @@
-
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import Navigation from '@/components/Navigation';
@@ -23,8 +22,6 @@ const Catalog = () => {
     setSelectedCategory,
     selectedStatus,
     setSelectedStatus,
-    priceRange,
-    setPriceRange,
     filteredProducts,
   } = useProductFilters(products);
 
@@ -62,8 +59,6 @@ const Catalog = () => {
           setSelectedCategory={setSelectedCategory}
           selectedStatus={selectedStatus}
           setSelectedStatus={setSelectedStatus}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
           categories={categories}
         />
 

@@ -6,7 +6,6 @@ export const useProductFilters = (products: Product[] | undefined) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [priceRange, setPriceRange] = useState<string>('all');
 
   const filteredProducts = useMemo(() => {
     return products?.filter(product => {
@@ -18,25 +17,9 @@ export const useProductFilters = (products: Product[] | undefined) => {
 
       const matchesStatus = selectedStatus === 'all' || product.status === selectedStatus;
 
-      let matchesPrice = true;
-      if (priceRange !== 'all' && product.rental_price) {
-        const price = Number(product.rental_price);
-        switch (priceRange) {
-          case 'low':
-            matchesPrice = price < 100;
-            break;
-          case 'medium':
-            matchesPrice = price >= 100 && price < 300;
-            break;
-          case 'high':
-            matchesPrice = price >= 300;
-            break;
-        }
-      }
-
-      return matchesSearch && matchesCategory && matchesStatus && matchesPrice;
+      return matchesSearch && matchesCategory && matchesStatus;
     });
-  }, [products, searchTerm, selectedCategory, selectedStatus, priceRange]);
+  }, [products, searchTerm, selectedCategory, selectedStatus]);
 
   return {
     searchTerm,
@@ -45,8 +28,6 @@ export const useProductFilters = (products: Product[] | undefined) => {
     setSelectedCategory,
     selectedStatus,
     setSelectedStatus,
-    priceRange,
-    setPriceRange,
     filteredProducts,
   };
 };

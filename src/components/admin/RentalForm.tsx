@@ -159,7 +159,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
       // Adicionar novo produto
       const productToAdd = {
         ...newProduct,
-        unit_price: newProduct.unit_price || product.rental_price || 0,
+        unit_price: newProduct.unit_price || 0,
       };
       setSelectedProducts(prev => [...prev, productToAdd]);
     }
