@@ -1,3 +1,4 @@
+
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product } from './useProducts';
@@ -14,17 +15,28 @@ export interface AvailabilityResult {
   isAvailable: boolean;
 }
 
+const isUuid = (value: string) => {
+  const regex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return regex.test(value);
+};
+
 const checkProductAvailability = async (searchTerm: string): Promise<AvailabilityResult> => {
   if (!searchTerm.trim()) {
     throw new Error("Por favor, insira um ID ou SKU para buscar.");
   }
 
-  // 1. Find the product by ID or SKU
-  const { data: product, error: productError } = await supabase
-    .from('products')
-    .select('*')
-    .or(`id.eq.${searchTerm},sku.eq.${searchTerm}`)
-    .maybeSingle();
+  // 1. Find the product by ID or SKU conditionally
+  let productQuery;
+  const trimmedSearchTerm = searchTerm.trim();
+
+  if (isUuid(trimmedSearchTerm)) {
+    productQuery = supabase.from('products').select('*').eq('id', trimmedSearchTerm);
+  } else {
+    productQuery = supabase.from('products').select('*').eq('sku', trimmedSearchTerm);
+  }
+
+  const { data: product, error: productError } = await productQuery.maybeSingle();
+
 
   if (productError) {
     console.error("Product search error:", productError);
