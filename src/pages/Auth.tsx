@@ -9,11 +9,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,23 +27,14 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = isLogin 
-        ? await signIn(email, password)
-        : await signUp(email, password);
+      const { error } = await signIn(email, password);
 
       if (error) {
         toast({
-          title: "Erro",
-          description: error.message,
+          title: "Erro de autenticação",
+          description: "Email ou senha incorretos.",
           variant: "destructive",
         });
-      } else {
-        if (!isLogin) {
-          toast({
-            title: "Cadastro realizado",
-            description: "Verifique seu email para confirmar a conta.",
-          });
-        }
       }
     } catch (error) {
       toast({
@@ -62,8 +52,11 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-serif text-asa-dark">
-            {isLogin ? 'Entrar' : 'Cadastrar'}
+            Acesso Administrativo
           </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Área restrita para administradores
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,19 +85,9 @@ const Auth = () => {
               className="w-full bg-asa-blush hover:bg-asa-blush/90 text-asa-dark"
               disabled={loading}
             >
-              {loading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Cadastrar')}
+              {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-asa-dark hover:underline"
-            >
-              {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
-            </button>
-          </div>
 
           <div className="mt-6 text-center">
             <button
