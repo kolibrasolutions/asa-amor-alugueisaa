@@ -1,0 +1,17 @@
+
+import { z } from 'zod';
+
+export const productSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  sku: z.string().optional(),
+  description: z.string().optional(),
+  brand: z.string().optional(),
+  color: z.string().optional(),
+  size: z.string().optional(),
+  rental_price: z.number().min(0).optional(),
+  purchase_price: z.number().min(0).optional(),
+  category_id: z.string().optional(),
+  status: z.enum(['available', 'rented', 'maintenance']).default('available'),
+});
+
+export type ProductFormData = z.infer<typeof productSchema>;
