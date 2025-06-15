@@ -1,7 +1,6 @@
-
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useDashboardStats } from '@/hooks/useDashboard';
 import { ProductsManagement } from '@/components/admin/ProductsManagement';
 import { CustomersManagement } from '@/components/admin/CustomersManagement';
@@ -10,16 +9,20 @@ import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 const Admin = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, isAdmin, loading } = useAdminAuth();
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const [activeSection, setActiveSection] = useState('dashboard');
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
+    if (!loading) {
+      if (!user) {
+        navigate('/auth');
+      } else if (!isAdmin) {
+        navigate('/access-denied');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, isAdmin, loading, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,7 +41,7 @@ const Admin = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return null;
   }
 
