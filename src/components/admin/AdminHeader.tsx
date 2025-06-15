@@ -17,7 +17,8 @@ export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: Adm
       case 'categories': return 'Gestão de Categorias';
       case 'customers': return 'Gestão de Clientes';
       case 'rentals': return 'Gestão de Aluguéis';
-      default: return 'Agenda';
+      case 'calendar': return 'Agenda de Aluguéis';
+      default: return 'Painel Administrativo';
     }
   };
 

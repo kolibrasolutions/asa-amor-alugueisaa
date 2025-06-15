@@ -58,9 +58,9 @@ const Admin = () => {
       case 'categories':
         return <CategoriesManagement />;
       case 'rentals':
-        return <RentalsManagement />;
+        return <RentalsManagement onSectionChange={setActiveSection} />;
       case 'calendar':
-        return <RentalsCalendar />;
+        return <RentalsCalendar onSectionChange={setActiveSection} />;
       default:
         return <AdminDashboard stats={stats} onSectionChange={setActiveSection} />;
     }

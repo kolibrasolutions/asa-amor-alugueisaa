@@ -7,6 +7,8 @@ import { RentalStatusBadge } from './RentalStatusBadge';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { RentalStatusUpdater } from './RentalStatusUpdater';
+import { Button } from '@/components/ui/button';
+import { ClipboardList } from 'lucide-react';
 
 const parseDate = (dateString: string): Date => {
   const parts = dateString.split('-').map(Number);
@@ -41,7 +43,11 @@ const statusTranslation: Record<string, string> = {
     cancelled: 'cancelado'
 }
 
-export const RentalsCalendar = () => {
+interface RentalsCalendarProps {
+  onSectionChange: (section: string) => void;
+}
+
+export const RentalsCalendar = ({ onSectionChange }: RentalsCalendarProps) => {
   const { data: rentals, isLoading } = useRentals();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
@@ -73,7 +79,13 @@ export const RentalsCalendar = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Agenda de Aluguéis</h1>
+       <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Agenda de Aluguéis</h1>
+        <Button variant="outline" onClick={() => onSectionChange('rentals')}>
+          <ClipboardList className="w-4 h-4 mr-2" />
+          Ver Lista de Aluguéis
+        </Button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
           <Calendar

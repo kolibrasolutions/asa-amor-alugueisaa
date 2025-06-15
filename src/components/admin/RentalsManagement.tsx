@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { RentalStatusBadge } from './RentalStatusBadge';
 import { RentalForm } from './RentalForm';
-import { Plus, Edit, Trash, Eye } from 'lucide-react';
+import { Plus, Edit, Trash, Eye, Calendar } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RentalDetails } from './RentalDetails';
 
-export const RentalsManagement = () => {
+interface RentalsManagementProps {
+  onSectionChange: (section: string) => void;
+}
+
+export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) => {
   const { data: rentals, isLoading } = useRentals();
   const deleteRental = useDeleteRental();
   const [showForm, setShowForm] = useState(false);
@@ -94,10 +98,16 @@ export const RentalsManagement = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestão de Aluguéis</h1>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Aluguel
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" onClick={() => onSectionChange('calendar')}>
+            <Calendar className="w-4 h-4 mr-2" />
+            Ver Agenda
+          </Button>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Aluguel
+          </Button>
+        </div>
       </div>
 
       <Card>

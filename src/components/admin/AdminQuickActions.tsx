@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Package, Users, Calendar, Folder } from 'lucide-react';
+import { Package, Users, Calendar, Folder, ClipboardList } from 'lucide-react';
 
 interface AdminQuickActionsProps {
   onSectionChange: (section: string) => void;
@@ -28,9 +28,15 @@ export const AdminQuickActions = ({ onSectionChange }: AdminQuickActionsProps) =
     },
     {
       id: 'rentals',
+      icon: ClipboardList,
+      title: 'Gerenciar Aluguéis',
+      description: 'Ver, criar e editar aluguéis'
+    },
+    {
+      id: 'calendar',
       icon: Calendar,
-      title: 'Novo Aluguel',
-      description: 'Criar novo contrato de aluguel'
+      title: 'Agenda de Aluguéis',
+      description: 'Visualizar aluguéis no calendário'
     }
   ];
 
