@@ -1,5 +1,5 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -41,7 +41,7 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
 
   const aspect = 3 / 4; // Proporção fixa 3:4
 
-  useState(() => {
+  useEffect(() => {
     if (imageFile && isOpen) {
       const reader = new FileReader();
       reader.addEventListener('load', () => {
