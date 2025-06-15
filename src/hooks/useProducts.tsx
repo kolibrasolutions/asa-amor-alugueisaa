@@ -9,8 +9,6 @@ export interface Product {
   brand?: string;
   color?: string;
   size?: string;
-  rental_price?: number;
-  purchase_price?: number;
   status?: 'available' | 'rented' | 'maintenance';
   category_id?: string;
   images?: string[];

@@ -1,4 +1,3 @@
-
 import { Product } from '@/hooks/useProducts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -105,17 +104,6 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
                 <span className="sr-only">Copiar código</span>
               </Button>
             </div>
-
-            {product.rental_price && (
-              <div className="mt-2">
-                <p className="text-lg font-bold text-asa-blush">
-                  R$ {Number(product.rental_price).toFixed(2)}
-                  <span className="text-sm font-normal text-asa-gray ml-1">
-                    /aluguel
-                  </span>
-                </p>
-              </div>
-            )}
           </div>
           
           <Button className="w-full mt-4" variant="outline">

@@ -1,4 +1,3 @@
-
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateProduct, useUpdateProduct, Product } from '@/hooks/useProducts';
@@ -25,8 +24,6 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
         brand: product.brand || '',
         color: product.color || '',
         size: product.size || '',
-        rental_price: product.rental_price || undefined,
-        purchase_price: product.purchase_price || undefined,
         category_id: product.category_id || '',
         status: (product.status as 'available' | 'rented' | 'maintenance') || 'available',
       };
@@ -38,8 +35,6 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
       brand: '',
       color: '',
       size: '',
-      rental_price: undefined,
-      purchase_price: undefined,
       category_id: '',
       status: 'available',
     };
@@ -59,8 +54,6 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
         brand: data.brand || undefined,
         color: data.color || undefined,
         size: data.size || undefined,
-        rental_price: data.rental_price || undefined,
-        purchase_price: data.purchase_price || undefined,
         category_id: data.category_id || undefined,
         status: data.status,
       };

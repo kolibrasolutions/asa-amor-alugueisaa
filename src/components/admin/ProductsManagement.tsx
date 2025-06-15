@@ -159,8 +159,6 @@ export const ProductsManagement = () => {
                   <TableHead>Código</TableHead>
                   <TableHead>Marca</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Preço Aluguel</TableHead>
-                  <TableHead>Preço Compra</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -178,8 +176,6 @@ export const ProductsManagement = () => {
                     <TableCell>
                       <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />
                     </TableCell>
-                    <TableCell>{formatCurrency(product.rental_price)}</TableCell>
-                    <TableCell>{formatCurrency(product.purchase_price)}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button

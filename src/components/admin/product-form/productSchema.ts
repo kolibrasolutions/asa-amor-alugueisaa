@@ -8,8 +8,6 @@ export const productSchema = z.object({
   brand: z.string().optional(),
   color: z.string().optional(),
   size: z.string().optional(),
-  rental_price: z.number().min(0).optional(),
-  purchase_price: z.number().min(0).optional(),
   category_id: z.string().optional(),
   status: z.enum(['available', 'rented', 'maintenance']).default('available'),
 });

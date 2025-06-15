@@ -1,4 +1,3 @@
-
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -90,29 +89,6 @@ export const ProductFormFields = () => {
               </SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="rental_price">Preço de Aluguel</Label>
-          <Input
-            id="rental_price"
-            type="number"
-            step="0.01"
-            {...register('rental_price', { valueAsNumber: true })}
-            placeholder="0.00"
-          />
-        </div>
-        <div>
-          <Label htmlFor="purchase_price">Preço de Compra</Label>
-          <Input
-            id="purchase_price"
-            type="number"
-            step="0.01"
-            {...register('purchase_price', { valueAsNumber: true })}
-            placeholder="0.00"
-          />
         </div>
       </div>
     </div>
