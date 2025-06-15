@@ -7,6 +7,7 @@ import { useDashboardStats } from '@/hooks/useDashboard';
 import { ProductsManagement } from '@/components/admin/ProductsManagement';
 import { CustomersManagement } from '@/components/admin/CustomersManagement';
 import { CategoriesManagement } from '@/components/admin/CategoriesManagement';
+import { RentalsManagement } from '@/components/admin/RentalsManagement';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
@@ -57,12 +58,7 @@ const Admin = () => {
       case 'categories':
         return <CategoriesManagement />;
       case 'rentals':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold">Gestão de Aluguéis</h1>
-            <p className="text-gray-600 mt-2">Em desenvolvimento...</p>
-          </div>
-        );
+        return <RentalsManagement />;
       case 'calendar':
         return (
           <div className="p-6">
