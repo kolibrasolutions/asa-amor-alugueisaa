@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { useRentals, RentalWithDetails } from '@/hooks/useRentals';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RentalStatusBadge } from './RentalStatusBadge';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { RentalStatusUpdater } from './RentalStatusUpdater';
 
 const parseDate = (dateString: string): Date => {
   const parts = dateString.split('-').map(Number);
@@ -97,12 +97,14 @@ export const RentalsCalendar = () => {
               {selectedRentals.length > 0 ? (
                 <ul className="space-y-4">
                   {selectedRentals.map(rental => (
-                    <li key={rental.id} className="border-l-4 p-2 rounded" style={{ borderColor: getStatusColor(rental.status) }}>
-                      <p className="font-semibold">{rental.customer.full_name}</p>
-                      <div className="text-sm text-muted-foreground">
-                        <RentalStatusBadge status={rental.status} />
-                      </div>
-                    </li>
+                    <RentalStatusUpdater key={rental.id} rental={rental}>
+                      <li className="border-l-4 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors" style={{ borderColor: getStatusColor(rental.status) }}>
+                        <p className="font-semibold">{rental.customer.full_name}</p>
+                        <div className="text-sm text-muted-foreground">
+                          <RentalStatusBadge status={rental.status} />
+                        </div>
+                      </li>
+                    </RentalStatusUpdater>
                   ))}
                 </ul>
               ) : (
