@@ -1,12 +1,12 @@
 
-import { DollarSign, Heart, Users, TrendingUp } from "lucide-react";
+import { Shield, Heart, Users, TrendingUp } from "lucide-react";
 
 const ServiceHighlights = () => {
   const services = [
     {
-      icon: DollarSign,
-      title: "Preços Transparentes",
-      description: "Sem taxas ocultas, valores justos e claros desde o primeiro contato"
+      icon: Shield,
+      title: "Qualidade Garantida",
+      description: "Peças de alta qualidade, rigorosamente selecionadas e mantidas"
     },
     {
       icon: Heart,

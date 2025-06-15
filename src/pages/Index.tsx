@@ -4,7 +4,6 @@ import Navigation from "@/components/Navigation";
 import IntroSection from "@/components/IntroSection";
 import CategoryGallery from "@/components/CategoryGallery";
 import ServiceHighlights from "@/components/ServiceHighlights";
-import RentalPackages from "@/components/RentalPackages";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
@@ -16,7 +15,6 @@ const Index = () => {
       <IntroSection />
       <CategoryGallery />
       <ServiceHighlights />
-      <RentalPackages />
       <ContactSection />
       <Footer />
     </div>
