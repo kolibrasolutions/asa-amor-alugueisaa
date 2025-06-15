@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { useDashboardStats } from '@/hooks/useDashboard';
 import { ProductsManagement } from '@/components/admin/ProductsManagement';
 import { CustomersManagement } from '@/components/admin/CustomersManagement';
@@ -10,6 +12,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const [activeSection, setActiveSection] = useState('dashboard');
