@@ -10,7 +10,7 @@ const SustainableSection = () => {
   };
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Imagem Principal */}
@@ -38,16 +38,16 @@ const SustainableSection = () => {
           {/* Conteúdo */}
           <div className="space-y-6">
             <h2 className="text-4xl md:text-5xl font-serif text-asa-dark leading-tight">
-              From Item to Headlook:<br />
-              <span className="text-asa-primary">Sustainable Wedding Day</span><br />
-              Accessories Made from Your<br />
-              Dress
+              Lorem Ipsum<br />
+              <span className="text-asa-primary">Dolor Sit Amet</span><br />
+              Consectetur<br />
+              Adipiscing
             </h2>
             
             <p className="text-gray-600 leading-relaxed">
-              Oferecemos uma experiência única e sustentável para o seu grande dia. 
-              Transformamos elementos do seu vestido em acessórios personalizados, 
-              criando memórias que durarão para sempre.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
+              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
+              nostrud exercitation.
             </p>
 
             <Button 
@@ -55,11 +55,11 @@ const SustainableSection = () => {
               className="bg-asa-primary hover:bg-asa-primary/90 text-white px-8 py-3 rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105"
             >
               <MessageCircle size={20} />
-              GET STARTED
+              LOREM IPSUM
             </Button>
 
             <p className="text-sm text-gray-500">
-              Entre em contato conosco e descubra como podemos tornar seu dia ainda mais especial.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
           </div>
         </div>

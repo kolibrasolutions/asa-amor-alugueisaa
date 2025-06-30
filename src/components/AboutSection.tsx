@@ -7,16 +7,15 @@ const AboutSection = () => {
   const navigate = useNavigate();
 
   const handleCategoryClick = (categoryId: string, categoryName: string) => {
-    // Navegar para o catálogo com filtro da categoria
     navigate(`/catalogo?categoria=${categoryId}&nome=${encodeURIComponent(categoryName)}`);
   };
 
   if (isLoading) {
     return (
-      <section id="sobre" className="py-8 bg-white">
+      <section id="sobre" className="pt-4 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <p className="text-gray-500">Carregando categorias...</p>
+            <p className="text-gray-500">Carregando...</p>
           </div>
         </div>
       </section>
@@ -24,17 +23,16 @@ const AboutSection = () => {
   }
 
   return (
-    <section id="sobre" className="py-8 bg-white">
+    <section id="sobre" className="pt-4 bg-white">
       <div className="container mx-auto px-4">
         {/* Título Principal */}
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-serif text-asa-dark mb-2">
-            O Amor Te Trouxe Aqui, Nós Também.
+            Lorem ipsum dolor sit amet
           </h2>
           <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Nada marca o amor de forma mais espetacular do que o momento especial do casamento. 
-            Na Noivas Cirlene, cada peça é escolhida com carinho, para tornar seu casamento 
-            absolutamente inesquecível.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt 
+            ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
           </p>
         </div>
 
@@ -66,12 +64,12 @@ const AboutSection = () => {
         {/* Fallback se não houver categorias */}
         {categories.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-500 mb-4">Nenhuma categoria encontrada.</p>
+            <p className="text-gray-500 mb-4">Lorem ipsum dolor sit amet</p>
             <Button 
               onClick={() => navigate("/catalogo")}
               className="bg-asa-primary hover:bg-asa-primary/90 text-white px-6 py-2 rounded-full"
             >
-              Ver Catálogo Completo
+              Ver Catálogo
             </Button>
           </div>
         )}

@@ -15,7 +15,7 @@ const Hero = () => {
 
   if (isLoading) {
     return (
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="animate-pulse bg-gray-200 w-full h-full" />
       </section>
     );
@@ -24,14 +24,14 @@ const Hero = () => {
   // Se não houver banners, usa a imagem padrão
   if (banners.length === 0) {
     return (
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/casal-noivos.png')"
           }}
         >
-          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
         <div className="relative z-10 text-center text-white animate-fade-in">
@@ -56,12 +56,12 @@ const Hero = () => {
   }
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
       <Carousel className="w-full h-full">
         <CarouselContent>
           {banners.map((banner) => (
             <CarouselItem key={banner.id}>
-              <div className="relative h-screen">
+              <div className="relative h-[80vh]">
                 <div 
                   className="absolute inset-0 overflow-hidden bg-gray-900"
                   style={{ paddingTop: '80px' }}
@@ -71,12 +71,12 @@ const Hero = () => {
                     alt={banner.title}
                     style={{
                       width: '100%',
-                      height: 'calc(100vh - 80px)',
+                      height: 'calc(80vh - 80px)',
                       objectFit: 'cover',
                       objectPosition: 'center top'
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/30"></div>
+                  <div className="absolute inset-0 bg-black/20"></div>
                 </div>
 
                 <div className="relative z-10 h-full flex items-center justify-center">

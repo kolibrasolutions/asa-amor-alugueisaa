@@ -39,46 +39,52 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
 
   return (
     <Card className="group bg-white border-0 shadow-none hover:shadow-lg transition-all duration-500 ease-out overflow-hidden">
-      <div className="aspect-[4/5] overflow-hidden relative bg-gray-50 rounded-t-lg">
+      <div className="relative w-full pt-[125%] overflow-hidden bg-gray-50 rounded-t-lg">
         {hasMultipleImages ? (
-          <Carousel setApi={setApi} className="w-full h-full">
-            <CarouselContent>
-              {product.images!.map((image, index) => (
-                <CarouselItem key={index}>
-                  <img
-                    src={image}
-                    alt={`${product.name} - imagem ${index + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 bg-white/90 backdrop-blur-sm border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
-            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 bg-white/90 backdrop-blur-sm border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
-
-            {count > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-white/90 backdrop-blur-sm p-2 px-3 rounded-full shadow-lg">
-                {Array.from({ length: count }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => api?.scrollTo(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${current === index + 1 ? 'bg-asa-dark scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
-                    aria-label={`Ir para imagem ${index + 1}`}
-                  />
+          <div className="absolute inset-0">
+            <Carousel setApi={setApi} className="w-full h-full">
+              <CarouselContent>
+                {product.images!.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative w-full h-full">
+                      <img
+                        src={image}
+                        alt={`${product.name} - imagem ${index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                      />
+                    </div>
+                  </CarouselItem>
                 ))}
-              </div>
-            )}
-          </Carousel>
+              </CarouselContent>
+              <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white/90 backdrop-blur-sm border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
+              <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white/90 backdrop-blur-sm border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
+
+              {count > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/90 backdrop-blur-sm py-1.5 px-2.5 rounded-full shadow-lg">
+                  {Array.from({ length: count }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => api?.scrollTo(index)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${current === index + 1 ? 'bg-asa-dark scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
+                      aria-label={`Ir para imagem ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </Carousel>
+          </div>
         ) : (
           <>
             {product.images && product.images.length > 0 ? (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-              />
+              <div className="absolute inset-0">
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                />
+              </div>
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                 <span className="text-gray-400 font-light text-sm">Sem imagem</span>
               </div>
             )}
