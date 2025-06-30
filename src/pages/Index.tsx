@@ -1,20 +1,21 @@
-
-import Hero from "@/components/Hero";
 import Navigation from "@/components/Navigation";
-import IntroSection from "@/components/IntroSection";
-import CategoryGallery from "@/components/CategoryGallery";
-import ServiceHighlights from "@/components/ServiceHighlights";
+import Hero from "@/components/Hero";
+import AboutSection from "@/components/AboutSection";
+import SustainableSection from "@/components/SustainableSection";
+import ClientGallery from "@/components/ClientGallery";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-asa-white">
+    <div className="min-h-screen">
       <Navigation />
-      <Hero />
-      <IntroSection />
-      <CategoryGallery />
-      <ServiceHighlights />
+      <div id="home">
+        <Hero />
+      </div>
+      <AboutSection />
+      <SustainableSection />
+      <ClientGallery />
       <ContactSection />
       <Footer />
     </div>

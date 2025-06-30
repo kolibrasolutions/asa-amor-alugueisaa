@@ -22,9 +22,7 @@ const Navigation = () => {
   const navItems = [
     { name: "Início", href: "#home" },
     { name: "Sobre", href: "#sobre" },
-    { name: "Categorias", href: "#categorias" },
     { name: "Catálogo", href: "/catalogo", external: true },
-    { name: "Serviços", href: "#servicos" },
     { name: "Contato", href: "#contato" },
   ];
 

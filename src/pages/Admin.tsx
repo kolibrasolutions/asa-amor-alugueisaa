@@ -1,80 +1,63 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { useAuth } from '@/hooks/useAuth';
-import { useDashboardStats } from '@/hooks/useDashboard';
-import { ProductsManagement } from '@/components/admin/ProductsManagement';
-import { CustomersManagement } from '@/components/admin/CustomersManagement';
-import { CategoriesManagement } from '@/components/admin/CategoriesManagement';
-import { RentalsManagement } from '@/components/admin/RentalsManagement';
-import { AdminHeader } from '@/components/admin/AdminHeader';
-import { AdminDashboard } from '@/components/admin/AdminDashboard';
-import { RentalsCalendar } from '@/components/admin/RentalsCalendar';
+import { useEffect } from "react";
+import { useNavigate, Routes, Route } from "react-router-dom";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminQuickActions } from "@/components/admin/AdminQuickActions";
+import { ProductsManagement } from "@/components/admin/ProductsManagement";
+import { CategoriesManagement } from "@/components/admin/CategoriesManagement";
+import { CustomersManagement } from "@/components/admin/CustomersManagement";
+import { RentalsManagement } from "@/components/admin/RentalsManagement";
+import { RentalsCalendar } from "@/components/admin/RentalsCalendar";
+import ColorsManagement from "@/components/admin/ColorsManagement";
+import SizesManagement from "@/components/admin/SizesManagement";
+import { BannersManagement } from "@/components/admin/BannersManagement";
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const [activeSection, setActiveSection] = useState('dashboard');
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        navigate('/auth');
-      } else if (!isAdmin) {
-        navigate('/access-denied');
-      }
+    if (!loading && !isAdmin) {
+      navigate("/access-denied");
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [isAdmin, loading, navigate]);
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  const handleSectionChange = (section: string) => {
+    navigate(`/admin/${section}`);
+  };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
-  };
-
-  const handleBackToDashboard = () => {
-    setActiveSection('dashboard');
-  };
-
-  if (loading || statsLoading) {
-    return (
-      <div className="min-h-screen bg-asa-white flex items-center justify-center">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return null;
-  }
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'products':
-        return <ProductsManagement />;
-      case 'customers':
-        return <CustomersManagement />;
-      case 'categories':
-        return <CategoriesManagement />;
-      case 'rentals':
-        return <RentalsManagement onSectionChange={setActiveSection} />;
-      case 'calendar':
-        return <RentalsCalendar onSectionChange={setActiveSection} />;
-      default:
-        return <AdminDashboard stats={stats} onSectionChange={setActiveSection} />;
-    }
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-asa-white">
+    <div className="min-h-screen bg-gray-50">
       <AdminHeader 
-        activeSection={activeSection}
-        userEmail={user.email}
-        onBack={handleBackToDashboard}
+        activeSection="dashboard"
+        userEmail={user?.email || ""}
+        onBack={() => navigate("/admin")}
         onSignOut={handleSignOut}
       />
-      {renderContent()}
+      <main className="container mx-auto py-8">
+        <Routes>
+          <Route index element={<AdminQuickActions />} />
+          <Route path="products/*" element={<ProductsManagement />} />
+          <Route path="categories" element={<CategoriesManagement />} />
+          <Route path="customers" element={<CustomersManagement />} />
+          <Route path="rentals" element={<RentalsManagement onSectionChange={handleSectionChange} />} />
+          <Route path="calendar" element={<RentalsCalendar onSectionChange={handleSectionChange} />} />
+          <Route path="colors" element={<ColorsManagement />} />
+          <Route path="sizes" element={<SizesManagement />} />
+          <Route path="banners" element={<BannersManagement />} />
+        </Routes>
+      </main>
     </div>
   );
 };

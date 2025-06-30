@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,18 @@ interface ImageCropProps {
   onClose: () => void;
   onCropComplete: (croppedImageBlob: Blob) => void;
   imageFile: File;
+  aspectRatio?: number;
+}
+
+// Função para calcular a proporção real do banner
+function calculateBannerAspectRatio() {
+  // Usar proporção 16:9 que é padrão para banners e funciona bem
+  // em desktop e mobile
+  const aspectRatio = 16 / 9; // 1.778:1
+  
+  console.log(`Proporção: ${aspectRatio.toFixed(3)}:1 (16:9 - padrão para banners)`);
+  
+  return aspectRatio;
 }
 
 function centerAspectCrop(
@@ -36,10 +47,17 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
   const [imgSrc, setImgSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [aspectRatio, setAspectRatio] = useState<number>(1.92);
   const imgRef = useRef<HTMLImageElement>(null);
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const aspect = 3 / 4; // Proporção fixa 3:4
+  // Calcular a proporção real quando o componente abrir
+  useEffect(() => {
+    if (isOpen) {
+      const realAspectRatio = calculateBannerAspectRatio();
+      setAspectRatio(realAspectRatio);
+      console.log('Proporção calculada:', realAspectRatio);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (imageFile && isOpen) {
@@ -53,125 +71,98 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height, aspect));
-  }, []);
+    setCrop(centerAspectCrop(width, height, aspectRatio));
+  }, [aspectRatio]);
 
-  const generateCroppedImage = useCallback(async () => {
-    if (!completedCrop || !imgRef.current || !previewCanvasRef.current) {
-      return;
-    }
+  const cropImage = useCallback(async () => {
+    if (!imgRef.current || !completedCrop) return;
 
-    const image = imgRef.current;
-    const canvas = previewCanvasRef.current;
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    if (!ctx) {
-      throw new Error('No 2d context');
-    }
-
+    // Usar as dimensões naturais da imagem
+    const image = imgRef.current;
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // Definir dimensões finais (600x800 para 3:4)
-    const targetWidth = 600;
-    const targetHeight = 800;
+    // Calcular as dimensões do crop mantendo a proporção
+    const cropWidth = completedCrop.width * scaleX;
+    const cropHeight = cropWidth / aspectRatio; // Forçar a proporção correta
 
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    ctx.imageSmoothingQuality = 'high';
+
+    const cropX = completedCrop.x * scaleX;
+    const cropY = completedCrop.y * scaleY;
 
     ctx.drawImage(
       image,
-      completedCrop.x * scaleX,
-      completedCrop.y * scaleY,
-      completedCrop.width * scaleX,
-      completedCrop.height * scaleY,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      targetWidth,
-      targetHeight,
+      cropWidth,
+      cropHeight
     );
 
-    return new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to create blob'));
-          }
-        },
-        'image/webp',
-        0.85
-      );
-    });
-  }, [completedCrop]);
-
-  const handleCropConfirm = async () => {
-    try {
-      const croppedBlob = await generateCroppedImage();
-      if (croppedBlob) {
-        onCropComplete(croppedBlob);
-        onClose();
+    canvas.toBlob((blob) => {
+      if (blob) {
+        onCropComplete(blob);
       }
-    } catch (error) {
-      console.error('Error generating cropped image:', error);
-    }
-  };
-
-  const handleClose = () => {
-    setImgSrc('');
-    setCrop(undefined);
-    setCompletedCrop(undefined);
-    onClose();
-  };
+    }, 'image/png', 1);
+  }, [completedCrop, onCropComplete, aspectRatio]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Ajustar Imagem da Categoria</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
+          <DialogTitle>Recortar Imagem</DialogTitle>
           <p className="text-sm text-gray-600">
-            Ajuste a área da imagem que será exibida na galeria de categorias (proporção 3:4).
+            Proporção: {aspectRatio.toFixed(2)}:1 (16:9 - padrão para banners)
           </p>
-          
+        </DialogHeader>
+        <div className="space-y-4">
           {imgSrc && (
-            <div className="flex flex-col items-center space-y-4">
+            <div 
+              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden"
+              style={{ 
+                aspectRatio: aspectRatio,
+                maxWidth: '800px',
+                maxHeight: '600px'
+              }}
+            >
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                aspect={aspect}
-                className="max-w-full"
+                aspect={aspectRatio}
+                className="w-full h-full"
               >
                 <img
                   ref={imgRef}
-                  alt="Crop preview"
+                  alt="Crop me"
                   src={imgSrc}
-                  style={{ maxHeight: '60vh', maxWidth: '100%' }}
                   onLoad={onImageLoad}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'contain'
+                  }}
                 />
               </ReactCrop>
-              
-              {/* Canvas oculto para gerar a imagem final */}
-              <canvas
-                ref={previewCanvasRef}
-                style={{ display: 'none' }}
-              />
             </div>
           )}
-          
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={handleClose}>
+            <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button 
-              onClick={handleCropConfirm}
-              disabled={!completedCrop}
-            >
-              Confirmar Crop
+            <Button onClick={cropImage}>
+              Concluir
             </Button>
           </div>
         </div>

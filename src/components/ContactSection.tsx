@@ -6,18 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Phone, MessageCircle, Calendar } from "lucide-react";
 
 const ContactSection = () => {
-  const consultants = [
-    {
-      name: "Jéssica",
-      role: "Consultora de Noivas",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      name: "João", 
-      role: "Consultor Masculino",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-    }
-  ];
 
   return (
     <section id="contato" className="py-20 bg-asa-beige">
@@ -27,53 +15,60 @@ const ContactSection = () => {
             Entre em Contato
           </h2>
           <p className="text-lg text-asa-gray max-w-2xl mx-auto">
-            Nossa equipe está pronta para ajudar você a encontrar a peça perfeita
+            Estamos prontos para ajudar você a encontrar a peça perfeita para o seu momento especial
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Consultants */}
+          {/* Contact Buttons */}
           <div>
             <h3 className="text-2xl font-serif font-semibold text-asa-dark mb-8">
-              Nossos Consultores
+              Fale Conosco
             </h3>
             
-            <div className="space-y-6 mb-8">
-              {consultants.map((consultant) => (
-                <div key={consultant.name} className="flex items-center bg-white p-6 rounded-2xl shadow-lg">
-                  <img
-                    src={consultant.image}
-                    alt={consultant.name}
-                    className="w-16 h-16 rounded-full object-cover mr-4"
-                  />
-                  <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-asa-dark">
-                      {consultant.name}
-                    </h4>
-                    <p className="text-asa-gray text-sm">
-                      {consultant.role}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4">
+            <div className="space-y-4 mb-8">
               <Button 
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-4 rounded-full transition-all duration-300"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-6 rounded-full transition-all duration-300 text-lg"
                 size="lg"
+                asChild
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                WhatsApp
+                <a href="https://wa.me/5535991479232" target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-6 h-6 mr-3" />
+                  WhatsApp
+                </a>
               </Button>
               <Button 
                 variant="outline"
-                className="w-full border-asa-dark text-asa-dark hover:bg-asa-dark hover:text-white font-medium py-4 rounded-full transition-all duration-300"
+                className="w-full border-asa-dark text-asa-dark hover:bg-asa-dark hover:text-white font-medium py-6 rounded-full transition-all duration-300 text-lg"
                 size="lg"
+                asChild
               >
-                <Phone className="w-5 h-5 mr-2" />
-                Ligar Agora
+                <a href="tel:+5535991479232">
+                  <Phone className="w-6 h-6 mr-3" />
+                  Ligar Agora
+                </a>
               </Button>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <h4 className="text-lg font-semibold text-asa-dark mb-4">
+                Informações de Contato
+              </h4>
+              <div className="space-y-3 text-asa-gray">
+                <div className="flex items-center">
+                  <Phone className="w-5 h-5 text-asa-blush mr-3" />
+                  <span>(35) 99147-9232</span>
+                </div>
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-asa-blush mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p>Rua Fausto Martiniano, 105</p>
+                    <p>Centro - Muzambinho, MG</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -98,7 +93,7 @@ const ContactSection = () => {
                     <Label htmlFor="phone" className="text-asa-dark">Telefone</Label>
                     <Input 
                       id="phone" 
-                      placeholder="(11) 99999-9999"
+                      placeholder="(35) 99147-9232"
                       className="mt-2"
                     />
                   </div>

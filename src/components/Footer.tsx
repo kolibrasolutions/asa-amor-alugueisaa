@@ -1,5 +1,5 @@
 
-import { Instagram, Facebook, MapPin, Phone, Mail, Settings } from "lucide-react";
+import { Instagram, Facebook, MapPin, Phone, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -41,20 +41,14 @@ const Footer = () => {
               <div className="flex items-center">
                 <MapPin className="w-5 h-5 text-asa-blush mr-3 flex-shrink-0" />
                 <span className="text-gray-300">
-                  Rua das Flores, 123 - Centro<br />
-                  São Paulo, SP
+                  Rua Fausto Martiniano, 105<br />
+                  Centro - Muzambinho, MG
                 </span>
               </div>
               <div className="flex items-center">
                 <Phone className="w-5 h-5 text-asa-blush mr-3 flex-shrink-0" />
                 <span className="text-gray-300">
-                  (11) 9999-9999
-                </span>
-              </div>
-              <div className="flex items-center">
-                <Mail className="w-5 h-5 text-asa-blush mr-3 flex-shrink-0" />
-                <span className="text-gray-300">
-                  contato@noivascirlene.com.br
+                  (35) 99147-9232
                 </span>
               </div>
             </div>

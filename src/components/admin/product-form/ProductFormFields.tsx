@@ -1,99 +1,217 @@
-
-import { useFormContext } from 'react-hook-form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useFormContext } from 'react-hook-form';
 import { useCategories } from '@/hooks/useCategories';
-import { ProductStatusBadge } from '../ProductStatusBadge';
-import { ProductFormData } from './productSchema';
+import { useColors } from '@/hooks/useColors';
+import { useSizes } from '@/hooks/useSizes';
 import { ProductImageUpload } from './ProductImageUpload';
 
 export const ProductFormFields = () => {
-  const { register, watch, setValue, formState: { errors } } = useFormContext<ProductFormData>();
+  const { control } = useFormContext();
   const { data: categories } = useCategories();
+  const { data: colors } = useColors();
+  const { data: sizes } = useSizes();
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Nome *</Label>
-          <Input id="name" {...register('name')} placeholder="Nome do produto" />
-          {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
-        </div>
-        <div>
-          <Label htmlFor="sku">Código (SKU)</Label>
-          <Input id="sku" {...register('sku')} placeholder="Opcional. Ex: VST-AZL-01" />
-          {errors.sku && <p className="text-sm text-red-500">{errors.sku.message}</p>}
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormField
+        control={control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome do Produto</FormLabel>
+            <FormControl>
+              <Input placeholder="Nome do produto" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="sku"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>SKU (Código)</FormLabel>
+            <FormControl>
+              <Input placeholder="Ex: VN001" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="brand"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Marca</FormLabel>
+            <FormControl>
+              <Input placeholder="Marca do produto" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="color"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cor</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a cor">
+                    {field.value && (
+                      <div className="flex items-center gap-2">
+                                                 <div 
+                           className="w-4 h-4 rounded-full border border-gray-300"
+                           style={{ 
+                             backgroundColor: colors?.find(c => c.value === field.value)?.hex_code || '#9CA3AF' 
+                           }}
+                         />
+                         {colors?.find(c => c.value === field.value)?.name || field.value}
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                                 <SelectContent>
+                   {colors?.map((color) => (
+                     <SelectItem key={color.value} value={color.value}>
+                       <div className="flex items-center gap-2">
+                         <div 
+                           className="w-4 h-4 rounded-full border border-gray-300"
+                           style={{ backgroundColor: color.hex_code }}
+                         />
+                         {color.name}
+                       </div>
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="size"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tamanho</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tamanho" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sizes?.map((size) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="category_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Categoria</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories?.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Status</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Disponível</SelectItem>
+                  <SelectItem value="rented">Alugado</SelectItem>
+                  <SelectItem value="maintenance">Manutenção</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="md:col-span-2">
+        <FormField
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descrição detalhada do produto"
+                  className="resize-none"
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="brand">Marca</Label>
-          <Input id="brand" {...register('brand')} placeholder="Marca do produto" />
-        </div>
-        <div>
-          <Label htmlFor="category_id">Categoria</Label>
-          <Select value={watch('category_id') || ''} onValueChange={(value) => setValue('category_id', value)}>
-            <SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
-            <SelectContent>
-              {categories?.map((category) => (
-                <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea id="description" {...register('description')} placeholder="Descrição do produto" />
-      </div>
-
-      <ProductImageUpload />
-
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="color">Cor</Label>
-          <Input id="color" {...register('color')} placeholder="Cor" />
-        </div>
-        <div>
-          <Label htmlFor="size">Tamanho</Label>
-          <Input id="size" {...register('size')} placeholder="Tamanho" />
-        </div>
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select value={watch('status')} onValueChange={(value) => setValue('status', value as any)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="available">
-                <div className="flex items-center space-x-2">
-                  <ProductStatusBadge status="available" />
-                  <span>Disponível</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="rented">
-                <div className="flex items-center space-x-2">
-                  <ProductStatusBadge status="rented" />
-                  <span>Alugado</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="maintenance">
-                <div className="flex items-center space-x-2">
-                  <ProductStatusBadge status="maintenance" />
-                  <span>Manutenção</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="md:col-span-2">
+        <FormField
+          control={control}
+          name="images"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Imagens</FormLabel>
+              <FormControl>
+                <ProductImageUpload
+                  images={field.value}
+                  onImagesChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );

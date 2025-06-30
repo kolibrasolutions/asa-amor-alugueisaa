@@ -1,63 +1,81 @@
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { 
+  ShoppingBag, 
+  Calendar, 
+  Users, 
+  Grid2x2, 
+  Palette,
+  Ruler,
+  Image
+} from "lucide-react";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Package, Users, Calendar, Folder, ClipboardList } from 'lucide-react';
+export const AdminQuickActions = () => {
+  const navigate = useNavigate();
 
-interface AdminQuickActionsProps {
-  onSectionChange: (section: string) => void;
-}
-
-export const AdminQuickActions = ({ onSectionChange }: AdminQuickActionsProps) => {
   const actions = [
     {
-      id: 'products',
-      icon: Package,
-      title: 'Gerenciar Produtos',
-      description: 'Adicionar, editar e remover produtos'
+      title: "Produtos",
+      description: "Gerenciar produtos do catálogo",
+      icon: <ShoppingBag className="w-6 h-6" />,
+      onClick: () => navigate("/admin/products"),
     },
     {
-      id: 'categories',
-      icon: Folder,
-      title: 'Gerenciar Categorias',
-      description: 'Criar e organizar categorias'
+      title: "Aluguéis",
+      description: "Gerenciar aluguéis e reservas",
+      icon: <Calendar className="w-6 h-6" />,
+      onClick: () => navigate("/admin/rentals"),
     },
     {
-      id: 'customers',
-      icon: Users,
-      title: 'Gerenciar Clientes',
-      description: 'Cadastro e histórico de clientes'
+      title: "Clientes",
+      description: "Gerenciar cadastro de clientes",
+      icon: <Users className="w-6 h-6" />,
+      onClick: () => navigate("/admin/customers"),
     },
     {
-      id: 'rentals',
-      icon: ClipboardList,
-      title: 'Gerenciar Aluguéis',
-      description: 'Ver, criar e editar aluguéis'
+      title: "Categorias",
+      description: "Gerenciar categorias de produtos",
+      icon: <Grid2x2 className="w-6 h-6" />,
+      onClick: () => navigate("/admin/categories"),
     },
     {
-      id: 'calendar',
-      icon: Calendar,
-      title: 'Agenda de Aluguéis',
-      description: 'Visualizar aluguéis no calendário'
-    }
+      title: "Cores",
+      description: "Gerenciar cores disponíveis",
+      icon: <Palette className="w-6 h-6" />,
+      onClick: () => navigate("/admin/colors"),
+    },
+    {
+      title: "Tamanhos",
+      description: "Gerenciar tamanhos disponíveis",
+      icon: <Ruler className="w-6 h-6" />,
+      onClick: () => navigate("/admin/sizes"),
+    },
+    {
+      title: "Banners",
+      description: "Gerenciar banners do site",
+      icon: <Image className="w-6 h-6" />,
+      onClick: () => navigate("/admin/banners"),
+    },
   ];
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {actions.map((action) => {
-        const IconComponent = action.icon;
-        return (
-          <Card 
-            key={action.id}
-            className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => onSectionChange(action.id)}
-          >
-            <CardContent className="p-6 text-center">
-              <IconComponent className="w-8 h-8 mx-auto mb-2 text-asa-blush" />
-              <h3 className="font-semibold mb-1">{action.title}</h3>
-              <p className="text-sm text-gray-600">{action.description}</p>
-            </CardContent>
-          </Card>
-        );
-      })}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {actions.map((action) => (
+        <Button
+          key={action.title}
+          variant="outline"
+          className="h-auto p-6 flex flex-col items-center justify-center gap-4 hover:bg-muted/50"
+          onClick={action.onClick}
+        >
+          {action.icon}
+          <div className="text-center">
+            <h3 className="font-semibold">{action.title}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {action.description}
+            </p>
+          </div>
+        </Button>
+      ))}
     </div>
   );
 };

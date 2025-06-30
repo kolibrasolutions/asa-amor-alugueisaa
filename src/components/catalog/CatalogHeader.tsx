@@ -1,7 +1,6 @@
-
 const CatalogHeader = () => {
   return (
-    <div className="text-center mb-12">
+    <div className="text-center mb-8">
       <h1 className="text-4xl font-serif font-bold text-asa-dark mb-4">
         Catálogo de Produtos
       </h1>
