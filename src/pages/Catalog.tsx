@@ -34,7 +34,7 @@ const Catalog = () => {
 
   // Aplicar filtros da URL quando o componente carregar
   useEffect(() => {
-    const categoryParam = searchParams.get('category');
+    const categoryParam = searchParams.get('categoria') || searchParams.get('category');
     const colorParam = searchParams.get('color');
     const sizeParam = searchParams.get('size');
     const searchParam = searchParams.get('search');
