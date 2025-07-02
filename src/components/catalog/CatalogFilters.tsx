@@ -44,7 +44,7 @@ const CatalogFilters = ({
   const hasActiveFilters = selectedCategory !== 'all' || selectedColor !== 'all' || selectedSize !== 'all' || searchTerm;
 
   const FilterContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Cabeçalho dos filtros - apenas para desktop */}
       <div className="hidden lg:flex items-center justify-between">
         <h3 className="text-lg font-semibold text-asa-dark">Filtros</h3>
@@ -67,12 +67,12 @@ const CatalogFilters = ({
           Buscar produtos
         </label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5 lg:h-4 lg:w-4 lg:left-3" />
           <Input
             placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-white/50 focus:bg-white"
+            className="pl-8 lg:pl-10 bg-white/50 focus:bg-white h-8 lg:h-10 text-sm"
           />
         </div>
       </div>
