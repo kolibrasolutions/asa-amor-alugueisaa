@@ -45,8 +45,8 @@ const CatalogFilters = ({
 
   const FilterContent = () => (
     <div className="space-y-6">
-      {/* Cabeçalho dos filtros */}
-      <div className="flex items-center justify-between">
+      {/* Cabeçalho dos filtros - apenas para desktop */}
+      <div className="hidden lg:flex items-center justify-between">
         <h3 className="text-lg font-semibold text-asa-dark">Filtros</h3>
         {hasActiveFilters && (
           <Button
@@ -63,16 +63,16 @@ const CatalogFilters = ({
 
       {/* Busca por texto */}
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <label className="text-sm font-medium text-gray-700 mb-2 block lg:block hidden">
           Buscar produtos
         </label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Digite para buscar..."
+            placeholder="Buscar produtos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white/50 focus:bg-white"
           />
         </div>
       </div>
@@ -280,21 +280,37 @@ const CatalogFilters = ({
       <div className="lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full mb-4">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtros
+            <Button variant="outline" className="w-full bg-white/95 backdrop-blur-sm shadow-sm border-gray-200 flex items-center justify-between">
+              <div className="flex items-center">
+                <Filter className="h-4 w-4 mr-2" />
+                <span>Filtrar</span>
+              </div>
               {hasActiveFilters && (
-                <span className="ml-2 bg-asa-dark text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-asa-dark text-white text-xs px-2 py-0.5 rounded-full">
                   {[searchTerm, selectedCategory !== 'all', selectedColor !== 'all', selectedSize !== 'all'].filter(Boolean).length}
                 </span>
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80">
-            <SheetHeader>
-              <SheetTitle>Filtros</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6">
+          <SheetContent side="right" className="w-[280px] sm:w-[320px] lg:w-[400px] pt-0">
+            <div className="sticky top-0 bg-white pt-4 pb-3 -mx-6 px-6 border-b">
+              <SheetHeader>
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-base">Filtros</SheetTitle>
+                  {hasActiveFilters && (
+                    <Button 
+                      onClick={clearFilters}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs text-asa-dark border-asa-dark/20 h-7 px-2"
+                    >
+                      Limpar
+                    </Button>
+                  )}
+                </div>
+              </SheetHeader>
+            </div>
+            <div className="mt-4 overflow-y-auto">
               <FilterContent />
             </div>
           </SheetContent>

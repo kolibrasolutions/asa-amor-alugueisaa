@@ -34,6 +34,9 @@ const Catalog = () => {
 
   // Aplicar filtros da URL quando o componente carregar
   useEffect(() => {
+    // Scroll para o topo quando a página carregar
+    window.scrollTo(0, 0);
+
     const categoryParam = searchParams.get('categoria') || searchParams.get('category');
     const colorParam = searchParams.get('color');
     const sizeParam = searchParams.get('size');
@@ -82,8 +85,8 @@ const Catalog = () => {
 
         {/* Layout principal com sidebar */}
         <div className="flex gap-8">
-          {/* Sidebar com filtros */}
-          <aside className="flex-shrink-0">
+          {/* Sidebar com filtros - apenas desktop */}
+          <aside className="hidden lg:block flex-shrink-0">
             <CatalogFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -103,11 +106,34 @@ const Catalog = () => {
           <main className="flex-1 min-w-0">
             {/* Cabeçalho da área de produtos */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-asa-dark">
-                  Produtos Disponíveis
-                </h2>
-                <p className="text-asa-gray">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                <div className="flex items-center justify-between w-full lg:w-auto">
+                  <h2 className="text-xl font-semibold text-asa-dark">
+                    Produtos Disponíveis
+                  </h2>
+                  <p className="text-asa-gray lg:hidden">
+                    {filteredProducts?.length || 0} produto(s)
+                  </p>
+                </div>
+                
+                {/* Filtros mobile */}
+                <div className="lg:hidden w-full">
+                  <CatalogFilters
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    selectedColor={selectedColor}
+                    setSelectedColor={setSelectedColor}
+                    selectedSize={selectedSize}
+                    setSelectedSize={setSelectedSize}
+                    categories={categories}
+                    availableColors={availableColors}
+                    availableSizes={availableSizes}
+                  />
+                </div>
+
+                <p className="hidden lg:block text-asa-gray">
                   {filteredProducts?.length || 0} produto(s) encontrado(s)
                 </p>
               </div>
