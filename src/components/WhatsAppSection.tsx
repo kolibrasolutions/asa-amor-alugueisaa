@@ -1,19 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Phone, MessageCircle, Calendar } from "lucide-react";
-
-const ContactSection = () => {
+const WhatsAppSection = () => {
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="relative">
             <img 
               src="/noivos.jpg" 
-              alt="Detalhes de Casamento" 
-              className="w-full h-[500px] object-cover rounded-lg"
+              alt="Casal de Noivos" 
+              className="w-full rounded-lg"
             />
           </div>
           
@@ -30,10 +24,10 @@ const ContactSection = () => {
               Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.
             </p>
             <a
-              href="https://wa.me/seu_numero"
+              href="https://wa.me/5535991479232"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
             >
               Fale Conosco pelo WhatsApp
             </a>
@@ -44,4 +38,4 @@ const ContactSection = () => {
   );
 };
 
-export default ContactSection;
+export default WhatsAppSection; 

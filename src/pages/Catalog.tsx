@@ -9,21 +9,11 @@ import CatalogFilters from '@/components/catalog/CatalogFilters';
 import ProductGrid from '@/components/catalog/ProductGrid';
 import NoProductsFound from '@/components/catalog/NoProductsFound';
 import { useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { useEffect } from 'react';
 
 const Catalog = () => {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const { data: products, isLoading: productsLoading } = useProducts();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
@@ -83,22 +73,6 @@ const Catalog = () => {
     );
   }
 
-  const FiltersContent = () => (
-    <CatalogFilters
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      selectedCategory={selectedCategory}
-      setSelectedCategory={setSelectedCategory}
-      selectedColor={selectedColor}
-      setSelectedColor={setSelectedColor}
-      selectedSize={selectedSize}
-      setSelectedSize={setSelectedSize}
-      categories={categories}
-      availableColors={availableColors}
-      availableSizes={availableSizes}
-    />
-  );
-
   return (
     <div className="min-h-screen bg-asa-white">
       <Navigation />
@@ -107,34 +81,23 @@ const Catalog = () => {
         <CatalogHeader />
 
         {/* Layout principal com sidebar */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar com filtros - visível apenas em desktop */}
-          <aside className="hidden lg:block flex-shrink-0 w-64">
-            <FiltersContent />
+        <div className="flex gap-8">
+          {/* Sidebar com filtros */}
+          <aside className="flex-shrink-0">
+            <CatalogFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+              selectedSize={selectedSize}
+              setSelectedSize={setSelectedSize}
+              categories={categories}
+              availableColors={availableColors}
+              availableSizes={availableSizes}
+            />
           </aside>
-
-          {/* Botão de filtros e drawer para mobile */}
-          <div className="lg:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full mb-4 bg-white"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filtrar Produtos
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
-                  <SheetTitle>Filtros</SheetTitle>
-                </SheetHeader>
-                <div className="py-4">
-                  <FiltersContent />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
 
           {/* Área principal com produtos */}
           <main className="flex-1 min-w-0">
@@ -149,38 +112,40 @@ const Catalog = () => {
                 </p>
               </div>
               
-              {/* Indicadores de filtros ativos */}
-              {(selectedCategory !== 'all' || selectedColor !== 'all' || selectedSize !== 'all' || searchTerm) && (
-                <div className="mb-4 p-3 bg-asa-blush/10 rounded-lg">
-                  <p className="text-sm text-asa-dark mb-2">Filtros ativos:</p>
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    {searchTerm && (
-                      <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
-                        "{searchTerm}"
-                      </span>
-                    )}
-                    {selectedCategory !== 'all' && (
-                      <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
-                        {categories?.find(c => c.id === selectedCategory)?.name}
-                      </span>
-                    )}
-                    {selectedColor !== 'all' && (
-                      <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded flex items-center gap-1">
-                        <div 
-                          className="w-3 h-3 rounded-full border border-gray-300"
-                          style={{ backgroundColor: availableColors.find(c => c.value === selectedColor)?.hex_code }}
-                        />
-                        {availableColors.find(c => c.value === selectedColor)?.name}
-                      </span>
-                    )}
-                    {selectedSize !== 'all' && (
-                      <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
-                        {availableSizes.find(s => s.value === selectedSize)?.name}
-                      </span>
-                    )}
+              {/* Indicadores de filtros ativos em mobile */}
+              <div className="lg:hidden">
+                {(selectedCategory !== 'all' || selectedColor !== 'all' || selectedSize !== 'all' || searchTerm) && (
+                  <div className="mb-4 p-3 bg-asa-blush/10 rounded-lg">
+                    <p className="text-sm text-asa-dark mb-2">Filtros ativos:</p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {searchTerm && (
+                        <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
+                          "{searchTerm}"
+                        </span>
+                      )}
+                      {selectedCategory !== 'all' && (
+                        <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
+                          {categories?.find(c => c.id === selectedCategory)?.name}
+                        </span>
+                      )}
+                      {selectedColor !== 'all' && (
+                        <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded flex items-center gap-1">
+                          <div 
+                            className="w-3 h-3 rounded-full border border-gray-300"
+                            style={{ backgroundColor: availableColors.find(c => c.value === selectedColor)?.hex_code }}
+                          />
+                          {availableColors.find(c => c.value === selectedColor)?.name}
+                        </span>
+                      )}
+                      {selectedSize !== 'all' && (
+                        <span className="bg-asa-blush/30 text-asa-dark px-2 py-1 rounded">
+                          {availableSizes.find(s => s.value === selectedSize)?.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Grid de produtos ou mensagem de vazio */}

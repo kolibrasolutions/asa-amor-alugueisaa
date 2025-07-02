@@ -1,19 +1,20 @@
+
 const IntroSection = () => {
   return (
     <section id="sobre" className="py-20 bg-asa-beige">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-asa-dark mb-8">
-            Lorem Ipsum Dolor Sit Amet
+            Realize o Sonho do seu Dia Especial
           </h2>
           <p className="text-lg text-asa-gray leading-relaxed mb-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt 
-            ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
-            ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            Na Noivas Cirlene, acreditamos que cada momento especial merece ser vivido com elegância e sofisticação. 
+            Nossa coleção cuidadosamente curada oferece vestidos de noiva deslumbrantes, ternos impecáveis 
+            e trajes de festa que fazem você brilhar.
           </p>
           <p className="text-lg text-asa-gray leading-relaxed mb-8">
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
-            nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+            Com atendimento personalizado e peças de alta qualidade, transformamos sonhos em realidade, 
+            criando memórias que durarão para sempre.
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mt-12">
@@ -24,10 +25,10 @@ const IntroSection = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-serif font-semibold text-asa-dark mb-2">
-                Lorem Ipsum
+                Qualidade Garantida
               </h3>
               <p className="text-asa-gray">
-                Consectetur adipiscing elit
+                Peças selecionadas com cuidado para o seu momento especial
               </p>
             </div>
             
@@ -38,10 +39,10 @@ const IntroSection = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-serif font-semibold text-asa-dark mb-2">
-                Dolor Sit
+                Atendimento Personalizado
               </h3>
               <p className="text-asa-gray">
-                Sed do eiusmod tempor
+                Cuidado especial para encontrar a peça perfeita para você
               </p>
             </div>
             
@@ -52,10 +53,10 @@ const IntroSection = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-serif font-semibold text-asa-dark mb-2">
-                Amet Elit
+                Momentos Únicos
               </h3>
               <p className="text-asa-gray">
-                Ut enim ad minim veniam
+                Transformamos seu sonho em realidade com elegância
               </p>
             </div>
           </div>

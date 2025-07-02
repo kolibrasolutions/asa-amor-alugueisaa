@@ -12,27 +12,27 @@ interface ImageCropProps {
   aspectRatio?: number;
 }
 
-// Usando proporção 4:5 para corresponder ao container do card
-const ASPECT_RATIO = 4 / 5;
-
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
   aspect: number,
-): Crop {
-  const height = mediaHeight * 0.8; // 80% da altura
-  const width = height * aspect; // Largura proporcional
-
-  return {
-    unit: '%',
-    width: (width / mediaWidth) * 100,
-    height: (height / mediaHeight) * 100,
-    x: (mediaWidth - width) / 2 / mediaWidth * 100,
-    y: (mediaHeight - height) / 2 / mediaHeight * 100
-  } as Crop;
+) {
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: '%',
+        width: 90,
+      },
+      aspect,
+      mediaWidth,
+      mediaHeight,
+    ),
+    mediaWidth,
+    mediaHeight,
+  )
 }
 
-export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageCropProps) => {
+export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRatio = 21/9 }: ImageCropProps) => {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -50,45 +50,35 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    const crop = centerAspectCrop(width, height, ASPECT_RATIO);
-    setCrop(crop);
-  }, []);
+    setCrop(centerAspectCrop(width, height, aspectRatio));
+  }, [aspectRatio]);
 
   const cropImage = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
 
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Usar as dimensões naturais da imagem
     const image = imgRef.current;
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // Criar um canvas temporário com as dimensões exatas da imagem
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = image.naturalWidth;
-    tempCanvas.height = image.naturalHeight;
+    // Calcular as dimensões do crop mantendo a proporção
+    const cropWidth = completedCrop.width * scaleX;
+    const cropHeight = cropWidth / aspectRatio; // Forçar a proporção correta
 
-    const tempCtx = tempCanvas.getContext('2d');
-    if (!tempCtx) return;
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
 
-    // Desenhar a imagem original no canvas temporário
-    tempCtx.drawImage(image, 0, 0);
+    ctx.imageSmoothingQuality = 'high';
 
-    // Calcular as dimensões do crop em pixels
-    const cropX = Math.round(completedCrop.x * scaleX);
-    const cropY = Math.round(completedCrop.y * scaleY);
-    const cropWidth = Math.round(completedCrop.width * scaleX);
-    const cropHeight = Math.round(completedCrop.height * scaleY);
+    const cropX = completedCrop.x * scaleX;
+    const cropY = completedCrop.y * scaleY;
 
-    // Criar o canvas final com as dimensões do crop
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = cropWidth;
-    finalCanvas.height = cropHeight;
-
-    const finalCtx = finalCanvas.getContext('2d');
-    if (!finalCtx) return;
-
-    // Copiar a área selecionada para o canvas final
-    finalCtx.drawImage(
-      tempCanvas,
+    ctx.drawImage(
+      image,
       cropX,
       cropY,
       cropWidth,
@@ -99,36 +89,38 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
       cropHeight
     );
 
-    // Converter para blob
-    finalCanvas.toBlob(
-      (blob) => {
-        if (blob) {
-          onCropComplete(blob);
-        }
-      },
-      'image/jpeg',
-      1
-    );
-  }, [completedCrop, onCropComplete]);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        onCropComplete(blob);
+      }
+    }, 'image/png', 1);
+  }, [completedCrop, onCropComplete, aspectRatio]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-auto overflow-y-auto max-h-[95vh]">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
         <DialogHeader>
           <DialogTitle>Recortar Imagem</DialogTitle>
           <p className="text-sm text-gray-600">
-            Proporção: 4:5 (formato retrato para produtos)
+            Proporção: {aspectRatio.toFixed(2)}:1 (Banner)
           </p>
         </DialogHeader>
         <div className="space-y-4">
           {imgSrc && (
-            <div className="relative mx-auto bg-gray-100 rounded-lg overflow-hidden flex justify-center">
+            <div 
+              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden"
+              style={{ 
+                aspectRatio: aspectRatio,
+                maxWidth: '800px',
+                maxHeight: '600px'
+              }}
+            >
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                aspect={ASPECT_RATIO}
-                className="max-h-[70vh]"
+                aspect={aspectRatio}
+                className="w-full h-full"
               >
                 <img
                   ref={imgRef}
@@ -136,8 +128,8 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ImageC
                   src={imgSrc}
                   onLoad={onImageLoad}
                   style={{ 
-                    maxHeight: '70vh',
-                    width: 'auto',
+                    width: '100%', 
+                    height: '100%', 
                     objectFit: 'contain'
                   }}
                 />

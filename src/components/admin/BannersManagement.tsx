@@ -106,22 +106,32 @@ export const BannersManagement = () => {
       let publicUrl = selectedBanner?.image_url;
 
       if (formData.image_file) {
-        // Upload new image
-        const fileName = `banner-${Date.now()}.png`;
-        const { error: uploadError } = await supabase.storage
-          .from('banners')
-          .upload(fileName, formData.image_file);
+        try {
+          // Upload new image
+          const fileName = `banner-${Date.now()}.png`;
+          const { error: uploadError } = await supabase.storage
+            .from('banners')
+            .upload(fileName, formData.image_file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        // Get public URL
-        const { data: { publicUrl: newUrl } } = supabase.storage
-          .from('banners')
-          .getPublicUrl(fileName);
+          // Get public URL
+          const { data: { publicUrl: newUrl } } = supabase.storage
+            .from('banners')
+            .getPublicUrl(fileName);
 
-        publicUrl = newUrl;
+          publicUrl = newUrl;
+          console.log("Nova imagem uploaded:", publicUrl);
+        } catch (error) {
+          console.error("Erro no upload da imagem:", error);
+          throw error;
+        }
       }
 
+      // Update banner record
       const { error } = await supabase
         .from('banners')
         .update({
@@ -141,8 +151,10 @@ export const BannersManagement = () => {
       });
       setIsDialogOpen(false);
       setSelectedBanner(null);
+      setImageFile(null);
     },
     onError: (error) => {
+      console.error("Erro ao atualizar banner:", error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar banner: " + error.message,
@@ -216,13 +228,16 @@ export const BannersManagement = () => {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log("Imagem selecionada:", file.name);
       setImageFile(file);
       setIsCropOpen(true);
     }
   };
 
   const handleCropComplete = (croppedImage: Blob) => {
-    setImageFile(new File([croppedImage], 'banner.png', { type: 'image/png' }));
+    console.log("Imagem cortada recebida");
+    const file = new File([croppedImage], 'banner.png', { type: 'image/png' });
+    setImageFile(file);
     setIsCropOpen(false);
   };
 
@@ -236,10 +251,18 @@ export const BannersManagement = () => {
     };
 
     if (selectedBanner) {
+      console.log("Atualizando banner com dados:", formData);
       updateBanner.mutate({ id: selectedBanner.id, formData });
     } else {
       createBanner.mutate(formData);
     }
+  };
+
+  const handleEdit = (banner: Banner) => {
+    console.log("Editando banner:", banner);
+    setSelectedBanner(banner);
+    setImageFile(null);
+    setIsDialogOpen(true);
   };
 
   if (isLoading) {
@@ -289,10 +312,7 @@ export const BannersManagement = () => {
                           <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => {
-                              setSelectedBanner(banner);
-                              setIsDialogOpen(true);
-                            }}
+                            onClick={() => handleEdit(banner)}
                           >
                             <Pencil className="w-4 h-4" />
                           </Button>
@@ -333,15 +353,23 @@ export const BannersManagement = () => {
                       alt="Preview"
                       className="w-full h-full object-cover rounded-lg"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="absolute top-2 right-2"
-                      onClick={() => setImageFile(null)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="bg-white"
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = (e) => handleImageSelect(e as React.ChangeEvent<HTMLInputElement>);
+                          input.click();
+                        }}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center w-full aspect-video bg-muted rounded-lg">
@@ -410,7 +438,7 @@ export const BannersManagement = () => {
           onClose={() => setIsCropOpen(false)}
           onCropComplete={handleCropComplete}
           imageFile={imageFile}
-          aspectRatio={16/9}
+          aspectRatio={21/9}
         />
       )}
     </div>

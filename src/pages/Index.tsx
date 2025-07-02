@@ -1,22 +1,18 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
-import AboutSection from "@/components/AboutSection";
-import SustainableSection from "@/components/SustainableSection";
+import CategoriesSection from "@/components/CategoriesSection";
 import ClientGallery from "@/components/ClientGallery";
-import ContactSection from "@/components/ContactSection";
+import WhatsAppSection from "@/components/WhatsAppSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-hidden">
       <Navigation />
-      <div id="home">
-        <Hero />
-      </div>
-      <AboutSection />
-      <SustainableSection />
+      <Hero />
+      <CategoriesSection />
       <ClientGallery />
-      <ContactSection />
+      <WhatsAppSection />
       <Footer />
     </div>
   );
