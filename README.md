@@ -50,6 +50,16 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Sobre o Sistema de Aluguel
+
+Este é um sistema especializado para gerenciamento de aluguéis de vestidos e acessórios para casamentos e eventos. O sistema inclui:
+
+- Catálogo de produtos com fotos e detalhes
+- Sistema de agendamento com verificação de disponibilidade
+- Painel administrativo completo
+- Integração com WhatsApp para notificações
+- Gestão de clientes e pedidos
+
 ## What technologies are used for this project?
 
 This project is built with:
