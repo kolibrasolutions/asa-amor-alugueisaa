@@ -3,12 +3,6 @@
   publish = "dist"
 
 [[redirects]]
-  from = "https://admin.noivascirlenete.netlify.app/*"
-  to = "/auth"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200 
