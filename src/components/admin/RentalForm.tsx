@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useProducts } from '@/hooks/useProducts';
-import { useCreateRental, useUpdateRental, useRental } from '@/hooks/useRentals';
+import { useCreateRental, useUpdateRental, useRental, sendRentalNotification } from '@/hooks/useRentals';
 import { useCreateRentalItem, useRentalItems, useDeleteRentalItem } from '@/hooks/useRentalItems';
 import { useBulkUpdateProductStatus } from '@/hooks/useProductAvailability';
 import { useProductAvailabilityByDate } from '@/hooks/useProductAvailabilityByDate';
@@ -42,6 +42,7 @@ import { CalendarIcon, ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/components/ui/use-toast';
 
 const rentalSchema = z.object({
   customer_id: z.string().min(1, 'Cliente é obrigatório'),
@@ -74,6 +75,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   const createRentalItem = useCreateRentalItem();
   const deleteRentalItem = useDeleteRentalItem();
   const bulkUpdateProductStatus = useBulkUpdateProductStatus();
+  const { toast } = useToast();
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [newProduct, setNewProduct] = useState({
@@ -124,12 +126,20 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   const endDate = watchedDates[1] ? format(watchedDates[1], 'yyyy-MM-dd') : '';
   
   const allProductIds = products?.map(p => p.id) || [];
-  const { data: availabilityData } = useProductAvailabilityByDate({
+  const { data: availabilityData, refetch: refetchAvailability } = useProductAvailabilityByDate({
     productIds: allProductIds,
     startDate,
     endDate,
     excludeRentalId: rentalId || undefined
   });
+
+  // Forçar refetch quando as datas mudarem
+  useEffect(() => {
+    if (startDate && endDate && allProductIds.length > 0) {
+      console.log('🔄 Forçando nova verificação de disponibilidade por mudança de datas');
+      refetchAvailability();
+    }
+  }, [startDate, endDate, allProductIds.length, refetchAvailability]);
 
   // Mostrar todos os produtos, mas com indicação de disponibilidade
   const allProductsWithAvailability = products?.map(product => {
@@ -138,12 +148,22 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     
     // Verificar se o produto está disponível na data selecionada
     const dateAvailability = availabilityData?.find(av => av.productId === product.id);
-    const isAvailableOnDate = !startDate || !endDate || dateAvailability?.isAvailable !== false;
+    const isAvailableOnDate = !startDate || !endDate || dateAvailability?.isAvailable === true;
     
     // Se estamos editando, permitir produtos que já estão no aluguel atual
     const isAlreadyInCurrentRental = rentalId && selectedProducts.some(sp => sp.product_id === product.id);
     
     const isFullyAvailable = (hasAvailableStatus && isAvailableOnDate) || isAlreadyInCurrentRental;
+    
+    // Debug detalhado
+    console.log(`🔍 Produto ${product.name} (${product.id}):`, {
+      hasAvailableStatus,
+      isAvailableOnDate,
+      dateAvailability: dateAvailability?.isAvailable,
+      isAlreadyInCurrentRental,
+      isFullyAvailable,
+      status: product.status
+    });
     
     return {
       ...product,
@@ -242,7 +262,6 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
           await createRentalItem.mutateAsync({
             rental_id: currentRentalId,
             ...product,
-            unit_price: 0, // Valor não é mais usado no sistema
           });
         }
 
@@ -251,6 +270,33 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
           await updateProductStatuses('rented');
         } else if (data.status === 'completed' || data.status === 'cancelled') {
           await updateProductStatuses('available');
+        }
+
+        // Enviar notificação APENAS para aluguéis novos (não para edições)
+        if (!rentalId) {
+          console.log('📧 Enviando notificação para novo aluguel...');
+          toast({
+            title: "🔔 Enviando notificação...",
+            description: "Preparando resumo do aluguel para envio.",
+          });
+          
+          // Aguardar um pouco para garantir que todos os dados foram salvos
+          setTimeout(async () => {
+            try {
+              await sendRentalNotification(currentRentalId);
+              toast({
+                title: "✅ Notificação enviada!",
+                description: "Resumo do aluguel enviado com sucesso.",
+              });
+            } catch (error) {
+              console.error('Erro ao enviar notificação:', error);
+              toast({
+                title: "⚠️ Falha na notificação",
+                description: "O aluguel foi criado, mas a notificação falhou.",
+                variant: "default",
+              });
+            }
+          }, 1500);
         }
       }
 

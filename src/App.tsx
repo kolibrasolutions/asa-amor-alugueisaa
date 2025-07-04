@@ -23,6 +23,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/catalogo" element={<Catalog />} />
             <Route path="/admin/*" element={<Admin />} />
+            <Route path="/admin-local/*" element={<Admin />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />

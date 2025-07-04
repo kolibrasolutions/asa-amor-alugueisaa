@@ -11,26 +11,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
-import { MessageCircle, Phone, Key, Save, TestTube, Globe } from 'lucide-react';
+import { MessageCircle, Phone, Key, Save, TestTube, Globe, Bell, Smartphone } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { sendWhatsAppTest, sendWhatsAppNotification, generateTestUrl, waitForRateLimit } from '@/lib/utils';
+import { sendWhatsAppTest, sendWhatsAppNotification, generateTestUrl, waitForRateLimit, sendNtfyTest } from '@/lib/utils';
 
 export const SettingsManagement = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('banners');
+  
+  // WhatsApp State
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [whatsappApiKey, setWhatsappApiKey] = useState('');
   const [isTesting, setIsTesting] = useState(false);
   const [isWaitingRateLimit, setIsWaitingRateLimit] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
 
+  // Ntfy State
+  const [ntfyTopic, setNtfyTopic] = useState('');
+  const [ntfyServerUrl, setNtfyServerUrl] = useState('https://ntfy.sh');
+  const [isTestingNtfy, setIsTestingNtfy] = useState(false);
+
   // Carregar configurações do localStorage na inicialização
   useEffect(() => {
+    // WhatsApp
     const savedPhone = localStorage.getItem('whatsapp_phone');
     const savedApiKey = localStorage.getItem('whatsapp_api_key');
     
     if (savedPhone) setWhatsappPhone(savedPhone);
     if (savedApiKey) setWhatsappApiKey(savedApiKey);
+
+    // Ntfy
+    const savedNtfyTopic = localStorage.getItem('ntfy_topic');
+    const savedNtfyServer = localStorage.getItem('ntfy_server_url');
+    
+    if (savedNtfyTopic) setNtfyTopic(savedNtfyTopic);
+    if (savedNtfyServer) setNtfyServerUrl(savedNtfyServer);
   }, []);
 
   const handleSaveWhatsAppConfig = () => {
@@ -51,6 +66,73 @@ export const SettingsManagement = () => {
       title: "✅ Configurações salvas",
       description: "Configurações do WhatsApp foram salvas com sucesso!",
     });
+  };
+
+  const handleSaveNtfyConfig = () => {
+    if (!ntfyTopic) {
+      toast({
+        title: "Erro",
+        description: "Preencha o tópico do ntfy",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Salvar no localStorage
+    localStorage.setItem('ntfy_topic', ntfyTopic);
+    localStorage.setItem('ntfy_server_url', ntfyServerUrl);
+
+    toast({
+      title: "✅ Configurações salvas",
+      description: "Configurações do ntfy foram salvas com sucesso!",
+    });
+  };
+
+  const handleTestNtfy = async () => {
+    if (!ntfyTopic) {
+      toast({
+        title: "Erro",
+        description: "Configure primeiro o tópico do ntfy",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTestingNtfy(true);
+
+    try {
+      console.log('Testando ntfy com:', {
+        topic: ntfyTopic,
+        server: ntfyServerUrl
+      });
+
+      const success = await sendNtfyTest({
+        topic: ntfyTopic,
+        serverUrl: ntfyServerUrl
+      });
+
+      if (success) {
+        toast({
+          title: "🎉 Teste enviado!",
+          description: "Mensagem de teste enviada via ntfy! Verifique seu app em alguns segundos.",
+        });
+      } else {
+        toast({
+          title: "❌ Erro no teste",
+          description: "Não foi possível enviar a mensagem. Verifique se o tópico está correto.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro no teste ntfy:', error);
+      toast({
+        title: "❌ Erro no teste",
+        description: "Erro ao enviar mensagem de teste. Verifique o console para mais detalhes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingNtfy(false);
+    }
   };
 
   const handleTestWhatsApp = async () => {
@@ -219,12 +301,102 @@ export const SettingsManagement = () => {
         </Tabs>
       </Card>
 
+      {/* Configurações ntfy.sh */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notificações Push (ntfy.sh) - Recomendado ⭐
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert>
+            <Smartphone className="h-4 w-4" />
+            <AlertDescription>
+              <strong>ntfy.sh - Notificações Push Gratuitas:</strong>
+              <br />1. <strong>Instale o app ntfy:</strong> <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" className="text-blue-600 underline">Android</a> | <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" className="text-blue-600 underline">iOS</a>
+              <br />2. <strong>Abra o app</strong> e clique em "Subscribe to topic"
+              <br />3. <strong>Digite seu tópico único</strong> (ex: asa-amor-secreto-2024)
+              <br />4. <strong>Configure o tópico abaixo</strong> e teste a integração
+              <br /><br />
+              <strong>✅ Vantagens:</strong> 100% gratuito, sem limites, funciona offline, muito confiável
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="ntfy-topic" className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Tópico do ntfy
+              </Label>
+              <Input
+                id="ntfy-topic"
+                placeholder="asa-amor-secreto-2024"
+                value={ntfyTopic}
+                onChange={(e) => setNtfyTopic(e.target.value)}
+              />
+              <p className="text-sm text-gray-500">
+                Escolha um nome único e difícil de adivinhar
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ntfy-server" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Servidor ntfy (opcional)
+              </Label>
+              <Input
+                id="ntfy-server"
+                placeholder="https://ntfy.sh"
+                value={ntfyServerUrl}
+                onChange={(e) => setNtfyServerUrl(e.target.value)}
+              />
+              <p className="text-sm text-gray-500">
+                Deixe como ntfy.sh ou use seu próprio servidor
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={handleSaveNtfyConfig} className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              Salvar Configurações ntfy
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleTestNtfy}
+              disabled={isTestingNtfy}
+              className="flex items-center gap-2"
+            >
+              <TestTube className="w-4 h-4" />
+              {isTestingNtfy ? 'Enviando...' : 'Testar ntfy'}
+            </Button>
+          </div>
+
+          {ntfyTopic && (
+            <Alert>
+              <Bell className="h-4 w-4" />
+              <AlertDescription>
+                <strong>URL de teste (para debug):</strong>
+                <br />
+                <code style={{ fontSize: '12px', wordBreak: 'break-all' }}>
+                  {ntfyServerUrl}/{ntfyTopic}
+                </code>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Configurações WhatsApp */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            Notificações WhatsApp
+            Notificações WhatsApp (Alternativa)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

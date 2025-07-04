@@ -11,6 +11,12 @@ interface WhatsAppConfig {
   apiKey: string;
 }
 
+// ntfy.sh Integration
+interface NtfyConfig {
+  topic: string;
+  serverUrl?: string; // Opcional, padrão é ntfy.sh
+}
+
 interface RentalSummary {
   customerName: string;
   eventDate: string;
@@ -18,7 +24,158 @@ interface RentalSummary {
   endDate: string;
   itemsCount: number;
   status: string;
+  products?: Array<{
+    name: string;
+    sku?: string;
+    description?: string;
+    quantity: number;
+    brand?: string;
+    color?: string;
+    size?: string;
+  }>;
 }
+
+// === NTFY.SH FUNCTIONS ===
+
+export async function sendNtfyNotification(
+  config: NtfyConfig,
+  summary: RentalSummary
+): Promise<boolean> {
+  try {
+    // Validar configurações
+    if (!config.topic) {
+      console.error('Ntfy config incomplete: topic is required');
+      return false;
+    }
+
+    const serverUrl = config.serverUrl || 'https://ntfy.sh';
+    const message = formatRentalMessageNtfy(summary);
+    
+    console.log('Sending ntfy notification:', {
+      topic: config.topic,
+      server: serverUrl,
+      messageLength: message.length
+    });
+    
+    // Fazer a requisição POST para ntfy.sh
+    const response = await fetch(`${serverUrl}/${config.topic}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Title': 'Novo Aluguel Registrado',
+        'Priority': 'default',
+        'Tags': 'wedding,dress,rental,new_order'
+      },
+      body: message
+    });
+    
+    if (response.ok) {
+      console.log('Ntfy notification sent successfully');
+      return true;
+    } else {
+      console.error('Ntfy notification failed:', response.status, response.statusText);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('Error sending ntfy notification:', error);
+    return false;
+  }
+}
+
+export async function sendNtfyTest(config: NtfyConfig): Promise<boolean> {
+  try {
+    if (!config.topic) {
+      console.error('Ntfy config incomplete: topic is required');
+      return false;
+    }
+
+    const serverUrl = config.serverUrl || 'https://ntfy.sh';
+    const testMessage = `Teste de notificacao do sistema ASA Amor Alugueis
+
+Este e um teste para verificar se as notificacoes estao funcionando corretamente.
+
+Se voce recebeu esta mensagem, a integracao esta funcionando!
+
+Data/Hora: ${new Date().toLocaleString('en-US')}`;
+    
+    console.log('=== TESTE NTFY DEBUG ===');
+    console.log('Topico:', config.topic);
+    console.log('Servidor:', serverUrl);
+    console.log('URL completa:', `${serverUrl}/${config.topic}`);
+    console.log('========================');
+    
+    const response = await fetch(`${serverUrl}/${config.topic}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+        'Title': 'Teste ASA Amor Alugueis',
+        'Priority': 'default',
+        'Tags': 'test'
+      },
+      body: testMessage
+    });
+    
+    if (response.ok) {
+      console.log('Teste ntfy enviado com sucesso!');
+      return true;
+    } else {
+      console.error('Falha no teste ntfy:', response.status, response.statusText);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('Error testing ntfy:', error);
+    return false;
+  }
+}
+
+function formatRentalMessageNtfy(summary: RentalSummary): string {
+  let productsText = '';
+  
+  if (summary.products && summary.products.length > 0) {
+    productsText = summary.products.map(product => {
+      // Linha 1: Nome + SKU, Cor, Tamanho na mesma linha
+      const inlineDetails = [];
+      if (product.sku) inlineDetails.push(`SKU: ${product.sku}`);
+      if (product.color) inlineDetails.push(`Cor: ${product.color}`);
+      if (product.size) inlineDetails.push(`Tamanho: ${product.size}`);
+      if (product.brand) inlineDetails.push(`Marca: ${product.brand}`);
+      
+      const inlineText = inlineDetails.length > 0 ? ` (${inlineDetails.join(', ')})` : '';
+      
+      let result = `• ${product.name}${inlineText}`;
+      
+      // Linha 2: Descrição (se existir)
+      if (product.description) {
+        result += `\n  ${product.description}`;
+      }
+      
+      // Linha 3: Quantidade
+      result += `\n  Quantidade: ${product.quantity}`;
+      
+      return result;
+    }).join('\n\n');
+  } else {
+    productsText = `${summary.itemsCount} produto(s)`;
+  }
+
+  return `🎉 NOVO ALUGUEL REGISTRADO
+
+👤 Cliente: ${summary.customerName}
+📅 Data do Evento: ${summary.eventDate}
+📋 Período: ${summary.startDate} até ${summary.endDate}
+
+👗 PRODUTOS ALUGADOS:
+${productsText}
+
+📊 Total de itens: ${summary.itemsCount}
+📌 Status: ${getStatusEmoji(summary.status)} ${getStatusText(summary.status)}
+
+Sistema ASA Amor Aluguéis`;
+}
+
+// === WHATSAPP FUNCTIONS ===
 
 export async function sendWhatsAppNotification(
   config: WhatsAppConfig,
@@ -215,12 +372,40 @@ export async function waitForRateLimit(): Promise<void> {
 }
 
 function formatRentalMessage(summary: RentalSummary): string {
+  let productsText = '';
+  
+  if (summary.products && summary.products.length > 0) {
+    productsText = '\n\n👗 PRODUTOS ALUGADOS:\n' + summary.products.map(product => {
+      // Linha 1: Nome + SKU, Cor, Tamanho na mesma linha
+      const inlineDetails = [];
+      if (product.sku) inlineDetails.push(`SKU: ${product.sku}`);
+      if (product.color) inlineDetails.push(`Cor: ${product.color}`);
+      if (product.size) inlineDetails.push(`Tamanho: ${product.size}`);
+      if (product.brand) inlineDetails.push(`Marca: ${product.brand}`);
+      
+      const inlineText = inlineDetails.length > 0 ? ` (${inlineDetails.join(', ')})` : '';
+      
+      let result = `• ${product.name}${inlineText}`;
+      
+      // Linha 2: Descrição (se existir)
+      if (product.description) {
+        result += `\n  ${product.description}`;
+      }
+      
+      // Linha 3: Quantidade
+      result += `\n  Quantidade: ${product.quantity}`;
+      
+      return result;
+    }).join('\n\n');
+  }
+
   return `🎉 NOVO ALUGUEL REGISTRADO
 
 👤 Cliente: ${summary.customerName}
 📅 Data do Evento: ${summary.eventDate}
-📋 Período: ${summary.startDate} até ${summary.endDate}
-👗 Itens: ${summary.itemsCount} produto(s)
+📋 Período: ${summary.startDate} até ${summary.endDate}${productsText}
+
+📊 Total de itens: ${summary.itemsCount}
 📌 Status: ${getStatusEmoji(summary.status)} ${getStatusText(summary.status)}
 
 Sistema ASA Amor Aluguéis`;
