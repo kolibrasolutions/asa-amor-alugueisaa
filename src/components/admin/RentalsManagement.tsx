@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import { useRentals, useDeleteRental } from '@/hooks/useRentals';
+import React, { useState } from 'react';
+import { useRentals, useDeleteRental, useRental, type RentalWithCustomer, type RentalItem } from '@/hooks/useRentals';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,7 +12,8 @@ import {
 } from '@/components/ui/table';
 import { RentalStatusBadge } from './RentalStatusBadge';
 import { RentalForm } from './RentalForm';
-import { Plus, Edit, Trash, Eye, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash, Eye, Calendar, FileText } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RentalDetails } from './RentalDetails';
+import { AdminBackButton } from './AdminHeader';
 
 interface RentalsManagementProps {
   onSectionChange: (section: string) => void;
@@ -37,6 +38,11 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
   const [showForm, setShowForm] = useState(false);
   const [editingRental, setEditingRental] = useState<string | null>(null);
   const [viewingRental, setViewingRental] = useState<string | null>(null);
+  const [contractRentalId, setContractRentalId] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  // Buscar dados completos do aluguel quando for gerar contrato
+  const { data: contractRental } = useRental(contractRentalId || '');
 
   const handleEdit = (rentalId: string) => {
     setEditingRental(rentalId);
@@ -52,11 +58,367 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
     setEditingRental(null);
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+  const handleGenerateContract = (rentalId: string) => {
+    setContractRentalId(rentalId);
+  };
+
+  // Gerar contrato automaticamente quando os dados estiverem prontos
+  React.useEffect(() => {
+    if (contractRental && contractRentalId) {
+      generateContractDocument(contractRental);
+      setContractRentalId(null);
+    }
+  }, [contractRental, contractRentalId]);
+
+  const generateContractDocument = (rental: RentalWithCustomer) => {
+    if (!rental) return;
+    
+    try {
+      // Gerar número do contrato baseado no ID do rental (últimos 4 dígitos)
+      const contractNumber = rental.id.slice(-4).toUpperCase();
+      
+      // Monta HTML do contrato baseado no modelo físico
+      const win = window.open('', '_blank');
+      if (!win) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível abrir a janela para o contrato. Verifique se o bloqueador de pop-up está desabilitado.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Produtos com código, quantidade, descrição, ajustes e valor (campos vazios para preenchimento manual)
+      const produtosHtml = rental.rental_items?.map((item: RentalItem, idx: number) => `
+        <tr>
+          <td style="border:1px solid #333;padding:4px;text-align:center;width:50px;font-size:11px;">${String(idx + 1).padStart(3, '0')}</td>
+          <td style="border:1px solid #333;padding:4px;text-align:center;width:50px;font-size:11px;">${item.quantity}</td>
+          <td style="border:1px solid #333;padding:4px;font-size:11px;">${item.product.name}${item.product.brand ? ` - ${item.product.brand}` : ''}${item.product.size ? ` - Tam: ${item.product.size}` : ''}${item.product.color ? ` - ${item.product.color}` : ''}</td>
+          <td style="border:1px solid #333;padding:4px;width:70px;text-align:center;font-size:11px;"></td>
+          <td style="border:1px solid #333;padding:4px;width:80px;text-align:center;font-size:11px;"></td>
+        </tr>
+      `).join('') || '';
+      
+      // Não adicionar linhas vazias desnecessárias
+      
+      const html = `
+        <html>
+        <head>
+          <title>Contrato de Aluguel - Nº ${contractNumber}</title>
+          <style>
+            @page { 
+              margin: 15mm; 
+              size: A4;
+            }
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 0;
+              font-size: 11px;
+              line-height: 1.3;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 15px;
+              border-bottom: 2px solid #333;
+              padding-bottom: 8px;
+            }
+            .header-left {
+              flex: 1;
+            }
+            .header-right {
+              flex: 1;
+              text-align: right;
+            }
+            .logo { 
+              font-size: 20px; 
+              font-weight: bold; 
+              margin-bottom: 3px;
+              color: #333;
+            }
+            .logo-subtitle {
+              font-size: 9px;
+              margin-bottom: 5px;
+              line-height: 1.2;
+            }
+            .contact-info {
+              font-size: 9px;
+              background-color: #f0f0f0;
+              padding: 3px;
+              border-radius: 2px;
+            }
+            .contract-number {
+              font-weight: bold;
+              font-size: 16px;
+              margin-bottom: 10px;
+            }
+            .section-title {
+              background-color: #333;
+              color: white;
+              text-align: center;
+              padding: 5px;
+              margin: 10px 0 8px 0;
+              font-weight: bold;
+              font-size: 12px;
+            }
+            .customer-info {
+              margin-bottom: 10px;
+            }
+            .customer-row {
+              margin-bottom: 5px;
+              min-height: 16px;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 2px;
+              display: flex;
+              align-items: center;
+            }
+            .customer-row-flex {
+              display: flex;
+              gap: 15px;
+              margin-bottom: 5px;
+            }
+            .customer-row-flex > div {
+              flex: 1;
+              min-height: 16px;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 2px;
+            }
+            .contracted-info {
+              margin-bottom: 10px;
+              padding: 8px;
+              background-color: #f9f9f9;
+              border: 1px solid #ddd;
+              font-size: 10px;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin: 8px 0;
+            }
+            th { 
+              background-color: #333;
+              color: white;
+              padding: 5px;
+              text-align: center;
+              font-weight: bold;
+              border: 1px solid #333;
+              font-size: 11px;
+            }
+            td { 
+              border: 1px solid #333;
+              padding: 4px;
+              vertical-align: top;
+            }
+            .total-row {
+              background-color: #f0f0f0;
+              font-weight: bold;
+              text-align: right;
+            }
+            .terms { 
+              font-size: 9px; 
+              margin-top: 15px;
+              text-align: justify;
+              line-height: 1.2;
+            }
+            .terms h4 {
+              background-color: #333;
+              color: white;
+              text-align: center;
+              padding: 4px;
+              margin: 10px 0 8px 0;
+              font-size: 11px;
+            }
+            .clause {
+              margin-bottom: 6px;
+            }
+            .signatures { 
+              margin-top: 20px;
+              page-break-inside: avoid;
+            }
+            .signature-date {
+              text-align: center;
+              margin: 20px 0;
+              font-size: 10px;
+            }
+            .signature-line {
+              display: inline-block;
+              width: 150px;
+              border-bottom: 1px solid #333;
+              margin: 0 8px;
+            }
+            .signature-section {
+              display: flex;
+              justify-content: space-between;
+              margin: 25px 0;
+            }
+            .signature-box {
+              text-align: center;
+              width: 45%;
+              font-size: 10px;
+            }
+            .signature-box-line {
+              border-bottom: 1px solid #333;
+              margin-top: 15px;
+              height: 1px;
+            }
+            .witnesses {
+              margin-top: 20px;
+              font-size: 10px;
+            }
+            .witness-line {
+              border-bottom: 1px solid #333;
+              margin: 8px 0;
+              height: 1px;
+            }
+            .return-confirmation {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-left">
+              <div class="logo">📋 NOIVAS CIRLENE</div>
+              <div class="logo-subtitle">
+                <strong>ALUGUEL DE:</strong> Vestidos de Noivas, Ternos, Pajens,<br/>
+                Damas de honra, Floristas, Madrinhas, Roupas em geral.<br/>
+                <strong>Nacionais e Importadas</strong>
+              </div>
+            </div>
+            <div class="header-right">
+              <div class="contract-number">Nº ${contractNumber}</div>
+              <div class="contact-info">
+                Tel.: (35) 3571-2422 / (35) 9 9147-9232<br/>
+                Rua Vereador Fausto Martimiano, 105<br/>
+                Centro - Muzambinho - MG
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">CONTRATANTE</div>
+          <div class="customer-info">
+            <div class="customer-row">
+              <strong>Nome:</strong> ${rental.customer_nome || '_'.repeat(80)}
+            </div>
+            <div class="customer-row">
+              <strong>Endereço:</strong> ${rental.customer_endereco || '_'.repeat(70)}
+            </div>
+            <div class="customer-row-flex">
+              <div>
+                <strong>Tel.:</strong> ${rental.customer_telefone || '_'.repeat(25)}
+              </div>
+              <div>
+                <strong>Cidade:</strong> ${rental.customer_cidade || '_'.repeat(25)}
+              </div>
+            </div>
+            <div class="customer-row-flex">
+              <div>
+                <strong>CPF:</strong> ${rental.customer_cpf || '_'.repeat(20)}
+              </div>
+              <div>
+                <strong>RG:</strong> ${rental.customer_rg || '_'.repeat(20)}
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">CONTRATADA</div>
+          <div class="contracted-info">
+            Cirlene Aparecida de Araújo Vieira, Brasileira, Casada, Comerciante, portadora do CPF: 432.488.536-20<br/>
+            RG M30.335.37, domiciliada na Rua Vereador Fausto Martimiano,105 - Centro - Muzambinho - MG
+          </div>
+
+          <div class="section-title">DESCRIÇÃO DO ALUGUEL</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px;">Cód.</th>
+                <th style="width:50px;">Quant.</th>
+                <th>Descrição</th>
+                <th style="width:70px;">Ajustes</th>
+                <th style="width:80px;">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${produtosHtml}
+              <tr class="total-row">
+                <td colspan="4" style="text-align:right; padding-right:8px; font-size:11px;"><strong>TOTAL: R$</strong></td>
+                <td style="text-align:center; font-size:11px;"><strong>___________</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="terms">
+            <h4>TERMOS E CONDIÇÕES</h4>
+            <div class="clause">
+              <strong>Cláusula Primeira</strong> - Os aluguéis uma vez firmado pelo(a) Contratante, só poderão ser cancelados mediante indenização referente a 50% (cinquenta por cento) sobre o valor total do aluguel. Não será devolvido o valor pago a título de sinal e não será repassado estes valores para outro aluguel.
+            </div>
+            <div class="clause">
+              <strong>Cláusula Segunda</strong> - A devolução será feita na Segunda feira até às 12:00 horas. Caso não seja respeitado este horário, será cobrada uma indenização equivalente a 50% (cinquenta por cento) sobre o valor do aluguel contratado.
+            </div>
+            <div class="clause">
+              <strong>Cláusula Terceira</strong> - Em caso de manchas de gordura, ou outros sinais de sujeira que dificulte a limpeza, será cobrado uma indenização equivalente a 20% (vinte por cento) sobre o valor do aluguel contratado.
+            </div>
+            <div class="clause">
+              <strong>Cláusula Quarta</strong> - Ficará a cargo do(a) contratante qualquer dano irrecuperável dos trajes e acessórios locados, assumindo a responsabilidade de arcar com o pagamento à vista em uma única parcela o valor total de custo.
+            </div>
+          </div>
+
+          <div class="signatures">
+            <div class="signature-date">
+              Muzambinho, <span class="signature-line"></span> de <span class="signature-line"></span> de <span class="signature-line"></span>
+            </div>
+            
+            <div class="signature-section">
+              <div class="signature-box">
+                <div>CONTRATANTE</div>
+                <div class="signature-box-line"></div>
+              </div>
+              <div class="signature-box">
+                <div>CIRLENE AP. ARAÚJO VIEIRA (OU FUNCIONÁRIA)</div>
+                <div class="signature-box-line"></div>
+              </div>
+            </div>
+
+            <div class="witnesses">
+              <div style="margin-bottom: 10px;"><strong>Testemunhas:</strong></div>
+              <div>1. <span class="witness-line"></span></div>
+              <div>2. <span class="witness-line"></span></div>
+            </div>
+
+            <div class="return-confirmation">
+              <strong>Devolução Confirmada ( )</strong> &nbsp;&nbsp;&nbsp;&nbsp; 
+              <strong>Ass.:</strong> <span class="signature-line"></span>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      
+      // Aguardar o carregamento e depois imprimir
+      setTimeout(() => {
+        win.print();
+      }, 1000);
+
+      toast({
+        title: "Contrato gerado",
+        description: "O contrato foi gerado com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao gerar contrato:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar o contrato. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatDate = (date: string) => {
@@ -96,6 +458,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
 
   return (
     <div className="p-6 space-y-6">
+      <AdminBackButton />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestão de Aluguéis</h1>
         <div className="flex items-center space-x-2">
@@ -126,7 +489,6 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                   <TableHead>Cliente</TableHead>
                   <TableHead>Data do Evento</TableHead>
                   <TableHead>Período</TableHead>
-                  <TableHead>Valor Total</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
@@ -135,14 +497,13 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                 {rentals.map((rental) => (
                   <TableRow key={rental.id}>
                     <TableCell className="font-medium">
-                      {rental.customer.full_name}
+                      {rental.customer_nome}
                     </TableCell>
                     <TableCell>{formatDate(rental.event_date)}</TableCell>
                     <TableCell>
                       {formatDate(rental.rental_start_date)} até{' '}
                       {formatDate(rental.rental_end_date)}
                     </TableCell>
-                    <TableCell>{formatCurrency(rental.total_amount)}</TableCell>
                     <TableCell>
                       <RentalStatusBadge status={rental.status} />
                     </TableCell>
@@ -151,7 +512,16 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleGenerateContract(rental.id)}
+                          title="Gerar Contrato"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => setViewingRental(rental.id)}
+                          title="Ver Detalhes"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
@@ -159,12 +529,13 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(rental.id)}
+                          title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" title="Excluir">
                               <Trash className="w-4 h-4" />
                             </Button>
                           </AlertDialogTrigger>

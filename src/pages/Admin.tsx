@@ -12,11 +12,14 @@ import { RentalsCalendar } from "@/components/admin/RentalsCalendar";
 import ColorsManagement from "@/components/admin/ColorsManagement";
 import SizesManagement from "@/components/admin/SizesManagement";
 import { BannersManagement } from "@/components/admin/BannersManagement";
+import { SettingsManagement } from "@/components/admin/SettingsManagement";
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const isDevelopment = import.meta.env.DEV;
+  const adminBasePath = isDevelopment ? '/admin-local' : '/admin';
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -29,7 +32,7 @@ const Admin = () => {
   }
 
   const handleSectionChange = (section: string) => {
-    navigate(`/admin/${section}`);
+    navigate(`${adminBasePath}/${section}`);
   };
 
   const handleSignOut = async () => {
@@ -42,7 +45,7 @@ const Admin = () => {
       <AdminHeader 
         activeSection="dashboard"
         userEmail={user?.email || ""}
-        onBack={() => navigate("/admin")}
+        onBack={() => navigate(adminBasePath)}
         onSignOut={handleSignOut}
       />
       <main className="container mx-auto py-8">
@@ -56,6 +59,7 @@ const Admin = () => {
           <Route path="colors" element={<ColorsManagement />} />
           <Route path="sizes" element={<SizesManagement />} />
           <Route path="banners" element={<BannersManagement />} />
+          <Route path="settings/*" element={<SettingsManagement />} />
         </Routes>
       </main>
     </div>

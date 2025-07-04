@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ export const ProductAvailabilitySearch = () => {
           </div>
           <div className="text-gray-700 mt-2 space-y-1">
              <p>O produto <strong>{product.name}</strong> (SKU: {product.sku}) está atualmente alugado.</p>
-             <p><strong>Cliente:</strong> {rental.customers?.full_name ?? 'Não informado'}</p>
+             <p><strong>Cliente:</strong> {rental.customers?.nome ?? 'Não informado'}</p>
              <p>
                 <strong>Devolução Prevista:</strong> 
                 <span className="font-semibold text-red-800 ml-1">

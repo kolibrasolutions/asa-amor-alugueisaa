@@ -12,9 +12,9 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm h-16">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-full">
+        <div className="flex items-center justify-between h-full">
           <div 
             className="text-2xl font-serif text-black cursor-pointer"
             onClick={() => window.location.href = '/'}
@@ -46,7 +46,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden bg-white border-t">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-t">
             <div className="py-4 space-y-2">
               {navItems.map((item) => (
                 <a

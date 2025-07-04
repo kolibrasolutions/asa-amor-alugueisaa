@@ -1,9 +1,8 @@
-
 import { useState, useCallback, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ImageCrop } from '@/components/admin/ImageCrop';
+import { ProductImageCrop } from '@/components/domains/products/components/ProductImageCrop';
 import { UploadCloud, Trash2 } from 'lucide-react';
 import { ProductFormData } from './productSchema';
 import { useToast } from '@/hooks/use-toast';
@@ -117,7 +116,7 @@ export const ProductImageUpload = () => {
         className="hidden"
       />
       {imageToCrop && (
-        <ImageCrop
+        <ProductImageCrop
           isOpen={isCropOpen}
           onClose={() => {
             setIsCropOpen(false);

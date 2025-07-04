@@ -29,6 +29,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AdminBackButton } from './AdminHeader';
 
 export const CategoriesManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,8 +114,9 @@ export const CategoriesManagement = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <AdminBackButton />
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestão de Categorias</h1>
+        <h2 className="text-xl font-semibold">Categorias</h2>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setSelectedCategory(null)}>

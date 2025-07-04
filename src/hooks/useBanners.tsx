@@ -1,14 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface Banner {
-  id: string;
-  image_url: string;
-  title: string;
-  subtitle: string;
-  active: boolean;
-  sort_order: number;
-}
+import { Banner } from '@/components/domains/banners/types';
 
 export const useBanners = () => {
   return useQuery({

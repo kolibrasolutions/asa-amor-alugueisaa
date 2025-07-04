@@ -29,7 +29,7 @@ export const useDashboardStats = () => {
           id,
           created_at,
           status,
-          customers (full_name)
+          customers (nome)
         `)
         .order('created_at', { ascending: false })
         .limit(5);

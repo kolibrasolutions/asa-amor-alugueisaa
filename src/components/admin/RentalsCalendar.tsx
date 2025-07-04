@@ -111,7 +111,7 @@ export const RentalsCalendar = ({ onSectionChange }: RentalsCalendarProps) => {
                   {selectedRentals.map(rental => (
                     <RentalStatusUpdater key={rental.id} rental={rental}>
                       <li className="border-l-4 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors" style={{ borderColor: getStatusColor(rental.status) }}>
-                        <p className="font-semibold">{rental.customer.full_name}</p>
+                        <p className="font-semibold">{rental.customer.nome}</p>
                         <div className="text-sm text-muted-foreground">
                           <RentalStatusBadge status={rental.status} />
                         </div>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +14,7 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { Plus, Search, Edit, Phone, Mail } from 'lucide-react';
 import { CustomerForm } from './CustomerForm';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { AdminBackButton } from './AdminHeader';
 
 export const CustomersManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,9 +24,11 @@ export const CustomersManagement = () => {
   const { data: customers, isLoading } = useCustomers();
 
   const filteredCustomers = customers?.filter(customer =>
-    customer.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.document_number?.includes(searchTerm)
+    (customer.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     customer.cidade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     customer.telefone?.includes(searchTerm) ||
+     customer.cpf?.includes(searchTerm) ||
+     customer.rg?.includes(searchTerm))
   );
 
   if (isLoading) {
@@ -35,6 +37,7 @@ export const CustomersManagement = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <AdminBackButton />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestão de Clientes</h1>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -73,29 +76,23 @@ export const CustomersManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Documento</TableHead>
+                <TableHead>Endereço</TableHead>
+                <TableHead>Tel.</TableHead>
+                <TableHead>Cidade</TableHead>
+                <TableHead>CPF</TableHead>
+                <TableHead>RG</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCustomers?.map((customer) => (
                 <TableRow key={customer.id}>
-                  <TableCell className="font-medium">{customer.full_name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      {customer.email && <Mail className="w-4 h-4 mr-2" />}
-                      {customer.email || '-'}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      {customer.phone && <Phone className="w-4 h-4 mr-2" />}
-                      {customer.phone || '-'}
-                    </div>
-                  </TableCell>
-                  <TableCell>{customer.document_number || '-'}</TableCell>
+                  <TableCell className="font-medium">{customer.nome}</TableCell>
+                  <TableCell>{customer.endereco}</TableCell>
+                  <TableCell>{customer.telefone}</TableCell>
+                  <TableCell>{customer.cidade}</TableCell>
+                  <TableCell>{customer.cpf}</TableCell>
+                  <TableCell>{customer.rg}</TableCell>
                   <TableCell>
                     <Button
                       variant="outline"

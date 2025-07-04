@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AdminRecentActivityProps {
@@ -22,7 +21,7 @@ export const AdminRecentActivity = ({ recentActivity }: AdminRecentActivityProps
           <div className="space-y-2">
             {recentActivity.map((activity) => (
               <div key={activity.id} className="flex justify-between items-center p-2 border-b">
-                <span>Aluguel para {activity.customers?.full_name}</span>
+                <span>Aluguel para {activity.customers?.nome}</span>
                 <span className="text-sm text-gray-500">
                   {new Date(activity.created_at).toLocaleDateString()}
                 </span>

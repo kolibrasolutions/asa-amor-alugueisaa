@@ -1,4 +1,4 @@
-import { Instagram, Facebook, MapPin, Phone, Settings } from "lucide-react";
+import { Instagram, Facebook, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -37,15 +37,6 @@ const Footer = () => {
           <p>© 2024 Noivas Cirlene. Todos os direitos reservados.</p>
         </div>
       </div>
-
-      {/* Admin Access - Discrete gear icon in bottom right */}
-      <Link 
-        to="/auth" 
-        className="absolute bottom-4 right-4 w-8 h-8 bg-gray-700 bg-opacity-50 rounded-full flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity duration-300"
-        title="Acesso Administrativo"
-      >
-        <Settings className="w-4 h-4 text-gray-300" />
-      </Link>
     </footer>
   );
 };

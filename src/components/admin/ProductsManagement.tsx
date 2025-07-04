@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
+import { useProducts, useDeleteProduct, type Product } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -31,15 +31,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AdminBackButton } from './AdminHeader';
 
 export const ProductsManagement = () => {
   const { data: products, isLoading } = useProducts();
   const deleteProduct = useDeleteProduct();
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const handleEdit = (product: any) => {
+  const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setShowForm(true);
   };
@@ -53,13 +54,7 @@ export const ProductsManagement = () => {
     setEditingProduct(null);
   };
 
-  const formatCurrency = (value: number | null | undefined) => {
-    if (!value) return '-';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+
 
   const filteredProducts = products?.filter(product => {
     if (statusFilter === 'all') return true;
@@ -90,8 +85,9 @@ export const ProductsManagement = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <AdminBackButton />
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestão de Produtos</h1>
+        <h1 className="text-3xl font-bold">Gestão de Estoque</h1>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Novo Produto
@@ -103,7 +99,7 @@ export const ProductsManagement = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">{products?.length || 0}</div>
-            <p className="text-sm text-gray-500">Total de Produtos</p>
+            <p className="text-sm text-gray-500">Total em Estoque</p>
           </CardContent>
         </Card>
         <Card>
@@ -129,7 +125,7 @@ export const ProductsManagement = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Produtos Cadastrados</CardTitle>
+            <CardTitle>Itens em Estoque</CardTitle>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por status" />
@@ -147,8 +143,8 @@ export const ProductsManagement = () => {
           {!filteredProducts || filteredProducts.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               {statusFilter === 'all' 
-                ? 'Nenhum produto cadastrado ainda.' 
-                : `Nenhum produto ${statusFilter === 'available' ? 'disponível' : statusFilter === 'rented' ? 'alugado' : 'em manutenção'} encontrado.`
+                ? 'Nenhum item cadastrado ainda.' 
+                : `Nenhum item ${statusFilter === 'available' ? 'disponível' : statusFilter === 'rented' ? 'alugado' : 'em manutenção'} encontrado.`
               }
             </p>
           ) : (

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -8,10 +7,10 @@ export interface RentalItem {
   rental_id: string;
   product_id: string;
   quantity: number;
-  unit_price: number;
 }
 
 export interface RentalItemWithProduct extends RentalItem {
+  unit_price: number;
   product: {
     id: string;
     name: string;
@@ -31,7 +30,11 @@ export const useRentalItems = (rentalId: string) => {
       const { data, error } = await supabase
         .from('rental_items')
         .select(`
-          *,
+          id,
+          rental_id,
+          product_id,
+          quantity,
+          unit_price,
           products(id, name, description, images, rental_price, brand, size, color)
         `)
         .eq('rental_id', rentalId);

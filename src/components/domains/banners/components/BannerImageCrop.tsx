@@ -3,14 +3,11 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import 'react-image-crop/dist/ReactCrop.css';
+import { BannerImageCropProps } from '../types';
 
-interface ImageCropProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCropComplete: (croppedImageBlob: Blob) => void;
-  imageFile: File;
-  aspectRatio?: number;
-}
+// Calculando a proporção baseada no viewport menos o header (1080px - 64px = 1016px altura)
+// Para uma largura típica de 1920px, temos 1920:1016 ≈ 1.89:1
+const BANNER_ASPECT_RATIO = 1920/1016;
 
 function centerAspectCrop(
   mediaWidth: number,
@@ -32,7 +29,7 @@ function centerAspectCrop(
   )
 }
 
-export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRatio = 3/4 }: ImageCropProps) => {
+export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: BannerImageCropProps) => {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -50,8 +47,8 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height, aspectRatio));
-  }, [aspectRatio]);
+    setCrop(centerAspectCrop(width, height, BANNER_ASPECT_RATIO));
+  }, []);
 
   const cropImage = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
@@ -65,7 +62,7 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
     const scaleY = image.naturalHeight / image.height;
 
     const cropWidth = completedCrop.width * scaleX;
-    const cropHeight = cropWidth / aspectRatio;
+    const cropHeight = cropWidth / BANNER_ASPECT_RATIO;
 
     canvas.width = cropWidth;
     canvas.height = cropHeight;
@@ -92,39 +89,32 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
         onCropComplete(blob);
       }
     }, 'image/png', 1);
-  }, [completedCrop, onCropComplete, aspectRatio]);
-
-  const getProportionText = () => {
-    if (aspectRatio === 3/4) return "3:4";
-    if (aspectRatio === 21/9) return "21:9";
-    return `${aspectRatio.toFixed(2)}:1`;
-  };
+  }, [completedCrop, onCropComplete]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Recortar Imagem</DialogTitle>
+          <DialogTitle>Recortar Banner</DialogTitle>
           <p className="text-sm text-gray-600">
-            Proporção: {getProportionText()}
+            Proporção: {Math.round(BANNER_ASPECT_RATIO * 100) / 100}:1 (Banner)
           </p>
         </DialogHeader>
         <div className="space-y-4">
           {imgSrc && (
             <div 
-              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden"
+              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center"
               style={{ 
-                aspectRatio: aspectRatio,
-                maxWidth: '800px',
-                maxHeight: '600px'
+                maxWidth: '90vw',
+                maxHeight: '70vh'
               }}
             >
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                aspect={aspectRatio}
-                className="w-full h-full"
+                aspect={BANNER_ASPECT_RATIO}
+                className="max-w-full max-h-full"
               >
                 <img
                   ref={imgRef}
@@ -132,8 +122,10 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
                   src={imgSrc}
                   onLoad={onImageLoad}
                   style={{ 
-                    width: '100%', 
-                    height: '100%', 
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    width: 'auto',
+                    height: 'auto',
                     objectFit: 'contain'
                   }}
                 />

@@ -1,81 +1,104 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { 
-  ShoppingBag, 
-  Calendar, 
-  Users, 
-  Grid2x2, 
-  Palette,
-  Ruler,
-  Image
+  Calendar,
+  CalendarClock,
+  Users,
+  ClipboardList,
+  Settings,
+  ShoppingBag,
+  LayoutGrid
 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export const AdminQuickActions = () => {
   const navigate = useNavigate();
+  const isDevelopment = import.meta.env.DEV;
+  const adminBasePath = isDevelopment ? '/admin-local' : '/admin';
 
-  const actions = [
-    {
-      title: "Produtos",
-      description: "Gerenciar produtos do catálogo",
-      icon: <ShoppingBag className="w-6 h-6" />,
-      onClick: () => navigate("/admin/products"),
-    },
+  const mainActions = [
     {
       title: "Aluguéis",
       description: "Gerenciar aluguéis e reservas",
-      icon: <Calendar className="w-6 h-6" />,
-      onClick: () => navigate("/admin/rentals"),
+      icon: <Calendar className="w-8 h-8" />,
+      onClick: () => navigate(`${adminBasePath}/rentals`),
+      primary: true
+    },
+    {
+      title: "Calendário",
+      description: "Visualizar agenda de provas e eventos",
+      icon: <CalendarClock className="w-8 h-8" />,
+      onClick: () => navigate(`${adminBasePath}/calendar`),
+      primary: true
     },
     {
       title: "Clientes",
       description: "Gerenciar cadastro de clientes",
-      icon: <Users className="w-6 h-6" />,
-      onClick: () => navigate("/admin/customers"),
+      icon: <Users className="w-8 h-8" />,
+      onClick: () => navigate(`${adminBasePath}/customers`),
+      primary: true
+    }
+  ];
+
+  const catalogActions = [
+    {
+      title: "Estoque",
+      description: "Gerenciar estoque de produtos",
+      icon: <ShoppingBag className="w-6 h-6" />,
+      onClick: () => navigate(`${adminBasePath}/products`),
     },
     {
-      title: "Categorias",
-      description: "Gerenciar categorias de produtos",
-      icon: <Grid2x2 className="w-6 h-6" />,
-      onClick: () => navigate("/admin/categories"),
-    },
-    {
-      title: "Cores",
-      description: "Gerenciar cores disponíveis",
-      icon: <Palette className="w-6 h-6" />,
-      onClick: () => navigate("/admin/colors"),
-    },
-    {
-      title: "Tamanhos",
-      description: "Gerenciar tamanhos disponíveis",
-      icon: <Ruler className="w-6 h-6" />,
-      onClick: () => navigate("/admin/sizes"),
-    },
-    {
-      title: "Banners",
-      description: "Gerenciar banners do site",
-      icon: <Image className="w-6 h-6" />,
-      onClick: () => navigate("/admin/banners"),
-    },
+      title: "Configurações",
+      description: "Cores, tamanhos, banners e categorias",
+      icon: <Settings className="w-6 h-6" />,
+      onClick: () => navigate(`${adminBasePath}/settings`),
+    }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {actions.map((action) => (
-        <Button
-          key={action.title}
-          variant="outline"
-          className="h-auto p-6 flex flex-col items-center justify-center gap-4 hover:bg-muted/50"
-          onClick={action.onClick}
-        >
-          {action.icon}
-          <div className="text-center">
-            <h3 className="font-semibold">{action.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {action.description}
-            </p>
-          </div>
-        </Button>
-      ))}
+    <div className="space-y-8">
+      {/* Ações Principais - Foco em Aluguéis */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {mainActions.map((action) => (
+          <Button
+            key={action.title}
+            variant={action.primary ? "default" : "outline"}
+            className="h-auto p-8 flex flex-col items-center justify-center gap-4 hover:scale-[1.02] transition-all"
+            onClick={action.onClick}
+          >
+            {action.icon}
+            <div className="text-center">
+              <h3 className="font-semibold text-lg">{action.title}</h3>
+              <p className={`text-sm mt-1 ${action.primary ? "text-white/80" : "text-muted-foreground"}`}>
+                {action.description}
+              </p>
+            </div>
+          </Button>
+        ))}
+      </div>
+
+      {/* Seção de Catálogo */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold mb-4">Catálogo</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {catalogActions.map((action) => (
+            <Button
+              key={action.title}
+              variant="outline"
+              className="h-auto p-6 flex flex-col items-center justify-center gap-4 hover:bg-muted/50"
+              onClick={action.onClick}
+            >
+              {action.icon}
+              <div className="text-center">
+                <h3 className="font-semibold">{action.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {action.description}
+                </p>
+              </div>
+            </Button>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 };

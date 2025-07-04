@@ -3,14 +3,10 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import 'react-image-crop/dist/ReactCrop.css';
+import { ProductImageCropProps } from '../types';
 
-interface ImageCropProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCropComplete: (croppedImageBlob: Blob) => void;
-  imageFile: File;
-  aspectRatio?: number;
-}
+// Proporção 4:5 como usado no ProductCard
+const PRODUCT_ASPECT_RATIO = 4/5;
 
 function centerAspectCrop(
   mediaWidth: number,
@@ -32,7 +28,7 @@ function centerAspectCrop(
   )
 }
 
-export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRatio = 3/4 }: ImageCropProps) => {
+export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ProductImageCropProps) => {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -50,8 +46,8 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height, aspectRatio));
-  }, [aspectRatio]);
+    setCrop(centerAspectCrop(width, height, PRODUCT_ASPECT_RATIO));
+  }, []);
 
   const cropImage = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
@@ -65,7 +61,7 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
     const scaleY = image.naturalHeight / image.height;
 
     const cropWidth = completedCrop.width * scaleX;
-    const cropHeight = cropWidth / aspectRatio;
+    const cropHeight = cropWidth / PRODUCT_ASPECT_RATIO;
 
     canvas.width = cropWidth;
     canvas.height = cropHeight;
@@ -92,39 +88,32 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
         onCropComplete(blob);
       }
     }, 'image/png', 1);
-  }, [completedCrop, onCropComplete, aspectRatio]);
-
-  const getProportionText = () => {
-    if (aspectRatio === 3/4) return "3:4";
-    if (aspectRatio === 21/9) return "21:9";
-    return `${aspectRatio.toFixed(2)}:1`;
-  };
+  }, [completedCrop, onCropComplete]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Recortar Imagem</DialogTitle>
+          <DialogTitle>Recortar Imagem do Produto</DialogTitle>
           <p className="text-sm text-gray-600">
-            Proporção: {getProportionText()}
+            Proporção: 4:5 (Produto)
           </p>
         </DialogHeader>
         <div className="space-y-4">
           {imgSrc && (
             <div 
-              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden"
+              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center"
               style={{ 
-                aspectRatio: aspectRatio,
-                maxWidth: '800px',
-                maxHeight: '600px'
+                maxWidth: '90vw',
+                maxHeight: '70vh'
               }}
             >
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
-                aspect={aspectRatio}
-                className="w-full h-full"
+                aspect={PRODUCT_ASPECT_RATIO}
+                className="max-w-full max-h-full"
               >
                 <img
                   ref={imgRef}
@@ -132,8 +121,10 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
                   src={imgSrc}
                   onLoad={onImageLoad}
                   style={{ 
-                    width: '100%', 
-                    height: '100%', 
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    width: 'auto',
+                    height: 'auto',
                     objectFit: 'contain'
                   }}
                 />

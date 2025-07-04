@@ -1,19 +1,20 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
 export interface Customer {
   id: string;
-  full_name: string;
+  nome: string;
+  endereco: string;
+  telefone: string;
+  cidade: string;
+  cpf: string;
+  rg: string;
   email?: string;
-  phone?: string;
-  address?: string;
-  document_number?: string;
-  notes?: string;
   created_at?: string;
-  updated_at?: string;
 }
+
+export type CustomerInsert = Omit<Customer, 'id' | 'created_at'>;
 
 export const useCustomers = () => {
   return useQuery({
@@ -25,7 +26,19 @@ export const useCustomers = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as Customer[];
+      
+      // Transform data to match Customer interface
+      return (data ?? []).map((customer: any) => ({
+        id: customer.id,
+        nome: customer.nome || customer.full_name || '',
+        endereco: customer.endereco || customer.address || '',
+        telefone: customer.telefone || customer.phone || '',
+        cidade: customer.cidade || '',
+        cpf: customer.cpf || customer.document_number || '',
+        rg: customer.rg || '',
+        email: customer.email || '',
+        created_at: customer.created_at,
+      })) as Customer[];
     },
   });
 };
@@ -35,10 +48,21 @@ export const useCreateCustomer = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (customer: CustomerInsert) => {
+      // Map frontend interface to database structure
+      const dbCustomer = {
+        nome: customer.nome,
+        endereco: customer.endereco,
+        telefone: customer.telefone,
+        cidade: customer.cidade,
+        cpf: customer.cpf,
+        rg: customer.rg,
+        email: customer.email,
+      };
+      
       const { data, error } = await supabase
         .from('customers')
-        .insert([customer])
+        .insert([dbCustomer as any])
         .select()
         .single();
       
@@ -68,9 +92,20 @@ export const useUpdateCustomer = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...customer }: Partial<Customer> & { id: string }) => {
+      // Map frontend interface to database structure
+      const dbCustomer = {
+        ...(customer.nome && { nome: customer.nome }),
+        ...(customer.endereco && { endereco: customer.endereco }),
+        ...(customer.telefone && { telefone: customer.telefone }),
+        ...(customer.cidade && { cidade: customer.cidade }),
+        ...(customer.cpf && { cpf: customer.cpf }),
+        ...(customer.rg && { rg: customer.rg }),
+        ...(customer.email && { email: customer.email }),
+      };
+      
       const { data, error } = await supabase
         .from('customers')
-        .update(customer)
+        .update(dbCustomer as any)
         .eq('id', id)
         .select()
         .single();

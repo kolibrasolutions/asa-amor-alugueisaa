@@ -5,9 +5,7 @@ import type { Product } from './useProducts';
 import type { Tables } from '@/integrations/supabase/types';
 import { useToast } from '@/components/ui/use-toast';
 
-export type RentalWithCustomer = Tables<'rentals'> & {
-  customers: Pick<Tables<'customers'>, 'full_name'> | null;
-};
+export type RentalWithCustomer = any;
 
 export interface AvailabilityResult {
   product: Product | null;
@@ -53,7 +51,7 @@ const checkProductAvailability = async (searchTerm: string): Promise<Availabilit
     .select(`
       rentals (
         *,
-        customers (full_name)
+        customers (nome)
       )
     `)
     .eq('product_id', product.id);
@@ -64,10 +62,9 @@ const checkProductAvailability = async (searchTerm: string): Promise<Availabilit
   }
   
   const activeRental = rentalItems
-    ?.map(item => item.rentals)
-    .filter(rental => rental && ['pending', 'confirmed', 'in_progress'].includes(rental.status || ''))
-    .sort((a, b) => new Date(b!.rental_end_date).getTime() - new Date(a!.rental_end_date).getTime())
-    [0] || null;
+    ?.map((item: any) => item.rentals)
+    .filter((rental: any) => rental && ['pending', 'confirmed', 'in_progress'].includes(rental.status || ''))
+    .sort((a: any, b: any) => new Date(b!.rental_end_date).getTime() - new Date(a!.rental_end_date).getTime())[0] || null;
 
 
   if (activeRental) {

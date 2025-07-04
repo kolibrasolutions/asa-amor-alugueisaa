@@ -8,12 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCreateCustomer, useUpdateCustomer, Customer } from '@/hooks/useCustomers';
 
 const customerSchema = z.object({
-  full_name: z.string().min(1, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  document_number: z.string().optional(),
-  notes: z.string().optional(),
+  nome: z.string().min(1, 'Nome é obrigatório'),
+  endereco: z.string().min(1, 'Endereço é obrigatório'),
+  telefone: z.string().min(1, 'Telefone é obrigatório'),
+  cidade: z.string().min(1, 'Cidade é obrigatória'),
+  cpf: z.string().min(1, 'CPF é obrigatório'),
+  rg: z.string().min(1, 'RG é obrigatório'),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
@@ -38,16 +38,15 @@ export const CustomerForm = ({ customer, onClose }: CustomerFormProps) => {
 
   const onSubmit = async (data: CustomerFormData) => {
     try {
-      // Convert empty strings to undefined for optional fields, but keep full_name
-      const cleanData: Omit<Customer, 'id' | 'created_at' | 'updated_at'> = {
-        full_name: data.full_name,
-        email: data.email || undefined,
-        phone: data.phone || undefined,
-        address: data.address || undefined,
-        document_number: data.document_number || undefined,
-        notes: data.notes || undefined,
+      // Enviar apenas os campos permitidos
+      const cleanData = {
+        nome: data.nome,
+        endereco: data.endereco,
+        telefone: data.telefone,
+        cidade: data.cidade,
+        cpf: data.cpf,
+        rg: data.rg,
       };
-
       if (customer) {
         await updateCustomer.mutateAsync({ id: customer.id, ...cleanData });
       } else {
@@ -67,68 +66,75 @@ export const CustomerForm = ({ customer, onClose }: CustomerFormProps) => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <Label htmlFor="full_name">Nome Completo *</Label>
+          <Label htmlFor="nome">Nome *</Label>
           <Input
-            id="full_name"
-            {...register('full_name')}
-            placeholder="Nome completo do cliente"
+            id="nome"
+            {...register('nome')}
+            placeholder="Nome completo"
           />
-          {errors.full_name && (
-            <p className="text-sm text-red-500">{errors.full_name.message}</p>
+          {errors.nome && (
+            <p className="text-sm text-red-500">{errors.nome.message}</p>
           )}
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register('email')}
-              placeholder="email@exemplo.com"
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              {...register('phone')}
-              placeholder="(11) 99999-9999"
-            />
-          </div>
-        </div>
-
         <div>
-          <Label htmlFor="document_number">CPF/CNPJ</Label>
+          <Label htmlFor="endereco">Endereço *</Label>
           <Input
-            id="document_number"
-            {...register('document_number')}
-            placeholder="000.000.000-00"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="address">Endereço</Label>
-          <Textarea
-            id="address"
-            {...register('address')}
+            id="endereco"
+            {...register('endereco')}
             placeholder="Endereço completo"
           />
+          {errors.endereco && (
+            <p className="text-sm text-red-500">{errors.endereco.message}</p>
+          )}
         </div>
-
-        <div>
-          <Label htmlFor="notes">Observações</Label>
-          <Textarea
-            id="notes"
-            {...register('notes')}
-            placeholder="Observações sobre o cliente"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="telefone">Tel. *</Label>
+            <Input
+              id="telefone"
+              {...register('telefone')}
+              placeholder="(11) 99999-9999"
+            />
+            {errors.telefone && (
+              <p className="text-sm text-red-500">{errors.telefone.message}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="cidade">Cidade *</Label>
+            <Input
+              id="cidade"
+              {...register('cidade')}
+              placeholder="Cidade"
+            />
+            {errors.cidade && (
+              <p className="text-sm text-red-500">{errors.cidade.message}</p>
+            )}
+          </div>
         </div>
-
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="cpf">CPF *</Label>
+            <Input
+              id="cpf"
+              {...register('cpf')}
+              placeholder="000.000.000-00"
+            />
+            {errors.cpf && (
+              <p className="text-sm text-red-500">{errors.cpf.message}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="rg">RG *</Label>
+            <Input
+              id="rg"
+              {...register('rg')}
+              placeholder="00.000.000-0"
+            />
+            {errors.rg && (
+              <p className="text-sm text-red-500">{errors.rg.message}</p>
+            )}
+          </div>
+        </div>
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancelar

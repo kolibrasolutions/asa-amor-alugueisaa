@@ -9,16 +9,16 @@ const Hero = () => {
 
   if (isLoading) {
     return (
-      <section className="relative w-full flex items-center justify-center">
-        <div className="animate-pulse bg-gray-200 w-full h-[calc(100vh-13rem)] md:h-auto md:aspect-[16/9] lg:aspect-[21/9]" />
+      <section className="relative w-full flex items-center justify-center mt-16">
+        <div className="animate-pulse bg-gray-200 w-full h-[calc(100vh-64px)]" />
       </section>
     );
   }
 
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden">
-      {/* Container fixo para altura no mobile */}
-      <div className="w-full h-[calc(100vh-13rem)] md:h-auto md:aspect-[16/9] lg:aspect-[21/9]">
+    <section className="relative w-full flex items-center justify-center overflow-hidden mt-16">
+      {/* Container com altura total da viewport */}
+      <div className="w-full h-[calc(100vh-64px)]"> {/* 64px é a altura do header */}
         <div className="relative w-full h-full">
           <img 
             src={activeBanner?.image_url || '/noivos.jpg'}

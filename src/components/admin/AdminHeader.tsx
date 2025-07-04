@@ -1,6 +1,6 @@
-
 import { Button } from '@/components/ui/button';
 import { LogOut, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AdminHeaderProps {
   activeSection: string;
@@ -23,6 +23,10 @@ export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: Adm
       default: return 'Painel Administrativo';
     }
   };
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/admin' || location.pathname === '/admin-local';
 
   return (
     <header className="bg-asa-dark text-white p-4">
@@ -57,5 +61,20 @@ export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: Adm
         </div>
       </div>
     </header>
+  );
+};
+
+export const AdminBackButton = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/admin' || location.pathname === '/admin-local';
+  if (isHome) return null;
+  return (
+    <button
+      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4"
+      onClick={() => navigate(-1)}
+    >
+      <ArrowLeft className="w-4 h-4" /> Voltar
+    </button>
   );
 };
