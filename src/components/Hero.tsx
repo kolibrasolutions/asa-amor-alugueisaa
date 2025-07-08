@@ -1,22 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useBanners } from "@/hooks/useBanners";
-import { useHeroSectionImages } from "@/hooks/useSectionImages";
 
 const Hero = () => {
   const navigate = useNavigate();
-  const { data: banners = [], isLoading: bannersLoading } = useBanners();
-  const { data: heroImages = [], isLoading: heroImagesLoading } = useHeroSectionImages();
+  const { data: banners = [], isLoading } = useBanners();
   
-  const isLoading = bannersLoading || heroImagesLoading;
-  
-  // Priorizar section images, se não houver, usar banners
-  const activeHeroImage = heroImages[0];
   const activeBanner = banners[0];
   
-  const imageUrl = activeHeroImage?.image_url || activeBanner?.image_url || '/noivos.jpg';
-  const title = activeHeroImage?.title || activeBanner?.title || "Noivas Cirlene";
-  const subtitle = activeHeroImage?.description || activeBanner?.subtitle || "Vestidos & Ternos";
+  const imageUrl = activeBanner?.image_url || '/noivos.jpg';
+  const title = activeBanner?.title || "Noivas Cirlene";
+  const subtitle = activeBanner?.subtitle || "Vestidos & Ternos";
 
   if (isLoading) {
     return (

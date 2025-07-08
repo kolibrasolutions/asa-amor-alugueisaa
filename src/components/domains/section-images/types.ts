@@ -49,20 +49,6 @@ export interface SectionImageUploadData {
 
 // Configurações das seções do site
 export const SECTION_CONFIGS: Record<string, SectionImageConfig> = {
-  hero: {
-    id: 'hero',
-    name: 'Hero Principal',
-    description: 'Imagem principal da página inicial',
-    aspectRatio: 16 / 9,
-    maxImages: 5,
-    allowMultiple: true,
-    cropSettings: {
-      aspectRatio: 16 / 9,
-      minWidth: 1920,
-      minHeight: 1080,
-      quality: 0.9,
-    },
-  },
   client_gallery: {
     id: 'client_gallery',
     name: 'Galeria de Clientes',
@@ -97,20 +83,6 @@ export const SECTION_CONFIGS: Record<string, SectionImageConfig> = {
     description: 'Imagens das seções "Sobre" e informativas',
     aspectRatio: 4 / 3,
     maxImages: 3,
-    allowMultiple: true,
-    cropSettings: {
-      aspectRatio: 4 / 3,
-      minWidth: 800,
-      minHeight: 600,
-      quality: 0.9,
-    },
-  },
-  categories_section: {
-    id: 'categories_section',
-    name: 'Seção Categorias',
-    description: 'Imagens de apoio para a seção de categorias',
-    aspectRatio: 4 / 3,
-    maxImages: 2,
     allowMultiple: true,
     cropSettings: {
       aspectRatio: 4 / 3,

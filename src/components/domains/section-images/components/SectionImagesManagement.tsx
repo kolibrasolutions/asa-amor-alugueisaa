@@ -16,52 +16,8 @@ import {
   SectionImageConfig,
   SECTION_CONFIGS 
 } from '../types';
-
-// Hook simulado para buscar imagens por seção
-const useSectionImages = (sectionId: string) => {
-  return {
-    data: [] as SectionImage[],
-    isLoading: false,
-  };
-};
-
-// Hook simulado para mutações
-const useSectionImageMutations = () => {
-  const { toast } = useToast();
-  
-  return {
-    uploadSectionImage: {
-      mutate: (data: SectionImageUploadData) => {
-        console.log('Upload section image:', data);
-        toast({
-          title: 'Sucesso!',
-          description: 'Imagem adicionada com sucesso.',
-        });
-      },
-      isPending: false,
-    },
-    updateSectionImage: {
-      mutate: ({ id, data }: { id: string; data: SectionImageFormData }) => {
-        console.log('Update section image:', id, data);
-        toast({
-          title: 'Sucesso!',
-          description: 'Imagem atualizada com sucesso.',
-        });
-      },
-      isPending: false,
-    },
-    deleteSectionImage: {
-      mutate: (id: string) => {
-        console.log('Delete section image:', id);
-        toast({
-          title: 'Sucesso!',
-          description: 'Imagem removida com sucesso.',
-        });
-      },
-      isPending: false,
-    },
-  };
-};
+import { useSectionImages, useSectionImageMutations } from '@/hooks/useSectionImages';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SectionImagesManagementProps {
   sectionId: string;
@@ -71,6 +27,7 @@ export const SectionImagesManagement: React.FC<SectionImagesManagementProps> = (
   const sectionConfig = SECTION_CONFIGS[sectionId];
   const { data: sectionImages = [], isLoading } = useSectionImages(sectionId);
   const { uploadSectionImage, updateSectionImage, deleteSectionImage } = useSectionImageMutations();
+  const { toast } = useToast();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -96,23 +53,39 @@ export const SectionImagesManagement: React.FC<SectionImagesManagementProps> = (
     }
   };
 
-  const handleCropComplete = (cropData: SectionImageCropData, croppedFile: File) => {
-    const uploadData: SectionImageUploadData = {
-      file: croppedFile,
-      sectionId,
-      cropData,
-      formData,
-    };
-    
-    uploadSectionImage.mutate(uploadData);
-    setIsAddDialogOpen(false);
-    setSelectedFile(null);
-    setFormData({
-      title: '',
-      description: '',
-      sort_order: 0,
-      is_active: true,
-    });
+  const handleCropComplete = async (cropData: SectionImageCropData, croppedFile: File) => {
+    try {
+      const uploadData: SectionImageUploadData = {
+        file: croppedFile,
+        sectionId,
+        cropData,
+        formData,
+      };
+      
+      await uploadSectionImage.mutateAsync(uploadData);
+      
+      toast({
+        title: 'Sucesso!',
+        description: 'Imagem adicionada com sucesso.',
+      });
+
+      setIsAddDialogOpen(false);
+      setIsCropDialogOpen(false);
+      setSelectedFile(null);
+      setFormData({
+        title: '',
+        description: '',
+        sort_order: 0,
+        is_active: true,
+      });
+    } catch (error) {
+      console.error('Erro ao fazer upload:', error);
+      toast({
+        title: 'Erro!',
+        description: 'Erro ao fazer upload da imagem.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleEdit = (image: SectionImage) => {
@@ -126,26 +99,54 @@ export const SectionImagesManagement: React.FC<SectionImagesManagementProps> = (
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (editingImage) {
-      updateSectionImage.mutate({
-        id: editingImage.id,
-        data: formData,
-      });
-      setIsEditDialogOpen(false);
-      setEditingImage(null);
+      try {
+        await updateSectionImage.mutateAsync({
+          id: editingImage.id,
+          data: formData,
+        });
+        
+        toast({
+          title: 'Sucesso!',
+          description: 'Imagem atualizada com sucesso.',
+        });
+
+        setIsEditDialogOpen(false);
+        setEditingImage(null);
+      } catch (error) {
+        console.error('Erro ao atualizar:', error);
+        toast({
+          title: 'Erro!',
+          description: 'Erro ao atualizar a imagem.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja remover esta imagem?')) {
-      deleteSectionImage.mutate(id);
+      try {
+        await deleteSectionImage.mutateAsync(id);
+        
+        toast({
+          title: 'Sucesso!',
+          description: 'Imagem removida com sucesso.',
+        });
+      } catch (error) {
+        console.error('Erro ao deletar:', error);
+        toast({
+          title: 'Erro!',
+          description: 'Erro ao remover a imagem.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
   const getImageUrl = (imagePath: string) => {
-    // Por enquanto retornando placeholder
-    return '/noivos.jpg';
+    return supabase.storage.from('section-images').getPublicUrl(imagePath).data.publicUrl;
   };
 
   const canAddMore = sectionImages.length < sectionConfig.maxImages;

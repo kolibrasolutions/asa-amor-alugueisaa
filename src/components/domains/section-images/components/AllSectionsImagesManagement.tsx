@@ -4,7 +4,7 @@ import { SectionImagesManagement } from './SectionImagesManagement';
 import { SECTION_CONFIGS } from '../types';
 
 export const AllSectionsImagesManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('hero');
+  const [activeTab, setActiveTab] = useState('client_gallery');
 
   const sectionEntries = Object.entries(SECTION_CONFIGS);
 
@@ -18,9 +18,9 @@ export const AllSectionsImagesManagement: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           {sectionEntries.map(([key, config]) => (
-            <TabsTrigger key={key} value={key} className="text-xs">
+            <TabsTrigger key={key} value={key} className="text-sm">
               {config.name}
             </TabsTrigger>
           ))}
