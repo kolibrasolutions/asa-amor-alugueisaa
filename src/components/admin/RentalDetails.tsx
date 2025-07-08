@@ -1,4 +1,4 @@
-import { useRental } from '@/hooks/useRentals';
+import { useRental, getEffectiveStatus } from '@/hooks/useRentals';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RentalStatusBadge } from './RentalStatusBadge';
@@ -416,7 +416,7 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
             <div>
               <label className="text-sm font-medium text-gray-500">Status</label>
               <div className="mt-1">
-                <RentalStatusBadge status={rental.status} />
+                <RentalStatusBadge status={getEffectiveStatus(rental)} />
               </div>
             </div>
             <div>

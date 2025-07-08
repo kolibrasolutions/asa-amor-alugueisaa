@@ -1,13 +1,13 @@
 
 import * as React from 'react';
 import { useState } from 'react';
-import { useUpdateRental, RentalWithDetails, Rental } from '@/hooks/useRentals';
+import { useUpdateRental, type RentalWithCustomer, type Rental } from '@/hooks/useRentals';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
 interface RentalStatusUpdaterProps {
-  rental: RentalWithDetails;
+  rental: RentalWithCustomer;
   children: React.ReactNode;
 }
 
@@ -24,7 +24,8 @@ const statusTranslation: Record<Rental['status'], string> = {
     confirmed: 'Confirmado',
     'in_progress': 'Em andamento',
     completed: 'Concluído',
-    cancelled: 'Cancelado'
+    cancelled: 'Cancelado',
+    overdue: 'Em Atraso'
 };
 
 export const RentalStatusUpdater = ({ rental, children }: RentalStatusUpdaterProps) => {

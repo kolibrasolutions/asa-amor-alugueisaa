@@ -1,11 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useBanners } from "@/hooks/useBanners";
+import { useHeroSectionImages } from "@/hooks/useSectionImages";
 
 const Hero = () => {
   const navigate = useNavigate();
-  const { data: banners = [], isLoading } = useBanners();
+  const { data: banners = [], isLoading: bannersLoading } = useBanners();
+  const { data: heroImages = [], isLoading: heroImagesLoading } = useHeroSectionImages();
+  
+  const isLoading = bannersLoading || heroImagesLoading;
+  
+  // Priorizar section images, se não houver, usar banners
+  const activeHeroImage = heroImages[0];
   const activeBanner = banners[0];
+  
+  const imageUrl = activeHeroImage?.image_url || activeBanner?.image_url || '/noivos.jpg';
+  const title = activeHeroImage?.title || activeBanner?.title || "Noivas Cirlene";
+  const subtitle = activeHeroImage?.description || activeBanner?.subtitle || "Vestidos & Ternos";
 
   if (isLoading) {
     return (
@@ -21,8 +32,8 @@ const Hero = () => {
       <div className="w-full h-[calc(100vh-64px)]"> {/* 64px é a altura do header */}
         <div className="relative w-full h-full">
           <img 
-            src={activeBanner?.image_url || '/noivos.jpg'}
-            alt="Banner"
+            src={imageUrl}
+            alt="Hero"
             className="w-full h-full object-cover"
             style={{
               objectPosition: "center 30%"
@@ -34,10 +45,10 @@ const Hero = () => {
 
       <div className="absolute z-10 text-center text-white px-4 md:px-8">
         <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-serif mb-2 md:mb-4 leading-tight">
-          {activeBanner?.title || "Noivas Cirlene"}
+          {title}
           <br />
           <span className="text-xl sm:text-2xl md:text-4xl lg:text-5xl block mt-1 md:mt-3">
-            {activeBanner?.subtitle || "Vestidos & Ternos"}
+            {subtitle}
           </span>
         </h1>
         <button

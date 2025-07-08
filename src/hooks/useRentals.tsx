@@ -10,7 +10,7 @@ export interface Rental {
   rental_end_date: string;
   event_date: string;
   total_amount: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -24,7 +24,7 @@ export interface RentalWithCustomer {
   event_date: string;
   total_amount: number;
   deposit_amount?: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -65,6 +65,10 @@ interface Customer {
   updated_at: string;
 }
 
+interface CustomerWithNome extends Customer {
+  nome?: string;
+}
+
 interface RentalResponse {
   id: string;
   customer_id: string;
@@ -72,12 +76,29 @@ interface RentalResponse {
   rental_end_date: string;
   event_date: string;
   total_amount: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
   notes?: string;
   created_at?: string;
   updated_at?: string;
   customer: Customer;
 }
+
+// Função para detectar se um aluguel está em atraso
+export const isRentalOverdue = (rental: RentalWithCustomer): boolean => {
+  const today = new Date();
+  const endDate = new Date(rental.rental_end_date);
+  
+  // Considera em atraso se passou da data de fim e não está finalizado ou cancelado
+  return endDate < today && !['completed', 'cancelled'].includes(rental.status);
+};
+
+// Função para obter o status efetivo do aluguel (incluindo atraso)
+export const getEffectiveStatus = (rental: RentalWithCustomer): 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'overdue' => {
+  if (isRentalOverdue(rental)) {
+    return 'overdue';
+  }
+  return rental.status;
+};
 
 export const useRentals = () => {
   return useQuery({
@@ -136,13 +157,18 @@ export const useRental = (id: string) => {
       // Transform data to match RentalWithCustomer interface
       const transformedData = {
         ...data,
-        customer_nome: data.customer?.full_name,
-        customer_endereco: data.customer?.address,
-        customer_telefone: data.customer?.phone,
-        customer_cpf: data.customer?.document_number,
+        customer_nome: data.customer?.full_name || '',
+        customer_endereco: data.customer?.address || '',
+        customer_telefone: data.customer?.phone || '',
+        customer_cpf: data.customer?.document_number || '',
         customer_rg: '',
         customer_cidade: '',
-        customer_email: data.customer?.email,
+        customer_email: data.customer?.email || '',
+        rental_items: data.rental_items?.map(item => ({
+          ...item,
+          rental_id: data.id,
+          product_id: item.product.id,
+        })) || [],
       };
       
       return transformedData as RentalWithCustomer;
@@ -257,8 +283,14 @@ export const sendRentalNotification = async (rentalId: string) => {
     })) || [];
 
     // Preparar dados para notificação
+    const customerWithNome = customer as CustomerWithNome;
+    const customerName = customerWithNome?.full_name || customerWithNome?.nome || 'Cliente não encontrado';
+    console.log('📋 Nome do cliente determinado:', customerName);
+    console.log('📋 full_name:', customerWithNome?.full_name);
+    console.log('📋 nome:', customerWithNome?.nome);
+    
     const summary = {
-      customerName: customer?.full_name || (customer ? `Cliente ID: ${rental.customer_id}` : 'Cliente não encontrado'),
+      customerName: customerName,
       eventDate: rental.event_date ? new Date(rental.event_date).toLocaleDateString('pt-BR') : 'Não informado',
       startDate: rental.rental_start_date ? new Date(rental.rental_start_date).toLocaleDateString('pt-BR') : 'Não informado',
       endDate: rental.rental_end_date ? new Date(rental.rental_end_date).toLocaleDateString('pt-BR') : 'Não informado',
@@ -369,6 +401,109 @@ export const useUpdateRental = () => {
   });
 };
 
+export const useConfirmReturn = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (rentalId: string) => {
+      console.log('✅ === CONFIRMANDO DEVOLUÇÃO ===');
+      console.log('📋 Rental ID:', rentalId);
+      
+      // Primeiro, buscar os produtos do aluguel para liberar depois
+      const { data: rentalItems, error: rentalItemsError } = await supabase
+        .from('rental_items')
+        .select('product_id, quantity')
+        .eq('rental_id', rentalId);
+
+      if (rentalItemsError) {
+        console.error('❌ Erro ao buscar itens do aluguel:', rentalItemsError);
+        throw rentalItemsError;
+      }
+
+      console.log('📦 Produtos no aluguel a serem liberados:', rentalItems?.map(item => item.product_id));
+
+      // Atualizar o status do aluguel para completed
+      const { data, error } = await supabase
+        .from('rentals')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', rentalId)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar status do aluguel:', error);
+        throw error;
+      }
+      
+      console.log('✅ Status do aluguel atualizado para completed');
+      
+      // Liberar os produtos verificando se não há outros aluguéis ativos
+      if (rentalItems && rentalItems.length > 0) {
+        const productIds = rentalItems.map(item => item.product_id);
+        
+        console.log(`🔄 Sincronizando produtos individualmente...`);
+        
+        // Para cada produto, usar a função de sincronização individual
+        for (const productId of productIds) {
+          await syncSingleProductStatus(productId);
+        }
+      }
+
+      // Executar sincronização completa para garantir consistência
+      console.log('🔄 Executando sincronização completa...');
+      await syncAllProductStatuses();
+      
+      console.log('✅ === DEVOLUÇÃO CONFIRMADA COM SUCESSO ===');
+      return data;
+    },
+    onSuccess: () => {
+      console.log('🔄 Invalidando caches...');
+      
+      // Invalidar múltiplas queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['rentals'] });
+      queryClient.invalidateQueries({ queryKey: ['product-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['rental-items'] });
+      
+      // Forçar reload completo dos dados com múltiplas tentativas
+      setTimeout(() => {
+        console.log('🔄 Primeiro refetch...');
+        queryClient.refetchQueries({ queryKey: ['products'] });
+        queryClient.refetchQueries({ queryKey: ['product-availability'] });
+      }, 100);
+      
+      setTimeout(() => {
+        console.log('🔄 Segundo refetch...');
+        queryClient.refetchQueries({ queryKey: ['products'] });
+        queryClient.refetchQueries({ queryKey: ['product-availability'] });
+      }, 1000);
+      
+      setTimeout(() => {
+        console.log('🔄 Terceiro refetch...');
+        queryClient.refetchQueries({ queryKey: ['products'] });
+        queryClient.refetchQueries({ queryKey: ['product-availability'] });
+      }, 2000);
+      
+      toast({
+        title: "Devolução confirmada",
+        description: "O aluguel foi finalizado e os produtos foram liberados com sucesso!",
+      });
+    },
+    onError: (error) => {
+      console.error('❌ Erro na confirmação de devolução:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao confirmar devolução: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
 // Função auxiliar para sincronizar status dos produtos
 const syncAllProductStatuses = async () => {
   try {
@@ -377,9 +512,11 @@ const syncAllProductStatuses = async () => {
     // Buscar todos os produtos
     const { data: allProducts } = await supabase
       .from('products')
-      .select('id');
+      .select('id, status');
 
     if (!allProducts) return;
+
+    console.log(`📊 Total de produtos para sincronizar: ${allProducts.length}`);
 
     // Para cada produto, verificar se há aluguéis ativos
     for (const product of allProducts) {
@@ -394,18 +531,87 @@ const syncAllProductStatuses = async () => {
       // Determinar status correto
       const correctStatus = (!activeRentals || activeRentals.length === 0) ? 'available' : 'rented';
       
-      // Atualizar status se necessário
-      await supabase
-        .from('products')
-        .update({ status: correctStatus })
-        .eq('id', product.id);
-      
-      console.log(`📦 Produto ${product.id}: ${correctStatus}`);
+      // Atualizar status apenas se necessário
+      if (product.status !== correctStatus) {
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ 
+            status: correctStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', product.id);
+
+        if (updateError) {
+          console.error(`❌ Erro ao atualizar produto ${product.id}:`, updateError);
+        } else {
+          console.log(`✅ Produto ${product.id}: ${product.status} → ${correctStatus}`);
+        }
+      } else {
+        console.log(`✓ Produto ${product.id}: ${correctStatus} (já correto)`);
+      }
     }
     
     console.log('✅ Sincronização concluída!');
   } catch (error) {
     console.error('❌ Erro na sincronização:', error);
+  }
+};
+
+// Função auxiliar para sincronizar status de um produto específico
+const syncSingleProductStatus = async (productId: string) => {
+  try {
+    console.log(`🔄 Sincronizando produto ${productId}...`);
+    
+    // Buscar produto atual
+    const { data: product } = await supabase
+      .from('products')
+      .select('id, status')
+      .eq('id', productId)
+      .single();
+
+    if (!product) {
+      console.error(`❌ Produto ${productId} não encontrado`);
+      return;
+    }
+
+    // Verificar se há aluguéis ativos para este produto
+    const { data: activeRentals } = await supabase
+      .from('rental_items')
+      .select(`
+        rentals!inner(id, status, rental_start_date, rental_end_date)
+      `)
+      .eq('product_id', productId)
+      .in('rentals.status', ['pending', 'confirmed', 'in_progress']);
+
+    // Determinar status correto
+    const correctStatus = (!activeRentals || activeRentals.length === 0) ? 'available' : 'rented';
+    
+    console.log(`📊 Produto ${productId}:`);
+    console.log(`   Status atual: ${product.status}`);
+    console.log(`   Status correto: ${correctStatus}`);
+    console.log(`   Aluguéis ativos: ${activeRentals?.length || 0}`);
+    
+    // Atualizar status apenas se necessário
+    if (product.status !== correctStatus) {
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ 
+          status: correctStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', productId);
+
+      if (updateError) {
+        console.error(`❌ Erro ao atualizar produto ${productId}:`, updateError);
+      } else {
+        console.log(`✅ Produto ${productId} atualizado: ${product.status} → ${correctStatus}`);
+      }
+    } else {
+      console.log(`✓ Produto ${productId} já está correto: ${correctStatus}`);
+    }
+    
+  } catch (error) {
+    console.error(`❌ Erro na sincronização do produto ${productId}:`, error);
   }
 };
 
@@ -493,6 +699,55 @@ export const useDeleteRental = () => {
       toast({
         title: "Erro",
         description: "Erro ao excluir aluguel: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Hook para forçar sincronização completa de produtos (útil para debug/correção)
+export const useForceSyncProducts = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async () => {
+      console.log('🔄 === FORÇANDO SINCRONIZAÇÃO COMPLETA ===');
+      
+      // Executar sincronização completa
+      await syncAllProductStatuses();
+      
+      // Aguardar um pouco para garantir que as mudanças foram aplicadas
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('✅ === SINCRONIZAÇÃO FORÇADA CONCLUÍDA ===');
+      return true;
+    },
+    onSuccess: () => {
+      console.log('🔄 Invalidando caches após sincronização forçada...');
+      
+      // Invalidar múltiplas queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['rentals'] });
+      queryClient.invalidateQueries({ queryKey: ['product-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['rental-items'] });
+      
+      // Forçar reload completo dos dados
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['products'] });
+        queryClient.refetchQueries({ queryKey: ['product-availability'] });
+      }, 500);
+      
+      toast({
+        title: "Sincronização forçada",
+        description: "Todos os produtos foram sincronizados com sucesso! Verifique o console para detalhes.",
+      });
+    },
+    onError: (error) => {
+      console.error('❌ Erro na sincronização forçada:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao sincronizar produtos: " + error.message,
         variant: "destructive",
       });
     },

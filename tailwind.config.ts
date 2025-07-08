@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Asa Amor custom colors
+				// Noivas Cirlene custom colors
 				'asa-white': '#FFFFFF',
 				'asa-beige': '#F9F6F3',
 				'asa-blush': '#EFDCD4',

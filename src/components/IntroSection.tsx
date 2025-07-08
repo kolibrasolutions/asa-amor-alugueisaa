@@ -5,16 +5,14 @@ const IntroSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-asa-dark mb-8">
-            Realize o Sonho do seu Dia Especial
+            Atendimento Personalizado
           </h2>
           <p className="text-lg text-asa-gray leading-relaxed mb-8">
-            Na Noivas Cirlene, acreditamos que cada momento especial merece ser vivido com elegância e sofisticação. 
-            Nossa coleção cuidadosamente curada oferece vestidos de noiva deslumbrantes, ternos impecáveis 
-            e trajes de festa que fazem você brilhar.
+            Nosso compromisso vai além do aluguel. Oferecemos uma experiência completa de consultoria, 
+            ajudando você a escolher a peça ideal para o seu estilo e tipo de cerimônia.
           </p>
           <p className="text-lg text-asa-gray leading-relaxed mb-8">
-            Com atendimento personalizado e peças de alta qualidade, transformamos sonhos em realidade, 
-            criando memórias que durarão para sempre.
+            Agende sua prova e deixe nossa equipe especializada cuidar de cada detalhe.
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mt-12">

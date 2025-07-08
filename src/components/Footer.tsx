@@ -9,7 +9,7 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-serif mb-4">Noivas Cirlene</h3>
             <p className="text-gray-400 text-sm">
-              Transformando sonhos em realidade através de peças únicas e atendimento personalizado. Seu dia especial merece toda nossa dedicação.
+              Realizando sonhos desde 1989 através de peças únicas e atendimento personalizado. São 35 anos de experiência cuidando dos momentos mais especiais da sua vida com dedicação e carinho.
             </p>
           </div>
 

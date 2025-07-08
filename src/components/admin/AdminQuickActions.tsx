@@ -7,14 +7,17 @@ import {
   ClipboardList,
   Settings,
   ShoppingBag,
-  LayoutGrid
+  LayoutGrid,
+  RefreshCw
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useForceSyncProducts } from "@/hooks/useRentals";
 
 export const AdminQuickActions = () => {
   const navigate = useNavigate();
   const isDevelopment = import.meta.env.DEV;
   const adminBasePath = isDevelopment ? '/admin-local' : '/admin';
+  const forceSync = useForceSyncProducts();
 
   const mainActions = [
     {
@@ -52,6 +55,13 @@ export const AdminQuickActions = () => {
       description: "Cores, tamanhos, banners e categorias",
       icon: <Settings className="w-6 h-6" />,
       onClick: () => navigate(`${adminBasePath}/settings`),
+    },
+    {
+      title: "Sincronizar",
+      description: "Forçar sincronização de produtos",
+      icon: <RefreshCw className="w-6 h-6" />,
+      onClick: () => forceSync.mutate(),
+      danger: true
     }
   ];
 
@@ -80,19 +90,26 @@ export const AdminQuickActions = () => {
       {/* Seção de Catálogo */}
       <Card className="p-6">
         <h2 className="text-lg font-semibold mb-4">Catálogo</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {catalogActions.map((action) => (
             <Button
               key={action.title}
-              variant="outline"
+              variant={action.danger ? "destructive" : "outline"}
               className="h-auto p-6 flex flex-col items-center justify-center gap-4 hover:bg-muted/50"
               onClick={action.onClick}
+              disabled={action.title === "Sincronizar" && forceSync.isPending}
             >
-              {action.icon}
+              {action.title === "Sincronizar" && forceSync.isPending ? (
+                <RefreshCw className="w-6 h-6 animate-spin" />
+              ) : (
+                action.icon
+              )}
               <div className="text-center">
                 <h3 className="font-semibold">{action.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {action.description}
+                <p className={`text-sm mt-1 ${action.danger ? "text-white/80" : "text-muted-foreground"}`}>
+                  {action.title === "Sincronizar" && forceSync.isPending 
+                    ? "Sincronizando..." 
+                    : action.description}
                 </p>
               </div>
             </Button>

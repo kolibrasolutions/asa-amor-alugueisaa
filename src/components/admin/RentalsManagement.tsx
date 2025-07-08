@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useRentals, useDeleteRental, useRental, type RentalWithCustomer, type RentalItem } from '@/hooks/useRentals';
+import { useRentals, useDeleteRental, useRental, useConfirmReturn, getEffectiveStatus, type RentalWithCustomer, type RentalItem } from '@/hooks/useRentals';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { RentalStatusBadge } from './RentalStatusBadge';
 import { RentalForm } from './RentalForm';
-import { Plus, Edit, Trash, Eye, Calendar, FileText } from 'lucide-react';
+import { Plus, Edit, Trash, Eye, Calendar, FileText, CheckCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -35,6 +35,7 @@ interface RentalsManagementProps {
 export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) => {
   const { data: rentals, isLoading } = useRentals();
   const deleteRental = useDeleteRental();
+  const confirmReturn = useConfirmReturn();
   const [showForm, setShowForm] = useState(false);
   const [editingRental, setEditingRental] = useState<string | null>(null);
   const [viewingRental, setViewingRental] = useState<string | null>(null);
@@ -60,6 +61,10 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
 
   const handleGenerateContract = (rentalId: string) => {
     setContractRentalId(rentalId);
+  };
+
+  const handleConfirmReturn = (rentalId: string) => {
+    confirmReturn.mutate(rentalId);
   };
 
   // Gerar contrato automaticamente quando os dados estiverem prontos
@@ -505,7 +510,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                       {formatDate(rental.rental_end_date)}
                     </TableCell>
                     <TableCell>
-                      <RentalStatusBadge status={rental.status} />
+                      <RentalStatusBadge status={getEffectiveStatus(rental)} />
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -556,6 +561,41 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
+                        {!['completed', 'cancelled'].includes(rental.status) && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                title="Confirmar Devolução"
+                                className={getEffectiveStatus(rental) === 'overdue' ? 'bg-red-100 border-red-400' : ''}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar Devolução</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja confirmar a devolução deste aluguel?
+                                  {getEffectiveStatus(rental) === 'overdue' && (
+                                    <span className="block mt-2 text-red-600 font-semibold">
+                                      ⚠️ Este aluguel está em atraso!
+                                    </span>
+                                  )}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleConfirmReturn(rental.id)}
+                                >
+                                  Confirmar Devolução
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

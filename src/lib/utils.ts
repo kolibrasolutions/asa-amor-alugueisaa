@@ -91,7 +91,7 @@ export async function sendNtfyTest(config: NtfyConfig): Promise<boolean> {
     }
 
     const serverUrl = config.serverUrl || 'https://ntfy.sh';
-    const testMessage = `Teste de notificacao do sistema ASA Amor Alugueis
+    const testMessage = `Teste de notificacao do sistema Noivas Cirlene
 
 Este e um teste para verificar se as notificacoes estao funcionando corretamente.
 
@@ -109,7 +109,7 @@ Data/Hora: ${new Date().toLocaleString('en-US')}`;
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
-        'Title': 'Teste ASA Amor Alugueis',
+        'Title': 'Teste Noivas Cirlene',
         'Priority': 'default',
         'Tags': 'test'
       },
@@ -172,7 +172,7 @@ ${productsText}
 📊 Total de itens: ${summary.itemsCount}
 📌 Status: ${getStatusEmoji(summary.status)} ${getStatusText(summary.status)}
 
-Sistema ASA Amor Aluguéis`;
+Sistema Noivas Cirlene`;
 }
 
 // === WHATSAPP FUNCTIONS ===
@@ -408,7 +408,7 @@ function formatRentalMessage(summary: RentalSummary): string {
 📊 Total de itens: ${summary.itemsCount}
 📌 Status: ${getStatusEmoji(summary.status)} ${getStatusText(summary.status)}
 
-Sistema ASA Amor Aluguéis`;
+Sistema Noivas Cirlene`;
 }
 
 function getStatusEmoji(status: string): string {

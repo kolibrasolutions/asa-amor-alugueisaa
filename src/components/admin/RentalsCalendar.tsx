@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
-import { useRentals, RentalWithDetails } from '@/hooks/useRentals';
+import { useRentals, getEffectiveStatus, type RentalWithCustomer } from '@/hooks/useRentals';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RentalStatusBadge } from './RentalStatusBadge';
@@ -16,13 +16,14 @@ const parseDate = (dateString: string): Date => {
   return new Date(parts[0], parts[1] - 1, parts[2]);
 };
 
-const getStatusColor = (status: RentalWithDetails['status']) => {
+const getStatusColor = (status: RentalWithCustomer['status']) => {
   switch (status) {
     case 'pending': return '#FBBF24';
     case 'confirmed': return '#60A5FA';
     case 'in_progress': return '#4ADE80';
     case 'completed': return '#9CA3AF';
     case 'cancelled': return '#F87171';
+    case 'overdue': return '#DC2626';
     default: return '#D1D5DB';
   }
 };
@@ -33,6 +34,7 @@ const statusStyles: Record<string, React.CSSProperties> = {
   'em andamento': { backgroundColor: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: '0.375rem' },
   concluído: { backgroundColor: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: '0.375rem' },
   cancelado: { backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: '0.375rem' },
+  'em atraso': { backgroundColor: '#FEE2E2', border: '1px solid #DC2626', borderRadius: '0.375rem' },
 };
 
 const statusTranslation: Record<string, string> = {
@@ -40,7 +42,8 @@ const statusTranslation: Record<string, string> = {
     confirmed: 'confirmado',
     in_progress: 'em andamento',
     completed: 'concluído',
-    cancelled: 'cancelado'
+    cancelled: 'cancelado',
+    overdue: 'em atraso'
 }
 
 interface RentalsCalendarProps {
@@ -55,7 +58,8 @@ export const RentalsCalendar = ({ onSectionChange }: RentalsCalendarProps) => {
     if (!rentals) return {};
     const mods: Record<string, Date[]> = {};
     rentals.forEach(rental => {
-      const translatedStatus = statusTranslation[rental.status] || rental.status;
+      const effectiveStatus = getEffectiveStatus(rental);
+      const translatedStatus = statusTranslation[effectiveStatus] || effectiveStatus;
       if (!mods[translatedStatus]) {
         mods[translatedStatus] = [];
       }
@@ -110,10 +114,10 @@ export const RentalsCalendar = ({ onSectionChange }: RentalsCalendarProps) => {
                 <ul className="space-y-4">
                   {selectedRentals.map(rental => (
                     <RentalStatusUpdater key={rental.id} rental={rental}>
-                      <li className="border-l-4 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors" style={{ borderColor: getStatusColor(rental.status) }}>
-                        <p className="font-semibold">{rental.customer.nome}</p>
+                      <li className="border-l-4 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors" style={{ borderColor: getStatusColor(getEffectiveStatus(rental)) }}>
+                        <p className="font-semibold">{rental.customer_nome}</p>
                         <div className="text-sm text-muted-foreground">
-                          <RentalStatusBadge status={rental.status} />
+                          <RentalStatusBadge status={getEffectiveStatus(rental)} />
                         </div>
                       </li>
                     </RentalStatusUpdater>

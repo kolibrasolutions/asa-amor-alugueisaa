@@ -32,7 +32,9 @@ const CategoriesSection = () => {
     <>
       <div className="py-4 md:py-8 text-center bg-white/80 md:bg-white">
         <h2 className="text-lg md:text-3xl font-serif text-gray-800/90 md:text-gray-800">Vestidos & Ternos</h2>
-        <p className="text-gray-600/80 md:text-gray-600 text-sm md:text-base mt-1 md:mt-2 max-w-2xl mx-auto px-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <p className="text-gray-600/80 md:text-gray-600 text-sm md:text-base mt-1 md:mt-2 max-w-2xl mx-auto px-4">
+          Descubra nossa coleção exclusiva de vestidos de noiva e ternos masculinos. Peças cuidadosamente selecionadas para fazer do seu casamento um momento único e inesquecível.
+        </p>
       </div>
 
       <section className="pb-8 container mx-auto px-4">
@@ -93,17 +95,12 @@ const CategoriesSection = () => {
             </div>
             
             <div className="space-y-6">
-              <h2 className="text-4xl font-serif">
-                Lorem Ipsum<br />
-                Dolor Sit Amet<br />
-                Consectetur<br />
-                Adipiscing
-              </h2>
+              <h2 className="text-4xl font-serif">Elegância em<br />Cada Detalhe</h2>
               <p className="text-gray-600">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+                Na Noivas Cirlene, cada peça é escolhida pensando na sua felicidade. Oferecemos vestidos de noiva dos mais diversos estilos - desde os clássicos e românticos até os modernos e sofisticados. Nossos ternos masculinos complementam perfeitamente o visual da noiva, garantindo que vocês estejam em perfeita harmonia no altar.
               </p>
               <p className="text-gray-600">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Todos os nossos vestidos e ternos passam por rigorosa seleção de qualidade e são mantidos em condições impecáveis. Oferecemos ajustes personalizados para garantir o caimento perfeito em cada cliente.
               </p>
             </div>
           </div>

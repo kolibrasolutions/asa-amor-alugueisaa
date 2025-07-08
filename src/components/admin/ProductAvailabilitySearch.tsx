@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useProductAvailabilityCheck } from '@/hooks/useProductAvailabilityCheck';
-import { Search, Loader2, CheckCircle, XCircle, Info } from 'lucide-react';
+import { isRentalOverdue } from '@/hooks/useRentals';
+import { Search, Loader2, CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -70,21 +71,36 @@ export const ProductAvailabilitySearch = () => {
     }
 
     if (rental) {
+      // Verificar se o aluguel está em atraso
+      const isOverdue = isRentalOverdue(rental);
+      
       return (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center text-red-700">
-            <XCircle className="mr-2 h-5 w-5" />
-            <h4 className="font-semibold text-lg">Produto Indisponível</h4>
+        <div className={`p-4 border rounded-md ${isOverdue ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'}`}>
+          <div className={`flex items-center ${isOverdue ? 'text-red-700' : 'text-yellow-700'}`}>
+            {isOverdue ? (
+              <AlertTriangle className="mr-2 h-5 w-5" />
+            ) : (
+              <XCircle className="mr-2 h-5 w-5" />
+            )}
+            <h4 className="font-semibold text-lg">
+              {isOverdue ? 'Produto em Atraso' : 'Produto Indisponível'}
+            </h4>
           </div>
           <div className="text-gray-700 mt-2 space-y-1">
              <p>O produto <strong>{product.name}</strong> (SKU: {product.sku}) está atualmente alugado.</p>
              <p><strong>Cliente:</strong> {rental.customers?.nome ?? 'Não informado'}</p>
-             <p>
-                <strong>Devolução Prevista:</strong> 
-                <span className="font-semibold text-red-800 ml-1">
+             <p className={isOverdue ? 'text-red-800 font-bold' : ''}>
+                <strong>Devolução {isOverdue ? 'ERA' : 'Prevista'}:</strong> 
+                <span className={`font-semibold ml-1 ${isOverdue ? 'text-red-900' : 'text-yellow-800'}`}>
                     {format(new Date(rental.rental_end_date), "dd/MM/yyyy", { locale: ptBR })}
                 </span>
              </p>
+             {isOverdue && (
+               <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-800">
+                 <p className="font-semibold">⚠️ ALUGUEL EM ATRASO!</p>
+                 <p className="text-sm">O cliente deveria ter devolvido este produto. Entre em contato para solicitar a devolução.</p>
+               </div>
+             )}
           </div>
         </div>
       );

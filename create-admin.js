@@ -8,7 +8,7 @@ const supabase = createClient(
 async function createAdmin() {
   try {
     const { data, error } = await supabase.auth.signUp({
-      email: 'admin@asaamoralugueis.com.br',
+      email: 'admin@noivascirlene.com.br',
       password: 'Admin@123',
       options: {
         data: {

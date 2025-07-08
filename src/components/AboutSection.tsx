@@ -48,17 +48,15 @@ const AboutSection = () => {
           </div>
           
           <div className="space-y-6">
-            <h2 className="text-4xl font-serif">
-              Lorem Ipsum<br />
-              Dolor Sit Amet<br />
-              Consectetur<br />
-              Adipiscing
-            </h2>
+            <h2 className="text-4xl font-serif">Seu Sonho,<br />Nossa Paixão</h2>
             <p className="text-gray-600">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+              Desde 1989, transformando sonhos em realidade através de peças únicas e atendimento personalizado. São 35 anos de experiência cuidando dos momentos mais especiais da vida de nossos clientes. Nosso compromisso é fazer com que você se sinta radiante e confiante no seu grande dia.
             </p>
             <p className="text-gray-600">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Trabalhamos com as melhores marcas do mercado e mantemos nosso catálogo sempre atualizado com as últimas tendências da moda nupcial. Cada casal que nos procura recebe atenção especial e dedicada.
+            </p>
+            <p className="text-gray-600">
+              Entre em contato conosco e agende sua visita. Estamos prontos para tornar seu casamento ainda mais especial!
             </p>
           </div>
         </div>
