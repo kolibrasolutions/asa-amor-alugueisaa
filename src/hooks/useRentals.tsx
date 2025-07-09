@@ -6,6 +6,7 @@ import { sendWhatsAppNotification, sendNtfyNotification } from '@/lib/utils';
 export interface Rental {
   id: string;
   customer_id: string;
+  contract_number: string;
   rental_start_date: string;
   rental_end_date: string;
   event_date: string;
@@ -19,6 +20,7 @@ export interface Rental {
 export interface RentalWithCustomer {
   id: string;
   customer_id: string;
+  contract_number: string;
   rental_start_date: string;
   rental_end_date: string;
   event_date: string;
@@ -105,25 +107,13 @@ export const useRentals = () => {
     queryKey: ['rentals'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rentals')
-        .select(`
-          *,
-          customer:customers!inner(*)
-        `)
+        .from('rental_with_customer')
+        .select(`*`)
         .order('created_at', { ascending: false });
+
       if (error) throw error;
       
-      // Transform data to match RentalWithCustomer interface
-      return (data as RentalResponse[]).map((rental) => ({
-        ...rental,
-        customer_nome: rental.customer.full_name,
-        customer_endereco: rental.customer.address,
-        customer_telefone: rental.customer.phone,
-        customer_cpf: rental.customer.document_number,
-        customer_rg: '',
-        customer_cidade: '',
-        customer_email: rental.customer.email,
-      })) as RentalWithCustomer[];
+      return data as RentalWithCustomer[];
     },
   });
 };
@@ -133,10 +123,9 @@ export const useRental = (id: string) => {
     queryKey: ['rental', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rentals')
+        .from('rental_with_customer')
         .select(`
           *,
-          customer:customers!inner(*),
           rental_items(
             id,
             quantity,
@@ -152,26 +141,10 @@ export const useRental = (id: string) => {
         `)
         .eq('id', id)
         .single();
+        
       if (error) throw error;
       
-      // Transform data to match RentalWithCustomer interface
-      const transformedData = {
-        ...data,
-        customer_nome: data.customer?.full_name || '',
-        customer_endereco: data.customer?.address || '',
-        customer_telefone: data.customer?.phone || '',
-        customer_cpf: data.customer?.document_number || '',
-        customer_rg: '',
-        customer_cidade: '',
-        customer_email: data.customer?.email || '',
-        rental_items: data.rental_items?.map(item => ({
-          ...item,
-          rental_id: data.id,
-          product_id: item.product.id,
-        })) || [],
-      };
-      
-      return transformedData as RentalWithCustomer;
+      return data as RentalWithCustomer;
     },
     enabled: !!id,
   });
@@ -182,10 +155,23 @@ export const useCreateRental = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (rental: Omit<Rental, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (rental: Omit<Rental, 'id' | 'created_at' | 'updated_at' | 'contract_number'>) => {
+      // 1. Gerar o número do contrato
+      const { data: contractNumberData, error: contractNumberError } = await supabase.rpc('generate_next_contract_number');
+
+      if (contractNumberError) {
+        throw new Error('Falha ao gerar o número do contrato: ' + contractNumberError.message);
+      }
+      
+      const newContractNumber = contractNumberData;
+
+      // 2. Criar o aluguel com o número do contrato
       const { data, error } = await supabase
         .from('rentals')
-        .insert([rental])
+        .insert([{ 
+          ...rental,
+          contract_number: newContractNumber 
+        }])
         .select()
         .single();
       
@@ -220,9 +206,9 @@ export const sendRentalNotification = async (rentalId: string) => {
     console.log('=== ENVIANDO NOTIFICAÇÃO DE ALUGUEL ===');
     console.log('Rental ID:', rentalId);
     
-    // Buscar dados do aluguel
+    // Buscar dados do aluguel a partir da VIEW para incluir dados do cliente
     const { data: rental, error: rentalError } = await supabase
-      .from('rentals')
+      .from('rental_with_customer')
       .select('*')
       .eq('id', rentalId)
       .single();
@@ -234,19 +220,8 @@ export const sendRentalNotification = async (rentalId: string) => {
 
     console.log('📋 Dados do aluguel:', rental);
 
-    // Buscar cliente diretamente usando o customer_id
-    const { data: customer, error: customerError } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('id', rental.customer_id)
-      .single();
-
-    console.log('👤 Dados do cliente raw:', customer);
-    console.log('👤 Campos disponíveis:', customer ? Object.keys(customer) : 'null');
-    
-    if (customerError) {
-      console.error('❌ Erro ao buscar cliente:', customerError);
-    }
+    // Na view, os dados do cliente já vêm no objeto principal
+    const customerName = rental.customer_nome || 'Cliente não encontrado';
 
     // Buscar itens do aluguel com detalhes dos produtos
     const { data: rentalItems, error: itemsError } = await supabase
@@ -283,12 +258,6 @@ export const sendRentalNotification = async (rentalId: string) => {
     })) || [];
 
     // Preparar dados para notificação
-    const customerWithNome = customer as CustomerWithNome;
-    const customerName = customerWithNome?.full_name || customerWithNome?.nome || 'Cliente não encontrado';
-    console.log('📋 Nome do cliente determinado:', customerName);
-    console.log('📋 full_name:', customerWithNome?.full_name);
-    console.log('📋 nome:', customerWithNome?.nome);
-    
     const summary = {
       customerName: customerName,
       eventDate: rental.event_date ? new Date(rental.event_date).toLocaleDateString('pt-BR') : 'Não informado',

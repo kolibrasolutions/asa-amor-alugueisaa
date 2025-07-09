@@ -25,8 +25,8 @@ const CategoriesSection = () => {
   const thumb1 = aboutImages?.[1];
   const thumb2 = aboutImages?.[2];
 
-  // A ordenação já é feita no hook useCategories. Apenas pegamos os 4 primeiros.
-  const categories = dbCategories.slice(0, 4);
+  // A ordenação já é feita no hook useCategories. Apenas pegamos as 5 primeiras.
+  const categories = dbCategories.slice(0, 5);
 
   if (isLoading) {
     return (
