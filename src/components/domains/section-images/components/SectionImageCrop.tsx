@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { SectionImageCropData, SectionImageConfig } from '../types';
 
 interface SectionImageCropProps {
@@ -67,39 +67,25 @@ export const SectionImageCrop: React.FC<SectionImageCropProps> = ({
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // Para galeria de clientes, garantir que seja quadrado
-    if (isClientGallery) {
-      const size = Math.min(crop.width, crop.height);
-      canvas.width = size;
-      canvas.height = size;
+    // Define o tamanho do canvas com base na resolução real da imagem original
+    // para preservar a qualidade máxima.
+    const canvasWidth = crop.width * scaleX;
+    const canvasHeight = crop.height * scaleY;
 
-      ctx.drawImage(
-        image,
-        crop.x * scaleX,
-        crop.y * scaleY,
-        size * scaleX,
-        size * scaleY,
-        0,
-        0,
-        size,
-        size
-      );
-    } else {
-      canvas.width = crop.width;
-      canvas.height = crop.height;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
-      ctx.drawImage(
-        image,
-        crop.x * scaleX,
-        crop.y * scaleY,
-        crop.width * scaleX,
-        crop.height * scaleY,
-        0,
-        0,
-        crop.width,
-        crop.height
-      );
-    }
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      canvasWidth,
+      canvasHeight,
+      0,
+      0,
+      canvasWidth,
+      canvasHeight
+    );
 
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
@@ -107,7 +93,7 @@ export const SectionImageCrop: React.FC<SectionImageCropProps> = ({
           const file = new File([blob], fileName, { type: 'image/jpeg' });
           resolve(file);
         }
-      }, 'image/jpeg', sectionConfig.cropSettings.quality || 0.9);
+      }, 'image/jpeg', sectionConfig.cropSettings.quality || 0.95);
     });
   };
 
@@ -135,6 +121,16 @@ export const SectionImageCrop: React.FC<SectionImageCropProps> = ({
     }
   };
 
+  const getAspectRatioText = () => {
+    if (isClientGallery) return '1:1 (Quadrado)';
+    return `${sectionConfig.cropSettings.aspectRatio}:1`;
+  };
+
+  const getMinSizeText = () => {
+    if (!sectionConfig.cropSettings.minWidth) return '';
+    return `${sectionConfig.cropSettings.minWidth}x${sectionConfig.cropSettings.minHeight}px`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
@@ -142,16 +138,16 @@ export const SectionImageCrop: React.FC<SectionImageCropProps> = ({
           <DialogTitle>
             Ajustar Imagem - {sectionConfig.name}
           </DialogTitle>
-          <div className="text-sm text-gray-600">
-            <p>{sectionConfig.description}</p>
-            <p className="mt-1">
-              <strong>Proporção:</strong> {isClientGallery ? '1:1 (Quadrado)' : `${sectionConfig.cropSettings.aspectRatio}:1`}
-              {sectionConfig.cropSettings.minWidth && (
-                <span className="ml-2">
-                  <strong>Tamanho mínimo:</strong> {sectionConfig.cropSettings.minWidth}x{sectionConfig.cropSettings.minHeight}px
-                </span>
-              )}
-            </p>
+          <DialogDescription>
+            {sectionConfig.description}
+          </DialogDescription>
+          <div className="mt-1 text-sm text-muted-foreground">
+            <strong>Proporção:</strong> {getAspectRatioText()}
+            {sectionConfig.cropSettings.minWidth && (
+              <span className="ml-2">
+                <strong>Tamanho mínimo:</strong> {getMinSizeText()}
+              </span>
+            )}
           </div>
         </DialogHeader>
         
@@ -161,27 +157,18 @@ export const SectionImageCrop: React.FC<SectionImageCropProps> = ({
               <div className="border border-gray-200 p-4 rounded-lg">
                 <ReactCrop
                   crop={crop}
-                  onChange={(newCrop) => {
-                    if (isClientGallery) {
-                      // Para galeria de clientes, sempre manter quadrado
-                      const size = Math.min(newCrop.width, newCrop.height);
-                      newCrop.width = size;
-                      newCrop.height = size;
-                    }
-                    setCrop(newCrop);
-                  }}
+                  onChange={setCrop}
                   onComplete={(c) => setCompletedCrop(c)}
                   aspect={isClientGallery ? 1 : sectionConfig.cropSettings.aspectRatio}
                   minWidth={100}
                   minHeight={isClientGallery ? 100 : 100 / sectionConfig.cropSettings.aspectRatio}
-                  locked={true}
                   ruleOfThirds={true}
                   keepSelection={true}
                 >
                   <img
                     ref={imgRef}
                     src={imageSrc}
-                    alt="Crop preview"
+                    alt="Prévia do recorte da imagem"
                     style={{ 
                       maxWidth: '600px', 
                       maxHeight: '400px', 

@@ -8,6 +8,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
 import { useClientGalleryImages } from "@/hooks/useSectionImages";
+import { supabase } from "@/integrations/supabase/client";
 
 const ClientGallery = () => {
   const plugin = useRef(
@@ -15,6 +16,13 @@ const ClientGallery = () => {
   );
 
   const { data: clientImages = [], isLoading } = useClientGalleryImages();
+
+  // Obter a URL pública do bucket de armazenamento
+  const { data: publicUrlData } = supabase.storage
+    .from('section-images')
+    .getPublicUrl('');
+
+  const storageBaseUrl = publicUrlData?.publicUrl || '';
 
   // Fallback para imagens estáticas se não houver imagens configuradas
   const fallbackImages = [
@@ -82,11 +90,11 @@ const ClientGallery = () => {
               {imagesToShow.map((image, index) => (
                 <CarouselItem 
                   key={image.id} 
-                  className="basis-1/4 transition-all duration-300"
+                  className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 transition-all duration-300"
                 >
                   <div className="relative aspect-square p-1">
                     <img 
-                      src={clientImages.length > 0 ? image.image_url : image.image_url}
+                      src={clientImages.length > 0 ? `${storageBaseUrl}/${image.image_url}` : image.image_url}
                       alt={image.title || `Casal Feliz ${index + 1}`}
                       className="w-full h-full object-cover rounded-lg"
                     />

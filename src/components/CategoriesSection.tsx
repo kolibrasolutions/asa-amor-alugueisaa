@@ -95,12 +95,12 @@ const CategoriesSection = () => {
             </div>
             
             <div className="space-y-6">
-              <h2 className="text-4xl font-serif">Elegância em<br />Cada Detalhe</h2>
+              <h2 className="text-4xl font-serif">Seu Sonho, Nossa Paixão</h2>
               <p className="text-gray-600">
-                Na Noivas Cirlene, cada peça é escolhida pensando na sua felicidade. Oferecemos vestidos de noiva dos mais diversos estilos - desde os clássicos e românticos até os modernos e sofisticados. Nossos ternos masculinos complementam perfeitamente o visual da noiva, garantindo que vocês estejam em perfeita harmonia no altar.
+                Desde 1994, transformando sonhos em realidade através de peças únicas e atendimento personalizado. São 30 anos de experiência cuidando dos momentos mais especiais da vida de nossos clientes. Nosso compromisso é fazer com que você se sinta radiante e confiante no seu grande dia.
               </p>
               <p className="text-gray-600">
-                Todos os nossos vestidos e ternos passam por rigorosa seleção de qualidade e são mantidos em condições impecáveis. Oferecemos ajustes personalizados para garantir o caimento perfeito em cada cliente.
+                Trabalhamos com as melhores marcas do mercado e mantemos nosso catálogo sempre atualizado com as últimas tendências da moda nupcial.
               </p>
             </div>
           </div>
