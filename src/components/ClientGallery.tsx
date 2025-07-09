@@ -89,7 +89,7 @@ const ClientGallery = () => {
               {imagesToShow.map((image, index) => (
                 <CarouselItem 
                   key={image.id} 
-                  className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 transition-all duration-300"
+                  className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
                 >
                   <div className="relative aspect-square p-1">
                     <img 

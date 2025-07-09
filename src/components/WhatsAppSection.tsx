@@ -1,11 +1,21 @@
 import { useWhatsAppSectionImages } from "@/hooks/useSectionImages";
+import { supabase } from "@/integrations/supabase/client";
 
 const WhatsAppSection = () => {
   const { data: whatsappImages = [], isLoading } = useWhatsAppSectionImages();
   
+  // Obter a URL pública do bucket de armazenamento
+  const { data: publicUrlData } = supabase.storage
+    .from('section-images')
+    .getPublicUrl('');
+
+  const storageBaseUrl = publicUrlData?.publicUrl || '';
+  
   // Usar a primeira imagem configurada ou fallback
   const sectionImage = whatsappImages[0];
-  const imageUrl = sectionImage?.image_url || '/noivos.jpg';
+  const imageUrl = sectionImage 
+    ? `${storageBaseUrl}/${sectionImage.image_url}` 
+    : '/noivos.jpg';
 
   if (isLoading) {
     return (
