@@ -25,11 +25,8 @@ const CategoriesSection = () => {
   const thumb1 = aboutImages?.[1];
   const thumb2 = aboutImages?.[2];
 
-  // Filtra apenas as categorias principais que queremos mostrar
-  const categories = dbCategories.filter(cat => 
-    cat.name.toLowerCase().includes('vestido') || 
-    cat.name.toLowerCase().includes('terno')
-  );
+  // Pega as 4 primeiras categorias do banco de dados
+  const categories = dbCategories.slice(0, 4);
 
   if (isLoading) {
     return (

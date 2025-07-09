@@ -81,6 +81,7 @@ const ClientGallery = () => {
           <Carousel
             opts={{
               align: "start",
+              loop: true,
             }}
             plugins={[plugin.current]}
             className="w-full"
