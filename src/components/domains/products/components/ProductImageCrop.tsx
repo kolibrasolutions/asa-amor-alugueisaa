@@ -102,10 +102,10 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
         <div className="space-y-4">
           {imgSrc && (
             <div 
-              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center"
+              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]"
               style={{ 
                 maxWidth: '90vw',
-                maxHeight: '70vh'
+                maxHeight: '80vh'
               }}
             >
               <ReactCrop
@@ -113,7 +113,7 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
                 aspect={PRODUCT_ASPECT_RATIO}
-                className="max-w-full max-h-full"
+                className="w-full h-full"
               >
                 <img
                   ref={imgRef}
@@ -121,10 +121,8 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
                   src={imgSrc}
                   onLoad={onImageLoad}
                   style={{ 
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    width: 'auto',
-                    height: 'auto',
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'contain'
                   }}
                 />
