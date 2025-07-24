@@ -51,12 +51,6 @@ const Hero = () => {
         >
           VER NOSSO CATÁLOGO
         </button>
-        
-        {/* Endereço na seção hero */}
-        <div className="mt-6 md:mt-8 text-white/80 text-sm md:text-base font-light">
-          <p>Rua Barão do Rio Branco, Oito 855</p>
-          <p>- Muzambinho/MG</p>
-        </div>
       </div>
     </section>
   );
