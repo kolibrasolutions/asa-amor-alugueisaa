@@ -16,8 +16,8 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-serif mb-4">Contato</h3>
             <div className="space-y-2 text-gray-400 text-sm">
-              <p>Rua Fausto Martiniano, 105</p>
-              <p>Centro - Muzambinho, MG</p>
+              <p>Rua Barão do Rio Branco, Oito 855</p>
+              <p>Muzambinho/MG</p>
               <p>(35) 99147-9232</p>
             </div>
           </div>

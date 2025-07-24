@@ -53,35 +53,54 @@ export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: 
   const cropImage = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Carregar a imagem original em alta resolução
+    const originalImage = new window.Image();
+    originalImage.src = imgSrc;
+    await new Promise((resolve) => {
+      if (originalImage.complete) return resolve(true);
+      originalImage.onload = resolve;
+    });
 
-    const image = imgRef.current;
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
+    // Usar as dimensões reais da imagem original
+    const naturalWidth = originalImage.naturalWidth;
+    const naturalHeight = originalImage.naturalHeight;
+
+    // Calcular o crop em relação à imagem original
+    const scaleX = naturalWidth / (imgRef.current.width || 1);
+    const scaleY = naturalHeight / (imgRef.current.height || 1);
 
     const cropWidth = completedCrop.width * scaleX;
     const cropHeight = cropWidth / BANNER_ASPECT_RATIO;
-
-    canvas.width = cropWidth;
-    canvas.height = cropHeight;
-
-    ctx.imageSmoothingQuality = 'high';
-
     const cropX = completedCrop.x * scaleX;
     const cropY = completedCrop.y * scaleY;
 
+    // Garantir resolução mínima para evitar granulado
+    const minWidth = 1920; // Largura mínima para banner
+    const minHeight = Math.round(minWidth / BANNER_ASPECT_RATIO);
+    
+    const finalWidth = Math.max(Math.round(cropWidth), minWidth);
+    const finalHeight = Math.max(Math.round(cropHeight), minHeight);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = finalWidth;
+    canvas.height = finalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Configurações de alta qualidade
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
     ctx.drawImage(
-      image,
+      originalImage,
       cropX,
       cropY,
       cropWidth,
       cropHeight,
       0,
       0,
-      cropWidth,
-      cropHeight
+      canvas.width,
+      canvas.height
     );
 
     canvas.toBlob((blob) => {
@@ -89,7 +108,7 @@ export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: 
         onCropComplete(blob);
       }
     }, 'image/png', 1);
-  }, [completedCrop, onCropComplete]);
+  }, [completedCrop, onCropComplete, imgSrc]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

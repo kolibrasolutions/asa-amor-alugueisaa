@@ -298,8 +298,8 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
               <div class="contract-number">Nº ${contractNumber}</div>
               <div class="contact-info">
                 Tel.: (35) 3571-2422 / (35) 9 9147-9232<br/>
-                Rua Vereador Fausto Martimiano, 105<br/>
-                Centro - Muzambinho - MG
+                Rua Barão do Rio Branco, Oito 855<br/>
+                Muzambinho/MG
               </div>
             </div>
           </div>

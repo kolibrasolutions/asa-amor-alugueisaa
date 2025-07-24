@@ -17,6 +17,17 @@ function centerAspectCrop(
   mediaHeight: number,
   aspect: number,
 ) {
+  // Forçar crop quadrado quando aspectRatio for 1
+  if (aspect === 1) {
+    const size = Math.min(mediaWidth, mediaHeight) * 0.9;
+    return {
+      unit: 'px' as const,
+      x: (mediaWidth - size) / 2,
+      y: (mediaHeight - size) / 2,
+      width: size,
+      height: size,
+    };
+  }
   return centerCrop(
     makeAspectCrop(
       {
@@ -56,35 +67,44 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
   const cropImage = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Carregar a imagem original em alta resolução
+    const originalImage = new window.Image();
+    originalImage.src = imgSrc;
+    await new Promise((resolve) => {
+      if (originalImage.complete) return resolve(true);
+      originalImage.onload = resolve;
+    });
 
-    const image = imgRef.current;
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
+    // Usar as dimensões reais da imagem original
+    const naturalWidth = originalImage.naturalWidth;
+    const naturalHeight = originalImage.naturalHeight;
+
+    // Calcular o crop em relação à imagem original
+    const scaleX = naturalWidth / (imgRef.current.width || 1);
+    const scaleY = naturalHeight / (imgRef.current.height || 1);
 
     const cropWidth = completedCrop.width * scaleX;
     const cropHeight = cropWidth / aspectRatio;
-
-    canvas.width = cropWidth;
-    canvas.height = cropHeight;
-
-    ctx.imageSmoothingQuality = 'high';
-
     const cropX = completedCrop.x * scaleX;
     const cropY = completedCrop.y * scaleY;
 
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(cropWidth);
+    canvas.height = Math.round(cropHeight);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.imageSmoothingQuality = 'high';
+
     ctx.drawImage(
-      image,
+      originalImage,
       cropX,
       cropY,
       cropWidth,
       cropHeight,
       0,
       0,
-      cropWidth,
-      cropHeight
+      canvas.width,
+      canvas.height
     );
 
     canvas.toBlob((blob) => {
@@ -92,17 +112,19 @@ export const ImageCrop = ({ isOpen, onClose, onCropComplete, imageFile, aspectRa
         onCropComplete(blob);
       }
     }, 'image/png', 1);
-  }, [completedCrop, onCropComplete, aspectRatio]);
+  }, [completedCrop, onCropComplete, aspectRatio, imgSrc]);
 
   const getProportionText = () => {
+    if (aspectRatio === 1) return "1:1";
     if (aspectRatio === 3/4) return "3:4";
     if (aspectRatio === 21/9) return "21:9";
+    if (Math.abs(aspectRatio - 4/3) < 0.01) return "4:3";
     return `${aspectRatio.toFixed(2)}:1`;
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Recortar Imagem</DialogTitle>
           <p className="text-sm text-gray-600">

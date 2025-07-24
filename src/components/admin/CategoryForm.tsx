@@ -162,7 +162,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
         </div>
 
         <div>
-          <Label>Imagem Principal (3:4)</Label>
+          <Label>Imagem Principal (4:3)</Label>
           
           {!imagePreview ? (
             <div
@@ -180,7 +180,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
                   <span className="font-medium">Clique para selecionar</span> ou arraste uma imagem aqui
                 </div>
                 <div className="text-xs text-gray-500">
-                  PNG, JPG, WebP até 5MB • Será ajustada para proporção 3:4
+                  PNG, JPG, WebP até 5MB • Será ajustada para proporção 4:3
                 </div>
               </div>
               <input
@@ -197,8 +197,8 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-32 h-40 object-cover rounded-lg border"
-                style={{ aspectRatio: '3/4' }}
+                className="w-32 h-24 object-cover rounded-lg border"
+                style={{ aspectRatio: '4/3' }}
               />
               <Button
                 type="button"
@@ -247,6 +247,7 @@ export const CategoryForm = ({ category, onClose }: CategoryFormProps) => {
           }}
           onCropComplete={handleCropComplete}
           imageFile={selectedFile}
+          aspectRatio={4/3}
         />
       )}
     </div>

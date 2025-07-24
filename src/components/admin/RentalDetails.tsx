@@ -229,8 +229,8 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
             <div class="contract-number">Nº ${contractNumber}</div>
             <div class="contact-info">
               Tel.: (35) 3571-2422 / (35) 9 9147-9232<br/>
-              Rua Vereador Fausto Martimiano, 105<br/>
-              Centro - Muzambinho - MG
+              Rua Barão do Rio Branco, Oito 855<br/>
+              Muzambinho/MG
             </div>
           </div>
         </div>
@@ -264,7 +264,7 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
         <div class="section-title">CONTRATADA</div>
         <div class="contracted-info">
           Cirlene Aparecida de Araújo Vieira, Brasileira, Casada, Comerciante, portadora do CPF: 432.488.536-20<br/>
-          RG M30.335.37, domiciliada na Rua Vereador Fausto Martimiano,105 - Centro - Muzambinho - MG
+          RG M30.335.37, domiciliada na Rua Barão do Rio Branco, Oito 855 - Muzambinho/MG
         </div>
 
         <div class="section-title">DESCRIÇÃO DO ALUGUEL</div>
