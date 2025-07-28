@@ -37,7 +37,7 @@ import { useBulkUpdateProductStatus } from '@/hooks/useProductAvailability';
 import { useProductAvailabilityByDate } from '@/hooks/useProductAvailabilityByDate';
 import { ProductStatusBadge } from './ProductStatusBadge';
 import { CustomerSearchField } from './CustomerSearchField';
-import { ProductSearchField } from './ProductSearchField';
+import { ProductVariantSearchField } from './ProductVariantSearchField';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react';
@@ -134,7 +134,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
   // Forçar refetch quando as datas mudarem
   useEffect(() => {
     if (startDate && endDate && allProductIds.length > 0) {
-      console.log('🔄 Forçando nova verificação de disponibilidade por mudança de datas');
+
       refetchAvailability();
     }
   }, [startDate, endDate, allProductIds.length, refetchAvailability]);
@@ -154,14 +154,14 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     const isFullyAvailable = (hasAvailableStatus && isAvailableOnDate) || isAlreadyInCurrentRental;
     
     // Debug detalhado
-    console.log(`🔍 Produto ${product.name} (${product.id}):`, {
-      hasAvailableStatus,
-      isAvailableOnDate,
-      dateAvailability: dateAvailability?.isAvailable,
-      isAlreadyInCurrentRental,
-      isFullyAvailable,
-      status: product.status
-    });
+    // console.log(`🔍 Produto ${product.name} (${product.id}):`, {
+    //   hasAvailableStatus,
+    //   isAvailableOnDate,
+    //   dateAvailability: dateAvailability?.isAvailable,
+    //   isAlreadyInCurrentRental,
+    //   isFullyAvailable,
+    //   status: product.status
+    // });
     
     return {
       ...product,
@@ -261,29 +261,33 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
 
         // Enviar notificação APENAS para aluguéis novos (não para edições)
         if (!rentalId) {
-          console.log('📧 Enviando notificação para novo aluguel...');
+          console.log('🔵 MOBILE DEBUG: Iniciando envio de notificação...');
+          console.log('🔵 MOBILE DEBUG: User Agent:', navigator.userAgent);
+          console.log('🔵 MOBILE DEBUG: Platform:', navigator.platform);
+          console.log('🔵 MOBILE DEBUG: Is Mobile?', window.innerWidth < 768);
+          
           toast({
             title: "🔔 Enviando notificação...",
             description: "Preparando resumo do aluguel para envio.",
           });
           
-          // Aguardar um pouco para garantir que todos os dados foram salvos
-          setTimeout(async () => {
-            try {
-              await sendRentalNotification(currentRentalId);
-              toast({
-                title: "✅ Notificação enviada!",
-                description: "Resumo do aluguel enviado com sucesso.",
-              });
-            } catch (error) {
-              console.error('Erro ao enviar notificação:', error);
-              toast({
-                title: "⚠️ Falha na notificação",
-                description: "O aluguel foi criado, mas a notificação falhou.",
-                variant: "default",
-              });
-            }
-          }, 1500);
+          // Enviar notificação diretamente sem setTimeout para melhor compatibilidade mobile
+          try {
+            console.log('🔵 MOBILE DEBUG: Chamando sendRentalNotification...');
+            await sendRentalNotification(currentRentalId);
+            console.log('🔵 MOBILE DEBUG: sendRentalNotification concluída com sucesso');
+            toast({
+              title: "✅ Notificação enviada!",
+              description: "Resumo do aluguel enviado com sucesso.",
+            });
+          } catch (error) {
+            console.error('🔴 MOBILE DEBUG: Erro ao enviar notificação:', error);
+            toast({
+              title: "⚠️ Falha na notificação",
+              description: `Erro: ${error.message || 'Erro desconhecido'}`,
+              variant: "destructive",
+            });
+          }
         }
       }
 
@@ -505,13 +509,14 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                 <div className="grid md:grid-cols-3 gap-4 items-end">
                   <div className="md:col-span-1">
                     <label className="text-sm font-medium">Produto</label>
-                    <ProductSearchField
+                    <ProductVariantSearchField
                       value={newProduct.product_id}
                       onChange={(productId) =>
                         setNewProduct(prev => ({ ...prev, product_id: productId }))
                       }
                       placeholder="Buscar produto por nome ou SKU..."
-                      availableProducts={allProductsWithAvailability}
+                      availableProducts={allProductsWithAvailability?.filter(p => !p.is_variant)}
+                      allAvailableProducts={allProductsWithAvailability}
                       showAvailabilityOnly={true}
                     />
                   </div>

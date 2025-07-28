@@ -203,8 +203,10 @@ export const useCreateRental = () => {
 // Função auxiliar para enviar notificações de aluguel
 export const sendRentalNotification = async (rentalId: string) => {
   try {
-    console.log('=== ENVIANDO NOTIFICAÇÃO DE ALUGUEL ===');
-    console.log('Rental ID:', rentalId);
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Iniciando envio de notificação');
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Rental ID:', rentalId);
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: User Agent:', navigator.userAgent);
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Is Mobile?', window.innerWidth < 768);
     
     // Buscar dados do aluguel a partir da VIEW para incluir dados do cliente
     const { data: rental, error: rentalError } = await supabase
@@ -271,31 +273,81 @@ export const sendRentalNotification = async (rentalId: string) => {
     console.log('📋 Dados para notificação:', summary);
 
     // === TENTAR NTFY.SH PRIMEIRO (RECOMENDADO) ===
-    const ntfyTopic = localStorage.getItem('ntfy_topic');
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Buscando configurações NTFY do localStorage...');
+    const ntfyConfigsString = localStorage.getItem('ntfy_configs');
     const ntfyServerUrl = localStorage.getItem('ntfy_server_url') || 'https://ntfy.sh';
     
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: localStorage data:', {
+      ntfyConfigsString,
+      ntfyServerUrl,
+      localStorageLength: localStorage.length
+    });
+    
+    // Compatibilidade com formato antigo
+    const legacyNtfyTopic = localStorage.getItem('ntfy_topic');
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: legacyNtfyTopic:', legacyNtfyTopic);
+    
     let ntfySuccess = false;
-    if (ntfyTopic) {
+    let ntfyConfigs = [];
+    
+    // Tentar carregar novo formato de configuração
+    if (ntfyConfigsString) {
       try {
-        console.log('📤 Enviando notificação ntfy...');
-        ntfySuccess = await sendNtfyNotification(
-          {
-            topic: ntfyTopic,
-            serverUrl: ntfyServerUrl
-          },
-          summary
-        );
-
-        if (ntfySuccess) {
-          console.log('✅ Notificação ntfy enviada com sucesso!');
+        ntfyConfigs = JSON.parse(ntfyConfigsString);
+        console.log('🟡 RENTAL NOTIFICATION DEBUG: Configurações NTFY parseadas:', ntfyConfigs);
+      } catch (error) {
+        console.error('🔴 RENTAL NOTIFICATION DEBUG: Erro ao parsear configurações ntfy:', error);
+      }
+    }
+    
+    // Fallback para formato antigo
+    if (ntfyConfigs.length === 0 && legacyNtfyTopic) {
+      ntfyConfigs = [{ topic: legacyNtfyTopic, name: 'Funcionário' }];
+      console.log('🟡 RENTAL NOTIFICATION DEBUG: Usando configuração legacy:', ntfyConfigs);
+    }
+    
+    if (ntfyConfigs.length > 0) {
+      try {
+        console.log(`🟡 RENTAL NOTIFICATION DEBUG: Enviando notificação ntfy para ${ntfyConfigs.length} funcionário(s)...`);
+        console.log(`🟡 RENTAL NOTIFICATION DEBUG: Configurações que serão usadas:`, ntfyConfigs);
+        
+        // Enviar para todos os funcionários configurados
+        const promises = ntfyConfigs.map(async (config, index) => {
+          if (!config.topic) {
+            console.log(`🟡 RENTAL NOTIFICATION DEBUG: Config ${index} sem tópico, pulando...`);
+            return false;
+          }
+          
+          console.log(`🟡 RENTAL NOTIFICATION DEBUG: Enviando para ${config.name} (tópico: ${config.topic})...`);
+          const result = await sendNtfyNotification(
+            {
+              topic: config.topic,
+              serverUrl: ntfyServerUrl
+            },
+            summary
+          );
+          console.log(`🟡 RENTAL NOTIFICATION DEBUG: Resultado para ${config.name}:`, result);
+          return result;
+        });
+        
+        console.log(`🟡 RENTAL NOTIFICATION DEBUG: Aguardando todas as promises...`);
+        const results = await Promise.all(promises);
+        console.log(`🟡 RENTAL NOTIFICATION DEBUG: Resultados das promises:`, results);
+        
+        const successCount = results.filter(Boolean).length;
+        
+        if (successCount > 0) {
+          ntfySuccess = true;
+          console.log(`✅ RENTAL NOTIFICATION DEBUG: ${successCount}/${ntfyConfigs.length} notificações ntfy enviadas com sucesso!`);
         } else {
-          console.log('❌ Falha no envio ntfy');
+          console.log('❌ RENTAL NOTIFICATION DEBUG: Falha no envio de todas as notificações ntfy');
         }
       } catch (error) {
-        console.error('Erro ao enviar notificação ntfy:', error);
+        console.error('🔴 RENTAL NOTIFICATION DEBUG: Erro ao enviar notificações ntfy:', error);
+        console.error('🔴 RENTAL NOTIFICATION DEBUG: Stack trace:', error.stack);
       }
     } else {
-      console.log('⚠️ ntfy não configurado');
+      console.log('⚠️ RENTAL NOTIFICATION DEBUG: ntfy não configurado - ntfyConfigs.length:', ntfyConfigs.length);
     }
 
     // === FALLBACK PARA WHATSAPP SE NTFY FALHAR ===
@@ -320,7 +372,7 @@ export const sendRentalNotification = async (rentalId: string) => {
         } catch (error) {
           console.error('Erro ao enviar notificação WhatsApp:', error);
         }
-      } else if (!ntfyTopic) {
+      } else if (ntfyConfigs.length === 0) {
         console.log('⚠️ Nenhuma notificação configurada');
       }
     }

@@ -155,84 +155,9 @@ const CatalogFilters = ({
           </Select>
         </div>
 
-        {/* Filtro visual de tamanhos */}
-        {availableSizes.length > 0 && (
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-3 block">
-              Filtro rápido por tamanho
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setSelectedSize('all')}
-                className={`px-2 py-2 text-xs rounded-lg border transition-all text-center ${
-                  selectedSize === 'all'
-                    ? 'bg-asa-dark text-white border-asa-dark'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-asa-dark'
-                }`}
-              >
-                Todos
-              </button>
-              {availableSizes.slice(0, 8).map((size) => (
-                <button
-                  key={size.value}
-                  onClick={() => setSelectedSize(size.value)}
-                  className={`px-2 py-2 text-xs rounded-lg border transition-all text-center ${
-                    selectedSize === size.value
-                      ? 'bg-asa-dark text-white border-asa-dark'
-                      : 'bg-white text-gray-600 border-gray-300 hover:border-asa-dark'
-                  }`}
-                  title={size.name}
-                >
-                  {size.name}
-                </button>
-              ))}
-              {availableSizes.length > 8 && (
-                <div className="col-span-3 text-xs text-gray-500 text-center mt-1">
-                  +{availableSizes.length - 8} outros tamanhos disponíveis no dropdown
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* Filtro visual de cores */}
-      {availableColors.length > 0 && (
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-3 block">
-            Filtro rápido por cor
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setSelectedColor('all')}
-              className={`px-3 py-2 text-xs rounded-lg border transition-all text-center ${
-                selectedColor === 'all'
-                  ? 'bg-asa-dark text-white border-asa-dark'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-asa-dark'
-              }`}
-            >
-              Todas
-            </button>
-            {availableColors.map((color) => (
-              <button
-                key={color.value}
-                onClick={() => setSelectedColor(color.value)}
-                className={`flex items-center gap-2 px-3 py-2 text-xs rounded-lg border transition-all ${
-                  selectedColor === color.value
-                    ? 'bg-asa-dark text-white border-asa-dark'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-asa-dark'
-                }`}
-                title={color.name}
-              >
-                <div 
-                  className="w-3 h-3 rounded-full border border-gray-300 flex-shrink-0"
-                  style={{ backgroundColor: color.hex_code }}
-                />
-                <span className="truncate">{color.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+
+
 
       {/* Indicador de filtros ativos */}
       {hasActiveFilters && (

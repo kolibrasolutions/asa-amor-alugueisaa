@@ -15,7 +15,10 @@ const Catalog = () => {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { data: products, isLoading: productsLoading } = useProducts();
+  const { data: allProducts, isLoading: productsLoading } = useProducts();
+
+  // Filtrar para mostrar apenas produtos pai no catálogo
+  const products = allProducts?.filter(product => !product.is_variant) || [];
   const { data: categories, isLoading: categoriesLoading } = useCategories();
 
   const {

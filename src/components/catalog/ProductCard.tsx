@@ -11,6 +11,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { ProductDetailsModal } from './ProductDetailsModal';
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,15 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const handleImageClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   React.useEffect(() => {
     if (!api) {
@@ -38,7 +48,8 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
   const hasMultipleImages = product.images && product.images.length > 1;
 
   return (
-    <Card className="group bg-white border-0 shadow-none hover:shadow-lg transition-all duration-500 ease-out overflow-hidden">
+    <>
+      <Card className="group bg-white border-0 shadow-none hover:shadow-lg transition-all duration-500 ease-out overflow-hidden">
       <div className="aspect-[4/5] overflow-hidden relative bg-gray-50 rounded-t-lg">
         {hasMultipleImages ? (
           <Carousel setApi={setApi} className="w-full h-full">
@@ -48,7 +59,8 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
                   <img
                     src={image}
                     alt={`${product.name} - imagem ${index + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out cursor-pointer"
+                    onClick={handleImageClick}
                   />
                 </CarouselItem>
               ))}
@@ -75,7 +87,8 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
               <img
                 src={product.images[0]}
                 alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out cursor-pointer"
+                onClick={handleImageClick}
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -106,14 +119,17 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
           <h3 className="text-lg font-light text-asa-dark tracking-wide leading-relaxed">
             {product.name}
           </h3>
-          {product.category_id && (
-            <p className="text-sm text-gray-500 mt-1 font-light">
-              {/* Categoria será mostrada aqui se necessário */}
-            </p>
-          )}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <ProductDetailsModal
+        product={product}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onCopyId={onCopyId}
+      />
+    </>
   );
 };
 

@@ -42,22 +42,28 @@ export async function sendNtfyNotification(
   summary: RentalSummary
 ): Promise<boolean> {
   try {
+    console.log('🟦 NTFY DEBUG: Iniciando sendNtfyNotification');
+    console.log('🟦 NTFY DEBUG: Config recebida:', config);
+    console.log('🟦 NTFY DEBUG: Summary recebida:', summary);
+    
     // Validar configurações
     if (!config.topic) {
-      console.error('Ntfy config incomplete: topic is required');
+      console.error('🔴 NTFY DEBUG: Ntfy config incomplete: topic is required');
       return false;
     }
 
     const serverUrl = config.serverUrl || 'https://ntfy.sh';
     const message = formatRentalMessageNtfy(summary);
     
-    console.log('Sending ntfy notification:', {
+    console.log('🟦 NTFY DEBUG: Preparando requisição:', {
       topic: config.topic,
       server: serverUrl,
-      messageLength: message.length
+      messageLength: message.length,
+      url: `${serverUrl}/${config.topic}`
     });
     
     // Fazer a requisição POST para ntfy.sh
+    console.log('🟦 NTFY DEBUG: Fazendo fetch...');
     const response = await fetch(`${serverUrl}/${config.topic}`, {
       method: 'POST',
       headers: {
@@ -69,16 +75,25 @@ export async function sendNtfyNotification(
       body: message
     });
     
+    console.log('🟦 NTFY DEBUG: Resposta recebida:', {
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText
+    });
+    
     if (response.ok) {
-      console.log('Ntfy notification sent successfully');
+      console.log('✅ NTFY DEBUG: Ntfy notification sent successfully');
       return true;
     } else {
-      console.error('Ntfy notification failed:', response.status, response.statusText);
+      console.error('❌ NTFY DEBUG: Ntfy notification failed:', response.status, response.statusText);
+      const responseText = await response.text();
+      console.error('❌ NTFY DEBUG: Response body:', responseText);
       return false;
     }
     
   } catch (error) {
-    console.error('Error sending ntfy notification:', error);
+    console.error('🔴 NTFY DEBUG: Error sending ntfy notification:', error);
+    console.error('🔴 NTFY DEBUG: Error stack:', error.stack);
     return false;
   }
 }

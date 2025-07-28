@@ -42,6 +42,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
   const [editingRental, setEditingRental] = useState<string | null>(null);
   const [viewingRental, setViewingRental] = useState<string | null>(null);
   const [contractRentalId, setContractRentalId] = useState<string | null>(null);
+  const [formKey, setFormKey] = useState(0);
   const { toast } = useToast();
   
   // Buscar dados completos do aluguel quando for gerar contrato
@@ -49,6 +50,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
 
   const handleEdit = (rentalId: string) => {
     setEditingRental(rentalId);
+    setFormKey(prev => prev + 1);
     setShowForm(true);
   };
 
@@ -69,15 +71,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
     confirmReturn.mutate(rentalId);
   };
 
-  // Gerar contrato automaticamente quando os dados estiverem prontos
-  React.useEffect(() => {
-    if (contractRental && contractRentalId) {
-      generateContractDocument(contractRental);
-      setContractRentalId(null);
-    }
-  }, [contractRental, contractRentalId]);
-
-  const generateContractDocument = (rental: RentalWithCustomer) => {
+  const generateContractDocument = React.useCallback((rental: RentalWithCustomer) => {
     if (!rental) return;
     
     try {
@@ -426,9 +420,17 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const formatDate = (date: string) => {
+   // Gerar contrato automaticamente quando os dados estiverem prontos
+   React.useEffect(() => {
+     if (contractRental && contractRentalId) {
+       generateContractDocument(contractRental);
+       setContractRentalId(null);
+     }
+   }, [contractRental, contractRentalId, generateContractDocument]);
+
+   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('pt-BR');
   };
 
@@ -443,6 +445,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
   if (showForm) {
     return (
       <RentalForm
+        key={`rental-form-${formKey}`}
         rentalId={editingRental}
         onClose={handleCloseForm}
       />
@@ -457,6 +460,7 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
         onEdit={() => {
           setEditingRental(viewingRental);
           setViewingRental(null);
+          setFormKey(prev => prev + 1);
           setShowForm(true);
         }}
       />
@@ -484,7 +488,10 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
             Ver Agenda
           </Button>
           <Button 
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setFormKey(prev => prev + 1);
+              setShowForm(true);
+            }}
             className="w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
