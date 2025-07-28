@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import 'react-image-crop/dist/ReactCrop.css';
 import { ProductImageCropProps } from '../types';
 
@@ -29,6 +30,7 @@ function centerAspectCrop(
 }
 
 export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: ProductImageCropProps) => {
+  const isMobile = useIsMobile();
   const [imgSrc, setImgSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -92,48 +94,57 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>Recortar Imagem do Produto</DialogTitle>
-          <p className="text-sm text-gray-600">
+      <DialogContent className={`${isMobile ? 'max-w-[98vw] max-h-[95vh] w-[98vw] p-3' : 'max-w-[95vw] max-h-[95vh] w-auto'} overflow-hidden flex flex-col`}>
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className={isMobile ? 'text-base' : ''}>Recortar Imagem do Produto</DialogTitle>
+          <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>
             Proporção: 4:5 (Produto)
           </p>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className={`${isMobile ? 'space-y-2 flex-1 flex flex-col min-h-0' : 'space-y-4'}`}>
           {imgSrc && (
             <div 
-              className="relative w-full mx-auto bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]"
-              style={{ 
-                maxWidth: '90vw',
-                maxHeight: '80vh'
-              }}
+              className={`relative w-full mx-auto bg-gray-100 rounded overflow-hidden flex items-center justify-center ${isMobile ? 'flex-1 min-h-0' : 'min-h-[400px]'}`}
             >
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(c) => setCompletedCrop(c)}
-                aspect={PRODUCT_ASPECT_RATIO}
-                className="w-full h-full"
-              >
-                <img
-                  ref={imgRef}
-                  alt="Crop me"
-                  src={imgSrc}
-                  onLoad={onImageLoad}
-                  style={{ 
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain'
-                  }}
-                />
-              </ReactCrop>
+              <div className="w-full h-full flex items-center justify-center p-2">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={PRODUCT_ASPECT_RATIO}
+                  className="max-w-full max-h-full"
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Crop me"
+                    src={imgSrc}
+                    onLoad={onImageLoad}
+                    style={{ 
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </ReactCrop>
+              </div>
             </div>
           )}
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>
+          <div className={`flex ${isMobile ? 'justify-center space-x-3 py-2' : 'justify-end space-x-2'} flex-shrink-0`}>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className={isMobile ? 'flex-1 max-w-[120px] h-10' : ''}
+              size={isMobile ? 'sm' : 'default'}
+            >
               Cancelar
             </Button>
-            <Button onClick={cropImage}>
+            <Button 
+              onClick={cropImage}
+              className={isMobile ? 'flex-1 max-w-[120px] h-10' : ''}
+              size={isMobile ? 'sm' : 'default'}
+            >
               Concluir
             </Button>
           </div>
