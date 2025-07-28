@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RentalStatusBadge } from './RentalStatusBadge';
 import { ArrowLeft, Edit, User, Calendar, Package } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useRef } from 'react';
 
 interface RentalDetailsProps {
@@ -13,6 +14,7 @@ interface RentalDetailsProps {
 }
 
 export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps) => {
+  const isMobile = useIsMobile();
   const { data: rental, isLoading } = useRental(rentalId);
   const handleGenerateContract = () => {
     if (!rental) return;
@@ -365,54 +367,64 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+    <div className={`${isMobile ? 'p-4' : 'p-6'} space-y-4 md:space-y-6`}>
+      {/* Header responsivo */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <Button variant="outline" onClick={onClose}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          <h1 className="text-3xl font-bold">Detalhes do Aluguel</h1>
-          <Button variant="default" onClick={handleGenerateContract}>
+          <Button onClick={onEdit}>
+            <Edit className="w-4 h-4 mr-2" />
+            Editar
+          </Button>
+        </div>
+        
+        <div className="space-y-3">
+          <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold`}>
+            Detalhes do Aluguel
+          </h1>
+          <Button 
+            variant="default" 
+            onClick={handleGenerateContract}
+            className={`${isMobile ? 'w-full' : 'w-auto'}`}
+          >
             Gerar Contrato
           </Button>
         </div>
-        <Button onClick={onEdit}>
-          <Edit className="w-4 h-4 mr-2" />
-          Editar
-        </Button>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className={`grid ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'} gap-4 md:gap-6`}>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <User className="w-5 h-5 mr-2" />
+          <CardHeader className={`${isMobile ? 'pb-3' : ''}`}>
+            <CardTitle className={`flex items-center ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <User className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
               Informações do Cliente
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${isMobile ? 'p-4 pt-0' : 'p-6'} space-y-3`}>
             <div>
               <label className="text-sm font-medium text-gray-500">Nome</label>
-              <p className="text-lg">{rental.customer_nome}</p>
+              <p className={`${isMobile ? 'text-base' : 'text-lg'} font-medium`}>{rental.customer_nome}</p>
             </div>
             {rental.customer_telefone && (
               <div>
                 <label className="text-sm font-medium text-gray-500">Telefone</label>
-                <p>{rental.customer_telefone}</p>
+                <p className={`${isMobile ? 'text-sm' : 'text-base'}`}>{rental.customer_telefone}</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2" />
+          <CardHeader className={`${isMobile ? 'pb-3' : ''}`}>
+            <CardTitle className={`flex items-center ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
               Informações do Aluguel
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${isMobile ? 'p-4 pt-0' : 'p-6'} space-y-3`}>
             <div>
               <label className="text-sm font-medium text-gray-500">Status</label>
               <div className="mt-1">
@@ -421,30 +433,57 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Data do Evento</label>
-              <p className="text-lg">{formatDate(rental.event_date)}</p>
+              <p className={`${isMobile ? 'text-base' : 'text-lg'} font-medium`}>{formatDate(rental.event_date)}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Período de Aluguel</label>
-              <p>{formatDate(rental.rental_start_date)} até {formatDate(rental.rental_end_date)}</p>
+              <p className={`${isMobile ? 'text-sm' : 'text-base'}`}>
+                {formatDate(rental.rental_start_date)} até {formatDate(rental.rental_end_date)}
+              </p>
             </div>
-
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Package className="w-5 h-5 mr-2" />
+        <CardHeader className={`${isMobile ? 'pb-3' : ''}`}>
+          <CardTitle className={`flex items-center ${isMobile ? 'text-lg' : 'text-xl'}`}>
+            <Package className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
             Produtos do Aluguel
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className={`${isMobile ? 'p-4 pt-0' : 'p-6'}`}>
           {rental.rental_items.length === 0 ? (
             <p className="text-center text-gray-500 py-4">
               Nenhum produto adicionado a este aluguel.
             </p>
+          ) : isMobile ? (
+            /* Mobile: Layout em cards */
+            <div className="space-y-3">
+              {rental.rental_items.map((item) => (
+                <Card key={item.id} className="border border-gray-200">
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{item.product.name}</p>
+                        {(item.product.brand || item.product.size || item.product.color) && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {[item.product.brand, item.product.size, item.product.color]
+                              .filter(Boolean)
+                              .join(' - ')}
+                          </p>
+                        )}
+                      </div>
+                      <div className="ml-3 text-right">
+                        <p className="text-sm font-medium">Qtd: {item.quantity}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
+            /* Desktop: Layout em tabela */
             <Table>
               <TableHeader>
                 <TableRow>
@@ -478,11 +517,13 @@ export const RentalDetails = ({ rentalId, onClose, onEdit }: RentalDetailsProps)
 
       {rental.notes && (
         <Card>
-          <CardHeader>
-            <CardTitle>Observações</CardTitle>
+          <CardHeader className={`${isMobile ? 'pb-3' : ''}`}>
+            <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'}`}>Observações</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap">{rental.notes}</p>
+          <CardContent className={`${isMobile ? 'p-4 pt-0' : 'p-6'}`}>
+            <p className={`whitespace-pre-wrap ${isMobile ? 'text-sm' : 'text-base'} leading-relaxed`}>
+              {rental.notes}
+            </p>
           </CardContent>
         </Card>
       )}

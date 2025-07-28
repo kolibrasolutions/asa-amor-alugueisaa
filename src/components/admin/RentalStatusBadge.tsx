@@ -6,7 +6,7 @@ interface RentalStatusBadgeProps {
 }
 
 const statusConfig = {
-  pending: { label: 'Pendente', variant: 'secondary' as const },
+  pending: { label: 'Reservado', variant: 'secondary' as const },
   confirmed: { label: 'Confirmado', variant: 'default' as const },
   in_progress: { label: 'Em Andamento', variant: 'outline' as const },
   completed: { label: 'Finalizado', variant: 'destructive' as const },

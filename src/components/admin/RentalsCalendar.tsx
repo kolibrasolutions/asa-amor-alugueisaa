@@ -29,7 +29,7 @@ const getStatusColor = (status: RentalWithCustomer['status']) => {
 };
 
 const statusStyles: Record<string, React.CSSProperties> = {
-  pendente: { backgroundColor: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '0.375rem' },
+  reservado: { backgroundColor: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '0.375rem' },
   confirmado: { backgroundColor: '#DBEAFE', border: '1px solid #93C5FD', borderRadius: '0.375rem' },
   'em andamento': { backgroundColor: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: '0.375rem' },
   concluído: { backgroundColor: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: '0.375rem' },
@@ -38,7 +38,7 @@ const statusStyles: Record<string, React.CSSProperties> = {
 };
 
 const statusTranslation: Record<string, string> = {
-    pending: 'pendente',
+    pending: 'reservado',
     confirmed: 'confirmado',
     in_progress: 'em andamento',
     completed: 'concluído',

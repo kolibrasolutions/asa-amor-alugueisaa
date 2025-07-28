@@ -36,6 +36,8 @@ import { useCreateRentalItem, useRentalItems, useDeleteRentalItem } from '@/hook
 import { useBulkUpdateProductStatus } from '@/hooks/useProductAvailability';
 import { useProductAvailabilityByDate } from '@/hooks/useProductAvailabilityByDate';
 import { ProductStatusBadge } from './ProductStatusBadge';
+import { CustomerSearchField } from './CustomerSearchField';
+import { ProductSearchField } from './ProductSearchField';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react';
@@ -49,7 +51,7 @@ const rentalSchema = z.object({
   event_date: z.date({ required_error: 'Data do evento é obrigatória' }),
   rental_start_date: z.date({ required_error: 'Data de início é obrigatória' }),
   rental_end_date: z.date({ required_error: 'Data de fim é obrigatória' }),
-  status: z.enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']),
+  status: z.enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'overdue']),
   notes: z.string().optional(),
 });
 
@@ -82,10 +84,6 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     product_id: '',
     quantity: 1,
   });
-  const [productNameInput, setProductNameInput] = useState('');
-  const [productSkuInput, setProductSkuInput] = useState('');
-  const [productNameFilter, setProductNameFilter] = useState('');
-  const [productSkuFilter, setProductSkuFilter] = useState('');
 
   const form = useForm<RentalFormData>({
     resolver: zodResolver(rentalSchema),
@@ -174,18 +172,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     };
   });
 
-  const handleProductSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setProductNameFilter(productNameInput);
-    setProductSkuFilter(productSkuInput);
-  };
 
-  // Filtrar produtos com busca por nome e SKU (mostra todos, disponíveis ou não)
-  const filteredProducts = allProductsWithAvailability?.filter(product => {
-    const nameMatch = !productNameFilter || product.name.toLowerCase().includes(productNameFilter.toLowerCase());
-    const skuMatch = !productSkuFilter || product.sku?.toLowerCase().includes(productSkuFilter.toLowerCase());
-    return nameMatch && skuMatch;
-  });
 
 
 
@@ -341,20 +328,13 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cliente *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um cliente" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <CustomerSearchField
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Digite o nome ou CPF do cliente..."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -373,7 +353,7 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="pending">Pendente</SelectItem>
+                        <SelectItem value="pending">Reservado</SelectItem>
                         <SelectItem value="confirmed">Confirmado</SelectItem>
                         <SelectItem value="in_progress">Em Andamento</SelectItem>
                         <SelectItem value="completed">Finalizado</SelectItem>
@@ -522,102 +502,19 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
               )}
 
               {allProductsWithAvailability && allProductsWithAvailability.length > 0 && (
-                <div className="grid md:grid-cols-4 gap-4 items-end">
-                  <div className="md:col-span-2 flex flex-col gap-2">
-                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:gap-4">
-                      <div className="flex-1">
-                        <label className="text-sm font-medium">Buscar por nome</label>
-                        <Input
-                          placeholder="Digite parte do nome do produto"
-                          value={productNameInput}
-                          onChange={e => setProductNameInput(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-sm font-medium">Buscar por SKU</label>
-                        <Input
-                          placeholder="Digite parte do SKU"
-                          value={productSkuInput}
-                          onChange={e => setProductSkuInput(e.target.value)}
-                        />
-                      </div>
-                      <Button type="button" className="mt-2 md:mt-0 h-10" onClick={handleProductSearch}>
-                        Buscar
-                      </Button>
-                    </div>
-                  </div>
-                  <div>
+                <div className="grid md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-1">
                     <label className="text-sm font-medium">Produto</label>
-                    <Select
+                    <ProductSearchField
                       value={newProduct.product_id}
-                      onValueChange={(value) =>
-                        setNewProduct(prev => ({ ...prev, product_id: value }))
+                      onChange={(productId) =>
+                        setNewProduct(prev => ({ ...prev, product_id: productId }))
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um produto" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredProducts?.map((product) => {
-                          const isDisabled = !product.isFullyAvailable;
-                          
-                          return (
-                            <SelectItem key={product.id} value={product.id} disabled={isDisabled}>
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex flex-col">
-                                  <span className={isDisabled ? 'text-muted-foreground line-through' : ''}>
-                                    {product.name} <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
-                                  </span>
-                                  {isDisabled && (
-                                    <span className="text-xs text-red-500">
-                                      {!product.hasAvailableStatus ? 'Status indisponível' : 
-                                       !product.isAvailableOnDate ? 'Ocupado na data selecionada' : 
-                                       'Indisponível'}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {isDisabled && (
-                                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                                      {!product.hasAvailableStatus ? 'Status' : 'Ocupado'}
-                                    </span>
-                                  )}
-                                  <ProductStatusBadge status={product.status as 'available' | 'rented' | 'maintenance'} />
-                                </div>
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    {filteredProducts && filteredProducts.length === 0 && (
-                      <div className="text-sm text-red-600 mt-2">
-                        Nenhum produto encontrado com os critérios informados.
-                      </div>
-                    )}
+                      placeholder="Buscar produto por nome ou SKU..."
+                      availableProducts={allProductsWithAvailability}
+                      showAvailabilityOnly={true}
+                    />
                   </div>
-
-                  {(() => {
-                    const selected = filteredProducts?.find(p => p.id === newProduct.product_id);
-                    if (!selected) return null;
-                    return (
-                      <div className="flex items-start gap-4 mt-2 p-3 border rounded bg-muted/20">
-                        {selected.images && selected.images.length > 0 && (
-                          <img
-                            src={selected.images[0]}
-                            alt={selected.name}
-                            className="w-24 h-24 object-cover rounded border"
-                          />
-                        )}
-                        <div>
-                          <div className="font-semibold text-lg">{selected.name} <span className="text-xs text-muted-foreground ml-2">({selected.sku})</span></div>
-                          {selected.description && (
-                            <div className="text-sm text-muted-foreground mt-1">{selected.description}</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
 
                   <div>
                     <label className="text-sm font-medium">Quantidade</label>

@@ -27,12 +27,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RentalDetails } from './RentalDetails';
 import { AdminBackButton } from './AdminHeader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RentalsManagementProps {
   onSectionChange: (section: string) => void;
 }
 
 export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) => {
+  const isMobile = useIsMobile();
   const { data: rentals, isLoading } = useRentals();
   const deleteRental = useDeleteRental();
   const confirmReturn = useConfirmReturn();
@@ -462,16 +464,29 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <AdminBackButton />
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestão de Aluguéis</h1>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" onClick={() => onSectionChange('calendar')}>
+      
+      {/* Header Section - Mobile Responsive */}
+      <div className="space-y-4">
+        <h1 className="text-xl md:text-3xl font-bold">
+          {isMobile ? 'Aluguéis' : 'Gestão de Aluguéis'}
+        </h1>
+        
+        {/* Mobile: Stack buttons vertically, Desktop: Horizontal */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-end sm:items-center sm:space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => onSectionChange('calendar')}
+            className="w-full sm:w-auto"
+          >
             <Calendar className="w-4 h-4 mr-2" />
             Ver Agenda
           </Button>
-          <Button onClick={() => setShowForm(true)}>
+          <Button 
+            onClick={() => setShowForm(true)}
+            className="w-full sm:w-auto"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Novo Aluguel
           </Button>
@@ -480,128 +495,248 @@ export const RentalsManagement = ({ onSectionChange }: RentalsManagementProps) =
 
       <Card>
         <CardHeader>
-          <CardTitle>Aluguéis Cadastrados</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Aluguéis Cadastrados</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 md:p-6">
           {!rentals || rentals.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               Nenhum aluguel cadastrado ainda.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Data do Evento</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile: Card Layout */}
+              <div className="block md:hidden space-y-3">
                 {rentals.map((rental) => (
-                  <TableRow key={rental.id}>
-                    <TableCell className="font-medium">
-                      {rental.customer_nome}
-                    </TableCell>
-                    <TableCell>{formatDate(rental.event_date)}</TableCell>
-                    <TableCell>
-                      {formatDate(rental.rental_start_date)} até{' '}
-                      {formatDate(rental.rental_end_date)}
-                    </TableCell>
-                    <TableCell>
-                      <RentalStatusBadge status={getEffectiveStatus(rental)} />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleGenerateContract(rental.id)}
-                          title="Gerar Contrato"
-                        >
-                          <FileText className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setViewingRental(rental.id)}
-                          title="Ver Detalhes"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(rental.id)}
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" title="Excluir">
-                              <Trash className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja excluir este aluguel? Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(rental.id)}
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        {!['completed', 'cancelled'].includes(rental.status) && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                title="Confirmar Devolução"
-                                className={getEffectiveStatus(rental) === 'overdue' ? 'bg-red-100 border-red-400' : ''}
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmar Devolução</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem certeza que deseja confirmar a devolução deste aluguel?
-                                  {getEffectiveStatus(rental) === 'overdue' && (
-                                    <span className="block mt-2 text-red-600 font-semibold">
-                                      ⚠️ Este aluguel está em atraso!
-                                    </span>
-                                  )}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleConfirmReturn(rental.id)}
+                  <Card key={rental.id} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold text-base">{rental.customer_nome}</p>
+                            <p className="text-sm text-gray-600">Evento: {formatDate(rental.event_date)}</p>
+                          </div>
+                          <RentalStatusBadge status={getEffectiveStatus(rental)} />
+                        </div>
+                        
+                        <div className="text-sm text-gray-600">
+                          <p>Período: {formatDate(rental.rental_start_date)} até {formatDate(rental.rental_end_date)}</p>
+                        </div>
+                        
+                        {/* Mobile Actions - Grid Layout */}
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleGenerateContract(rental.id)}
+                            className="text-xs"
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            Contrato
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewingRental(rental.id)}
+                            className="text-xs"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Detalhes
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(rental.id)}
+                            className="text-xs"
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
+                          
+                          {!['completed', 'cancelled'].includes(rental.status) ? (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className={`text-xs ${getEffectiveStatus(rental) === 'overdue' ? 'bg-red-100 border-red-400' : ''}`}
                                 >
-                                  Confirmar Devolução
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Devolver
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar Devolução</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja confirmar a devolução deste aluguel?
+                                    {getEffectiveStatus(rental) === 'overdue' && (
+                                      <span className="block mt-2 text-red-600 font-semibold">
+                                        ⚠️ Este aluguel está em atraso!
+                                      </span>
+                                    )}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleConfirmReturn(rental.id)}
+                                  >
+                                    Confirmar Devolução
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          ) : (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="text-xs text-red-600">
+                                  <Trash className="w-3 h-3 mr-1" />
+                                  Excluir
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir este aluguel? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(rental.id)}
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </CardContent>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+              
+              {/* Desktop: Table Layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Data do Evento</TableHead>
+                      <TableHead>Período</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rentals.map((rental) => (
+                      <TableRow key={rental.id}>
+                        <TableCell className="font-medium">
+                          {rental.customer_nome}
+                        </TableCell>
+                        <TableCell>{formatDate(rental.event_date)}</TableCell>
+                        <TableCell>
+                          {formatDate(rental.rental_start_date)} até{' '}
+                          {formatDate(rental.rental_end_date)}
+                        </TableCell>
+                        <TableCell>
+                          <RentalStatusBadge status={getEffectiveStatus(rental)} />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleGenerateContract(rental.id)}
+                              title="Gerar Contrato"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setViewingRental(rental.id)}
+                              title="Ver Detalhes"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(rental.id)}
+                              title="Editar"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" title="Excluir">
+                                  <Trash className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir este aluguel? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(rental.id)}
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                            {!['completed', 'cancelled'].includes(rental.status) && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    title="Confirmar Devolução"
+                                    className={getEffectiveStatus(rental) === 'overdue' ? 'bg-red-100 border-red-400' : ''}
+                                  >
+                                    <CheckCircle className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar Devolução</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Tem certeza que deseja confirmar a devolução deste aluguel?
+                                      {getEffectiveStatus(rental) === 'overdue' && (
+                                        <span className="block mt-2 text-red-600 font-semibold">
+                                          ⚠️ Este aluguel está em atraso!
+                                        </span>
+                                      )}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleConfirmReturn(rental.id)}
+                                    >
+                                      Confirmar Devolução
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

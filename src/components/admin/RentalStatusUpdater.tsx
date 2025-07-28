@@ -20,7 +20,7 @@ const statusOptions: Array<Rental['status']> = [
 ];
 
 const statusTranslation: Record<Rental['status'], string> = {
-    pending: 'Pendente',
+    pending: 'Reservado',
     confirmed: 'Confirmado',
     'in_progress': 'Em andamento',
     completed: 'Concluído',
