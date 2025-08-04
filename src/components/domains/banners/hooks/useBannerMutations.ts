@@ -11,11 +11,15 @@ export const useBannerMutations = () => {
     mutationFn: async (formData: BannerFormData) => {
       if (!formData.image_file) throw new Error('Imagem é obrigatória');
 
-      // Upload image
+      // Upload image com configurações de alta qualidade
       const fileName = `banner-${Date.now()}.png`;
       const { error: uploadError } = await supabase.storage
         .from('banners')
-        .upload(fileName, formData.image_file);
+        .upload(fileName, formData.image_file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: 'image/png'
+        });
 
       if (uploadError) throw uploadError;
 
@@ -66,13 +70,14 @@ export const useBannerMutations = () => {
       let publicUrl = currentImageUrl;
 
       if (formData.image_file) {
-        // Upload new image
+        // Upload new image com configurações de alta qualidade
         const fileName = `banner-${Date.now()}.png`;
         const { error: uploadError } = await supabase.storage
           .from('banners')
           .upload(fileName, formData.image_file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
+            contentType: 'image/png'
           });
 
         if (uploadError) throw uploadError;
@@ -176,4 +181,4 @@ export const useBannerMutations = () => {
     deleteBanner,
     reorderBanners
   };
-}; 
+};

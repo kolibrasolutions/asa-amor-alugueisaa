@@ -8,7 +8,20 @@ const Hero = () => {
   
   const activeBanner = banners[0];
   
-  const imageUrl = activeBanner?.image_url || '/noivos.jpg';
+  // Adicionar parâmetros de qualidade à URL da imagem do Supabase
+  const getHighQualityImageUrl = (url: string) => {
+    if (!url || url.startsWith('/')) return url; // URL local, não modificar
+    
+    // Se for URL do Supabase, adicionar parâmetros de qualidade
+    if (url.includes('supabase.co')) {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}quality=100&format=original`;
+    }
+    
+    return url;
+  };
+  
+  const imageUrl = getHighQualityImageUrl(activeBanner?.image_url || '/noivos.jpg');
   const title = activeBanner?.title || "Noivas Cirlene";
   const subtitle = activeBanner?.subtitle || "Vestidos & Ternos";
 
@@ -30,8 +43,12 @@ const Hero = () => {
             alt="Hero"
             className="w-full h-full object-cover"
             style={{
-              objectPosition: "center 30%"
+              objectPosition: "center 30%",
+              imageRendering: "high-quality"
             }}
+            loading="eager"
+            decoding="sync"
+            fetchpriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/50"></div>
         </div>

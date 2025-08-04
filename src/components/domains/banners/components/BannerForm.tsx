@@ -96,4 +96,4 @@ export const BannerForm = ({ banner, onSubmit, onCancel, isLoading }: BannerForm
       )}
     </>
   );
-}; 
+};

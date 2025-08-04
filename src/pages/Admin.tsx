@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, Routes, Route } from "react-router-dom";
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -18,8 +18,19 @@ const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isDevelopment = import.meta.env.DEV;
   const adminBasePath = isDevelopment ? '/admin-local' : '/admin';
+
+  // Determinar a seção ativa baseada na URL
+  const getActiveSection = () => {
+    const path = location.pathname;
+    if (path === adminBasePath || path === adminBasePath + '/') {
+      return 'dashboard';
+    }
+    const section = path.replace(adminBasePath + '/', '').split('/')[0];
+    return section || 'dashboard';
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -43,10 +54,11 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminHeader 
-        activeSection="dashboard"
+        activeSection={getActiveSection()}
         userEmail={user?.email || ""}
         onBack={() => navigate(adminBasePath)}
         onSignOut={handleSignOut}
+        adminBasePath={adminBasePath}
       />
       <main className="container mx-auto py-8">
         <Routes>

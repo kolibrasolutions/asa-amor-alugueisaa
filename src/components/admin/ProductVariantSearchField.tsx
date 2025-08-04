@@ -190,7 +190,9 @@ export const ProductVariantSearchField = ({
     
     const availableProduct = (allAvailableProducts || availableProducts)?.find(p => p.id === product.id);
     if (!availableProduct?.isFullyAvailable) {
-      if (!availableProduct?.hasAvailableStatus) {
+      if (availableProduct?.isOverdue) {
+        return { text: 'Em atraso', color: 'text-red-600' };
+      } else if (!availableProduct?.hasAvailableStatus) {
         return { text: 'Status indisponível', color: 'text-red-600' };
       } else if (!availableProduct?.isAvailableOnDate) {
         return { text: 'Ocupado na data selecionada', color: 'text-orange-600' };
@@ -394,4 +396,4 @@ export const ProductVariantSearchField = ({
       )}
     </div>
   );
-}; 
+};

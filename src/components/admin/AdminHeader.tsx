@@ -9,9 +9,10 @@ interface AdminHeaderProps {
   userEmail: string;
   onBack: () => void;
   onSignOut: () => void;
+  adminBasePath?: string;
 }
 
-export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: AdminHeaderProps) => {
+export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut, adminBasePath = '/admin' }: AdminHeaderProps) => {
   const isMobile = useIsMobile();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   
@@ -54,7 +55,12 @@ export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: Adm
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
-            <h1 className="text-lg font-serif truncate">
+            <h1 
+              className={`text-lg font-serif truncate ${
+                activeSection !== 'dashboard' ? 'cursor-pointer hover:text-white/80 transition-colors' : ''
+              }`}
+              onClick={activeSection !== 'dashboard' ? () => navigate(adminBasePath) : undefined}
+            >
               {getSectionTitle(activeSection, true)}
             </h1>
           </div>
@@ -114,7 +120,12 @@ export const AdminHeader = ({ activeSection, userEmail, onBack, onSignOut }: Adm
               Voltar
             </Button>
           )}
-          <h1 className="text-2xl font-serif">
+          <h1 
+            className={`text-2xl font-serif ${
+              activeSection !== 'dashboard' ? 'cursor-pointer hover:text-white/80 transition-colors' : ''
+            }`}
+            onClick={activeSection !== 'dashboard' ? () => navigate(adminBasePath) : undefined}
+          >
             {getSectionTitle(activeSection)}
           </h1>
         </div>

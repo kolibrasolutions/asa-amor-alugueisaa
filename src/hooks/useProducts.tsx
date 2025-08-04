@@ -413,3 +413,149 @@ export const useUpdateProductQuantity = () => {
     },
   });
 };
+
+// Hook para criar nova variação de um produto existente
+export const useCreateProductVariant = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ parentProductId, variant }: { parentProductId: string, variant: ProductVariant }) => {
+      // Buscar produto base para obter dados
+      const { data: baseProduct, error: baseError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', parentProductId)
+        .single();
+      
+      if (baseError) throw baseError;
+      
+      // Criar nova variação
+      const { id, created_at, updated_at, ...baseProductData } = baseProduct;
+      const { data, error } = await supabase
+        .from('products')
+        .insert([{
+          ...baseProductData,
+          size: variant.size,
+          quantity: variant.quantity || 1,
+          parent_product_id: parentProductId,
+          is_variant: true,
+          variant_type: 'size',
+          sku: null, // O trigger irá gerar automaticamente
+          has_size_variants: false
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants', variables.parentProductId] });
+      queryClient.invalidateQueries({ queryKey: ['product-with-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['products-inventory-hierarchy'] });
+      toast({
+        title: "Variação criada",
+        description: "Nova variação adicionada com sucesso!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao criar variação: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Hook para deletar variação de produto
+export const useDeleteProductVariant = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (variantId: string) => {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', variantId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['product-with-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['products-inventory-hierarchy'] });
+      toast({
+        title: "Variação removida",
+        description: "Variação removida com sucesso!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao remover variação: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Hook para atualizar produto com suas variações
+export const useUpdateProductWithVariants = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const createVariant = useCreateProductVariant();
+  const deleteVariant = useDeleteProductVariant();
+
+  return useMutation({
+    mutationFn: async ({ 
+      productId, 
+      productData, 
+      newVariants, 
+      existingVariants 
+    }: { 
+      productId: string, 
+      productData: Partial<Product>, 
+      newVariants: ProductVariant[], 
+      existingVariants: Product[] 
+    }) => {
+      // Atualizar produto base
+      const { data: updatedProduct, error: updateError } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', productId)
+        .select()
+        .single();
+      
+      if (updateError) throw updateError;
+      
+      // Criar novas variações
+      for (const variant of newVariants) {
+        await createVariant.mutateAsync({ parentProductId: productId, variant });
+      }
+      
+      return updatedProduct;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['product-with-variants'] });
+      queryClient.invalidateQueries({ queryKey: ['products-inventory-hierarchy'] });
+      toast({
+        title: "Produto atualizado",
+        description: "Produto e variações atualizados com sucesso!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar produto: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};

@@ -147,16 +147,20 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
     // Verificar se o produto está disponível na data selecionada
     const dateAvailability = availabilityData?.find(av => av.productId === product.id);
     const isAvailableOnDate = !startDate || !endDate || dateAvailability?.isAvailable === true;
+    const isOverdue = dateAvailability?.isOverdue === true;
+    const availabilityStatus = dateAvailability?.status || 'available';
     
     // Se estamos editando, permitir produtos que já estão no aluguel atual
     const isAlreadyInCurrentRental = rentalId && selectedProducts.some(sp => sp.product_id === product.id);
     
-    const isFullyAvailable = (hasAvailableStatus && isAvailableOnDate) || isAlreadyInCurrentRental;
+    const isFullyAvailable = (hasAvailableStatus && isAvailableOnDate && !isOverdue) || isAlreadyInCurrentRental;
     
     // Debug detalhado
     // console.log(`🔍 Produto ${product.name} (${product.id}):`, {
     //   hasAvailableStatus,
     //   isAvailableOnDate,
+    //   isOverdue,
+    //   availabilityStatus,
     //   dateAvailability: dateAvailability?.isAvailable,
     //   isAlreadyInCurrentRental,
     //   isFullyAvailable,
@@ -168,6 +172,8 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
       isFullyAvailable,
       hasAvailableStatus,
       isAvailableOnDate,
+      isOverdue,
+      availabilityStatus,
       isAlreadyInCurrentRental
     };
   });
@@ -500,7 +506,19 @@ export const RentalForm = ({ rentalId, onClose }: RentalFormProps) => {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Não há produtos disponíveis para aluguel nas datas selecionadas. Os produtos mostrados estão ocupados neste período.
+                    {(() => {
+                      const overdueCount = allProductsWithAvailability?.filter(p => p.isOverdue).length || 0;
+                      const occupiedCount = allProductsWithAvailability?.filter(p => !p.isAvailableOnDate && !p.isOverdue).length || 0;
+                      
+                      if (overdueCount > 0 && occupiedCount > 0) {
+                        return `Não há produtos disponíveis para aluguel nas datas selecionadas. ${overdueCount} produto(s) em atraso e ${occupiedCount} produto(s) ocupados neste período.`;
+                      } else if (overdueCount > 0) {
+                        return `Não há produtos disponíveis para aluguel nas datas selecionadas. ${overdueCount} produto(s) em atraso.`;
+                      } else {
+                        return 'Não há produtos disponíveis para aluguel nas datas selecionadas. Os produtos mostrados estão ocupados neste período.';
+                      }
+                    })()
+                    }
                   </AlertDescription>
                 </Alert>
               )}

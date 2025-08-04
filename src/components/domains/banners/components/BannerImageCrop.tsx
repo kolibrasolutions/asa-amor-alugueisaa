@@ -74,23 +74,41 @@ export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: 
     const cropX = completedCrop.x * scaleX;
     const cropY = completedCrop.y * scaleY;
 
-    // Garantir resolução mínima para evitar granulado
-    const minWidth = 1920; // Largura mínima para banner
-    const minHeight = Math.round(minWidth / BANNER_ASPECT_RATIO);
+    // Estratégia final: usar alta resolução com suavização de qualidade máxima
+    // Garantir que a imagem final tenha pelo menos 1920px de largura para banners
+    const minWidth = 1920;
+    const aspectRatio = BANNER_ASPECT_RATIO;
     
-    const finalWidth = Math.max(Math.round(cropWidth), minWidth);
-    const finalHeight = Math.max(Math.round(cropHeight), minHeight);
-
+    // Calcular dimensões finais mantendo qualidade
+    const exactCropWidth = Math.round(cropWidth);
+    const exactCropHeight = Math.round(cropHeight);
+    
+    // Se a área cropada for menor que o mínimo, escalar proporcionalmente
+    let finalWidth = exactCropWidth;
+    let finalHeight = exactCropHeight;
+    
+    if (exactCropWidth < minWidth) {
+      finalWidth = minWidth;
+      finalHeight = Math.round(minWidth / aspectRatio);
+    }
+    
+    // Criar canvas com alta resolução
     const canvas = document.createElement('canvas');
     canvas.width = finalWidth;
     canvas.height = finalHeight;
+    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Configurações de alta qualidade
+    // Configurações de máxima qualidade para suavização
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-
+    ctx.globalCompositeOperation = 'source-over';
+    
+    // Aplicar transformações para melhor qualidade
+    ctx.save();
+    
+    // Desenhar a imagem com alta qualidade
     ctx.drawImage(
       originalImage,
       cropX,
@@ -99,15 +117,19 @@ export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: 
       cropHeight,
       0,
       0,
-      canvas.width,
-      canvas.height
+      finalWidth,
+      finalHeight
     );
+    
+    ctx.restore();
 
+    // Usar PNG com qualidade máxima
     canvas.toBlob((blob) => {
       if (blob) {
+        console.log(`Crop finalizado: ${finalWidth}x${finalHeight}px, tamanho: ${(blob.size / 1024 / 1024).toFixed(2)}MB`);
         onCropComplete(blob);
       }
-    }, 'image/png', 1);
+    }, 'image/png', 1.0);
   }, [completedCrop, onCropComplete, imgSrc]);
 
   return (
@@ -163,4 +185,4 @@ export const BannerImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }: 
       </DialogContent>
     </Dialog>
   );
-}; 
+};

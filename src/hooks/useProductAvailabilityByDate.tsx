@@ -37,19 +37,47 @@ export const useProductAvailabilityByDate = (params: AvailabilityCheckParams) =>
         .lte('rental_start_date', params.endDate)
         .gte('rental_end_date', params.startDate);
 
+      // Também buscar aluguéis em atraso (que passaram da data de devolução)
+      const today = new Date().toISOString().split('T')[0];
+      let overdueQuery = supabase
+        .from('rentals')
+        .select(`
+          id,
+          rental_start_date,
+          rental_end_date,
+          status,
+          rental_items!inner(product_id)
+        `)
+        .in('rental_items.product_id', params.productIds)
+        .in('status', ['pending', 'confirmed', 'in_progress'])
+        .lt('rental_end_date', today);
+
       // Excluir o aluguel atual se estiver editando
       if (params.excludeRentalId) {
         query = query.neq('id', params.excludeRentalId);
+        overdueQuery = overdueQuery.neq('id', params.excludeRentalId);
       }
 
-      const { data: conflictingRentals, error } = await query;
+      const [conflictingResult, overdueResult] = await Promise.all([
+        query,
+        overdueQuery
+      ]);
 
-      if (error) {
-        console.error('❌ Error checking availability:', error);
-        throw error;
+      if (conflictingResult.error) {
+        console.error('❌ Error checking availability:', conflictingResult.error);
+        throw conflictingResult.error;
       }
+
+      if (overdueResult.error) {
+        console.error('❌ Error checking overdue rentals:', overdueResult.error);
+        throw overdueResult.error;
+      }
+
+      const conflictingRentals = conflictingResult.data;
+      const overdueRentals = overdueResult.data;
 
       console.log('🔍 Aluguéis encontrados que podem conflitar:', conflictingRentals?.length || 0);
+      console.log('⏰ Aluguéis em atraso encontrados:', overdueRentals?.length || 0);
       
       conflictingRentals?.forEach((rental, index) => {
         console.log(`📋 Aluguel ${index + 1}:`, {
@@ -72,8 +100,19 @@ export const useProductAvailabilityByDate = (params: AvailabilityCheckParams) =>
         console.log(`   - Solicitado: ${params.startDate} até ${params.endDate}`);
       });
 
+      overdueRentals?.forEach((rental, index) => {
+        console.log(`⏰ Aluguel em atraso ${index + 1}:`, {
+          id: rental.id,
+          start: rental.rental_start_date,
+          end: rental.rental_end_date,
+          status: rental.status,
+          produtos: rental.rental_items?.map(item => item.product_id)
+        });
+      });
+
       // Extrair os IDs dos produtos que estão indisponíveis
       const unavailableProductIds = new Set<string>();
+      const overdueProductIds = new Set<string>();
       
       conflictingRentals?.forEach(rental => {
         rental.rental_items?.forEach(item => {
@@ -82,17 +121,40 @@ export const useProductAvailabilityByDate = (params: AvailabilityCheckParams) =>
         });
       });
 
+      overdueRentals?.forEach(rental => {
+        rental.rental_items?.forEach(item => {
+          overdueProductIds.add(item.product_id);
+          console.log(`⏰ Produto ${item.product_id} marcado como em atraso`);
+        });
+      });
+
       console.log('📊 Produtos indisponíveis:', Array.from(unavailableProductIds));
+      console.log('⏰ Produtos em atraso:', Array.from(overdueProductIds));
 
       // Retornar quais produtos estão disponíveis
       const result = params.productIds.map(productId => {
-        const isAvailable = !unavailableProductIds.has(productId);
-        console.log(`📦 Produto ${productId}: ${isAvailable ? 'DISPONÍVEL ✅' : 'INDISPONÍVEL ❌'}`);
+        const isOverdue = overdueProductIds.has(productId);
+        const isUnavailable = unavailableProductIds.has(productId);
+        const isAvailable = !isUnavailable && !isOverdue;
+        
+        let status = 'available';
+        if (isOverdue) {
+          status = 'overdue';
+        } else if (isUnavailable) {
+          status = 'unavailable';
+        }
+        
+        console.log(`📦 Produto ${productId}: ${isAvailable ? 'DISPONÍVEL ✅' : isOverdue ? 'EM ATRASO ⏰' : 'INDISPONÍVEL ❌'}`);
         
         return {
           productId,
           isAvailable,
+          isOverdue,
+          status,
           conflictingRentals: conflictingRentals?.filter(rental => 
+            rental.rental_items?.some(item => item.product_id === productId)
+          ) || [],
+          overdueRentals: overdueRentals?.filter(rental => 
             rental.rental_items?.some(item => item.product_id === productId)
           ) || []
         };
@@ -120,4 +182,4 @@ export const useCheckSingleProductAvailability = (
     endDate,
     excludeRentalId
   });
-}; 
+};

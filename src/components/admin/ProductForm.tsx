@@ -1,13 +1,14 @@
 
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateProduct, useCreateProductWithVariants, useUpdateProduct, Product, ProductVariant } from '@/hooks/useProducts';
+import { useCreateProduct, useCreateProductWithVariants, useUpdateProduct, useProductVariants, useCreateProductVariant, Product, ProductVariant } from '@/hooks/useProducts';
 import { productSchema, ProductFormData } from './product-form/productSchema';
 import { ProductFormHeader } from './product-form/ProductFormHeader';
 import { ProductFormFields } from './product-form/ProductFormFields';
 import { ProductFormActions } from './product-form/ProductFormActions';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 interface ProductFormProps {
   product?: Product | null;
@@ -18,7 +19,11 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createProduct = useCreateProduct();
   const createProductWithVariants = useCreateProductWithVariants();
   const updateProduct = useUpdateProduct();
+  const createVariant = useCreateProductVariant();
   const { uploadImage, deleteImage } = useImageUpload();
+  
+  // Buscar variações se estamos editando um produto
+  const { data: existingVariants } = useProductVariants(product?.id || '');
 
   const getDefaultValues = (): ProductFormData => {
     if (product) {
@@ -31,7 +36,8 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
         category_id: product.category_id || '',
         status: (product.status as 'available' | 'rented' | 'maintenance') || 'available',
         images: product.images || [],
-        has_size_variants: true
+        has_size_variants: true,
+        size_variants: [] // Será populado via useEffect
       };
     }
     return {
@@ -52,6 +58,17 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
     resolver: zodResolver(productSchema),
     defaultValues: getDefaultValues(),
   });
+  
+  // Carregar variações existentes quando estamos editando
+  useEffect(() => {
+    if (product && existingVariants) {
+      const sizeVariants = existingVariants.map(variant => ({
+        size: variant.size || '',
+        quantity: variant.quantity || 1
+      }));
+      methods.setValue('size_variants', sizeVariants);
+    }
+  }, [product, existingVariants, methods]);
 
   const onSubmit = async (data: ProductFormData) => {
     try {
@@ -103,8 +120,27 @@ export const ProductForm = ({ product, onClose }: ProductFormProps) => {
       } as Omit<Product, 'id' | 'created_at' | 'updated_at'>;
 
       if (product) {
-        // Para produtos existentes, ainda usar a lógica antiga por compatibilidade
+        // Para produtos existentes, atualizar produto base
         await updateProduct.mutateAsync({ id: product.id, ...cleanData });
+        
+        // Verificar se há novas variações para adicionar
+        if (data.size_variants && data.size_variants.length > 0) {
+          const existingVariantSizes = existingVariants?.map(v => v.size) || [];
+          const newVariants = data.size_variants.filter(variant => 
+            !existingVariantSizes.includes(variant.size)
+          );
+          
+          // Criar novas variações
+           for (const variant of newVariants) {
+             await createVariant.mutateAsync({ 
+               parentProductId: product.id, 
+               variant: {
+                 size: variant.size,
+                 quantity: variant.quantity || 1
+               }
+             });
+           }
+        }
       } else {
         // Para produtos novos, sempre criar com variações
         if (data.size_variants && data.size_variants.length > 0) {
