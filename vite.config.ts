@@ -42,8 +42,8 @@ export default defineConfig(({ mode }) => ({
         background_color: '#FAF7F4',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/admin',
+        start_url: '/admin',
         icons: [
           {
             src: 'admin-icon-192.svg',
