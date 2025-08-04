@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Smartphone, Monitor, Download, Wifi, WifiOff, RotateCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { 
+  Smartphone, 
+  Monitor, 
+  Download, 
+  Wifi, 
+  WifiOff, 
+  RotateCw, 
+  CheckCircle, 
+  AlertCircle 
+} from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDataSync } from '@/hooks/useDataSync';
 
 interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[];
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
-    platform: string;
-  }>;
   prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
 export const PWASettings = () => {
@@ -74,8 +79,11 @@ export const PWASettings = () => {
     }
   };
 
-  const formatLastSync = (timestamp: number | null) => {
+  const formatLastSync = (timestamp: Date | number | null) => {
     if (!timestamp) return 'Nunca';
+    if (timestamp instanceof Date) {
+      return timestamp.toLocaleString('pt-BR');
+    }
     return new Date(timestamp).toLocaleString('pt-BR');
   };
 
