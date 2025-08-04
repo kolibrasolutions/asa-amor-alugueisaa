@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
@@ -34,15 +35,15 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ['favicon.ico', 'admin-icon-192.svg', 'admin-icon-512.svg'],
       manifest: {
-        name: 'Noivas Cirlene - Sistema Administrativo',
-        short_name: 'Admin Noivas',
-        description: 'Sistema administrativo para gestão de aluguéis de vestidos de noiva',
+        name: 'Asa & Amor Alugueis',
+        short_name: 'Asa & Amor',
+        description: 'Aluguel de vestidos de noiva, trajes e acessórios',
         theme_color: '#8B5A3C',
         background_color: '#FAF7F4',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/admin',
-        start_url: '/admin',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
             src: 'admin-icon-192.svg',
@@ -57,30 +58,7 @@ export default defineConfig(({ mode }) => ({
             purpose: 'any maskable'
           }
         ],
-        categories: ['business', 'productivity'],
-        shortcuts: [
-          {
-            name: 'Aluguéis',
-            short_name: 'Aluguéis',
-            description: 'Gerenciar aluguéis e reservas',
-            url: '/admin/rentals',
-            icons: [{ src: 'admin-icon-192.svg', sizes: '192x192' }]
-          },
-          {
-            name: 'Calendário',
-            short_name: 'Agenda',
-            description: 'Visualizar agenda de eventos',
-            url: '/admin/calendar',
-            icons: [{ src: 'admin-icon-192.svg', sizes: '192x192' }]
-          },
-          {
-            name: 'Clientes',
-            short_name: 'Clientes',
-            description: 'Gerenciar clientes',
-            url: '/admin/customers',
-            icons: [{ src: 'admin-icon-192.svg', sizes: '192x192' }]
-          }
-        ]
+        categories: ['business', 'lifestyle', 'shopping']
       }
     })
   ].filter(Boolean),
