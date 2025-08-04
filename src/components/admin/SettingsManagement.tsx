@@ -12,11 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
-import { Bell, Globe, Plus, Trash2, Images } from 'lucide-react';
+import { Bell, Globe, Plus, Trash2, Images, Smartphone } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { sendNtfyTest } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
+import { PWASettings } from './PWASettings';
 
 interface NtfyConfig {
   topic: string;
@@ -308,6 +309,9 @@ export const SettingsManagement = () => {
             <TabsTrigger value="notifications" className={`data-[state=active]:border-b-2 ${isMobile ? 'text-xs whitespace-nowrap px-1.5 py-2 min-w-0 flex-shrink-0' : ''}`}>
               {isMobile ? 'Notif.' : 'Notificações'}
             </TabsTrigger>
+            <TabsTrigger value="pwa" className={`data-[state=active]:border-b-2 ${isMobile ? 'text-xs whitespace-nowrap px-1.5 py-2 min-w-0 flex-shrink-0' : ''}`}>
+              {isMobile ? 'PWA' : 'Aplicativo'}
+            </TabsTrigger>
           </TabsList>
 
           <div className={`${isMobile ? 'p-3' : 'p-6'} overflow-hidden`}>
@@ -344,6 +348,12 @@ export const SettingsManagement = () => {
             <TabsContent value="notifications" className="m-0 overflow-hidden">
               <div className="max-w-full overflow-hidden">
                 <NotificationsTab />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pwa" className="m-0 overflow-hidden">
+              <div className="max-w-full overflow-hidden">
+                <PWASettings />
               </div>
             </TabsContent>
           </div>
