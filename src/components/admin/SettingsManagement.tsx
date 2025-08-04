@@ -18,6 +18,7 @@ import { sendNtfyTest } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 import { PWASettings } from './PWASettings';
+import { PWASettingsTest } from './PWASettingsTest';
 
 interface NtfyConfig {
   topic: string;
@@ -353,7 +354,7 @@ export const SettingsManagement = () => {
 
             <TabsContent value="pwa" className="m-0 overflow-hidden">
               <div className="max-w-full overflow-hidden">
-                <PWASettings />
+                <PWASettingsTest />
               </div>
             </TabsContent>
           </div>
