@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, X, RefreshCw } from 'lucide-react';
+import { Download, X, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -23,6 +23,8 @@ export const PWAInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showOfflineReady, setShowOfflineReady] = useState(false);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -44,15 +46,38 @@ export const PWAInstallPrompt: React.FC = () => {
       setShowInstallPrompt(true);
     };
 
+    const handleOnline = () => {
+      setIsOnline(true);
+      setShowOfflineReady(false);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      // Only show offline ready if service worker is registered and app is installed
+      if (isInstalled && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(registration => {
+          if (registration) {
+            setShowOfflineReady(true);
+          }
+        });
+      }
+    };
+
     window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [isInstalled]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -74,6 +99,7 @@ export const PWAInstallPrompt: React.FC = () => {
     setOfflineReady(false);
     setNeedRefresh(false);
     setShowInstallPrompt(false);
+    setShowOfflineReady(false);
   };
 
   // Don't show install prompt if already installed
@@ -170,13 +196,14 @@ export const PWAInstallPrompt: React.FC = () => {
         </Card>
       )}
 
-      {/* Offline Ready */}
-      {offlineReady && (
+      {/* Offline Ready - Only show when actually offline */}
+      {(offlineReady || showOfflineReady) && !isOnline && (
         <Card className="fixed bottom-4 right-4 w-80 z-50 shadow-lg border-green-500">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm flex items-center gap-2">
-                ✅ App Pronto para Offline
+                <WifiOff className="h-4 w-4" />
+                Modo Offline Ativo
               </CardTitle>
               <Button
                 variant="ghost"
@@ -188,10 +215,24 @@ export const PWAInstallPrompt: React.FC = () => {
               </Button>
             </div>
             <CardDescription className="text-xs">
-              O sistema agora funciona offline
+              Sem conexão - usando dados em cache
             </CardDescription>
           </CardHeader>
         </Card>
+      )}
+
+      {/* Connection Status Indicator */}
+      {!isOnline && (
+        <div className="fixed top-4 right-4 z-50">
+          <Card className="border-orange-500 bg-orange-50">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 text-orange-700">
+                <WifiOff className="h-4 w-4" />
+                <span className="text-sm font-medium">Sem conexão</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </>
   );

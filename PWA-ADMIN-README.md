@@ -7,7 +7,8 @@ O sistema administrativo agora funciona como um PWA, permitindo instalação no 
 ### ✨ Funcionalidades PWA
 
 - **Instalação no dispositivo**: Pode ser instalado como um app nativo
-- **Funcionamento offline**: Cache inteligente para uso sem internet
+- **Funcionamento offline inteligente**: Cache inteligente com detecção automática de conexão
+- **Indicador de status**: Mostra quando está offline no canto superior direito
 - **Atualizações automáticas**: Notificações de novas versões
 - **Ícones personalizados**: Interface dedicada para administração
 - **Atalhos rápidos**: Acesso direto às principais funcionalidades
@@ -55,6 +56,11 @@ O PWA inclui atalhos para acesso rápido:
 
 ### 📋 Funcionalidades Offline
 
+#### 🔍 Detecção Automática
+- **Indicador de Status**: Mostra quando está offline no canto superior direito
+- **Modo Offline Ativo**: Notificação aparece apenas quando sem conexão
+- **Reconexão Automática**: Remove indicadores quando a internet volta
+
 #### Disponível Offline
 - Interface do sistema
 - Dados em cache do Supabase
@@ -73,6 +79,7 @@ O sistema detecta automaticamente novas versões e exibe:
 - Notificação de atualização disponível
 - Botão para aplicar atualização
 - Reinicialização automática após atualização
+- Status de conexão respeitado durante atualizações
 
 ### 🛠️ Desenvolvimento
 
