@@ -7,8 +7,10 @@ O sistema administrativo agora funciona como um PWA, permitindo instalação no 
 ### ✨ Funcionalidades PWA
 
 - **Instalação no dispositivo**: Pode ser instalado como um app nativo
+- **Sincronização automática**: Prioriza sincronização de dados em tempo real
 - **Funcionamento offline inteligente**: Cache inteligente com detecção automática de conexão
 - **Indicador de status**: Mostra quando está offline no canto superior direito
+- **Recuperação automática**: Sincroniza automaticamente quando reconecta
 - **Atualizações automáticas**: Notificações de novas versões
 - **Ícones personalizados**: Interface dedicada para administração
 - **Atalhos rápidos**: Acesso direto às principais funcionalidades
@@ -54,32 +56,55 @@ O PWA inclui atalhos para acesso rápido:
 - **512x512**: `admin-icon-512.svg`
 - **Formato**: SVG (escalável e leve)
 
-### 📋 Funcionalidades Offline
+### 🔄 Sistema de Sincronização
 
-#### 🔍 Detecção Automática
-- **Indicador de Status**: Mostra quando está offline no canto superior direito
-- **Modo Offline Ativo**: Notificação aparece apenas quando sem conexão
-- **Reconexão Automática**: Remove indicadores quando a internet volta
+#### 🎯 **Prioridade: Sincronização**
+- **Automática**: Sincroniza dados a cada 5 minutos quando online
+- **Reconexão**: Sincronização imediata ao reestabelecer conexão
+- **Inteligente**: Invalida caches específicos do React Query
+- **Retry**: Tentativas automáticas em caso de falha
+- **Manual**: Botão para sincronizar manualmente
 
-#### Disponível Offline
+#### 🔍 **Detecção e Indicadores**
+- **Status de Conexão**: Indicador no canto superior direito quando offline
+- **Sincronizando**: Indicador central durante sincronização
+- **Sucesso**: Timestamp da última sincronização bem-sucedida
+- **Erro**: Notificação de falhas com botão para retry
+- **Dados Pendentes**: Aviso quando há dados para sincronizar
+
+#### 📱 **Funcionalidades Offline**
+
+##### ✅ Disponível Offline:
 - Interface do sistema
 - Dados em cache do Supabase
 - Navegação entre páginas
 - Formulários (salvos ao reconectar)
 
-#### Requer Conexão
+##### ❌ Requer Conexão:
 - Sincronização de dados
 - Upload de imagens
 - Notificações push
 - Backup em tempo real
 
-### 🔄 Atualizações
+### 🔄 Atualizações do App
 
 O sistema detecta automaticamente novas versões e exibe:
 - Notificação de atualização disponível
 - Botão para aplicar atualização
 - Reinicialização automática após atualização
 - Status de conexão respeitado durante atualizações
+
+### 🛠️ Queries Sincronizadas
+
+O sistema sincroniza automaticamente as seguintes áreas:
+- **Aluguéis** (`rentals`)
+- **Produtos** (`products`)
+- **Categorias** (`categories`) 
+- **Clientes** (`customers`)
+- **Dashboard** (`dashboard`)
+- **Notificações** (`notifications`)
+- **Banners** (`banners`)
+- **Imagens Hero** (`hero-images`)
 
 ### 🛠️ Desenvolvimento
 

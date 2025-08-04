@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, X, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { Download, X, RefreshCw, Wifi, WifiOff, Sync, AlertTriangle } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useDataSync } from '@/hooks/useDataSync';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -23,8 +24,18 @@ export const PWAInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOfflineReady, setShowOfflineReady] = useState(false);
+  
+  // Hook de sincronização de dados
+  const { 
+    isOnline, 
+    isSyncing, 
+    lastSyncTime, 
+    pendingSync, 
+    syncError,
+    performSync,
+    clearSyncError
+  } = useDataSync();
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -46,13 +57,7 @@ export const PWAInstallPrompt: React.FC = () => {
       setShowInstallPrompt(true);
     };
 
-    const handleOnline = () => {
-      setIsOnline(true);
-      setShowOfflineReady(false);
-    };
-
     const handleOffline = () => {
-      setIsOnline(false);
       // Only show offline ready if service worker is registered and app is installed
       if (isInstalled && 'serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then(registration => {
@@ -61,6 +66,10 @@ export const PWAInstallPrompt: React.FC = () => {
           }
         });
       }
+    };
+    
+    const handleOnline = () => {
+      setShowOfflineReady(false);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -94,6 +103,8 @@ export const PWAInstallPrompt: React.FC = () => {
   const handleUpdateClick = () => {
     updateServiceWorker(true);
   };
+
+
 
   const close = () => {
     setOfflineReady(false);
@@ -222,18 +233,98 @@ export const PWAInstallPrompt: React.FC = () => {
       )}
 
       {/* Connection Status Indicator */}
-      {!isOnline && (
-        <div className="fixed top-4 right-4 z-50">
-          <Card className="border-orange-500 bg-orange-50">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 text-orange-700">
-                <WifiOff className="h-4 w-4" />
-                <span className="text-sm font-medium">Sem conexão</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+       {!isOnline && (
+         <div className="fixed top-4 right-4 z-50">
+           <Card className="border-orange-500 bg-orange-50">
+             <CardContent className="p-3">
+               <div className="flex items-center gap-2 text-orange-700">
+                 <WifiOff className="h-4 w-4" />
+                 <div className="flex flex-col">
+                   <span className="text-sm font-medium">Sem conexão</span>
+                   {pendingSync && (
+                     <span className="text-xs text-orange-600">Dados pendentes para sincronizar</span>
+                   )}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )}
+
+       {/* Sync Status Indicator */}
+       {isSyncing && (
+         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+           <Card className="border-blue-500 bg-blue-50">
+             <CardContent className="p-3">
+               <div className="flex items-center gap-2 text-blue-700">
+                 <Sync className="h-4 w-4 animate-spin" />
+                 <span className="text-sm font-medium">Sincronizando dados...</span>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )}
+
+       {/* Sync Error Indicator */}
+       {syncError && (
+         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+           <Card className="border-red-500 bg-red-50">
+             <CardContent className="p-3">
+               <div className="flex items-center gap-2 text-red-700">
+                 <AlertTriangle className="h-4 w-4" />
+                 <div className="flex flex-col">
+                   <span className="text-sm font-medium">Erro na sincronização</span>
+                   <div className="flex items-center gap-2 mt-1">
+                     <span className="text-xs">{syncError}</span>
+                     <Button
+                       size="sm"
+                       variant="outline"
+                       onClick={() => {
+                         clearSyncError();
+                         performSync();
+                       }}
+                       className="h-6 px-2 text-xs"
+                     >
+                       Tentar novamente
+                     </Button>
+                   </div>
+                 </div>
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   onClick={clearSyncError}
+                   className="h-6 w-6 p-0 ml-2"
+                 >
+                   <X className="h-3 w-3" />
+                 </Button>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )}
+
+       {/* Sync Success Indicator */}
+       {isOnline && lastSyncTime && !isSyncing && !syncError && (
+         <div className="fixed top-4 right-4 z-40">
+           <Card className="border-green-500 bg-green-50">
+             <CardContent className="p-2">
+               <div className="flex items-center gap-2 text-green-700">
+                 <Wifi className="h-3 w-3" />
+                 <span className="text-xs">Sincronizado {lastSyncTime.toLocaleTimeString()}</span>
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   onClick={performSync}
+                   className="h-5 w-5 p-0 ml-1"
+                   title="Sincronizar agora"
+                 >
+                   <RefreshCw className="h-3 w-3" />
+                 </Button>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )}
     </>
   );
 };
