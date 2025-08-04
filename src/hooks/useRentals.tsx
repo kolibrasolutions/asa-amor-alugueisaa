@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { sendWhatsAppNotification, sendNtfyNotification } from '@/lib/utils';
+import { getNotificationSettings } from '@/lib/notificationConfig';
 
 export interface Rental {
   id: string;
@@ -273,38 +274,17 @@ export const sendRentalNotification = async (rentalId: string) => {
     console.log('📋 Dados para notificação:', summary);
 
     // === TENTAR NTFY.SH PRIMEIRO (RECOMENDADO) ===
-    console.log('🟡 RENTAL NOTIFICATION DEBUG: Buscando configurações NTFY do localStorage...');
-    const ntfyConfigsString = localStorage.getItem('ntfy_configs');
-    const ntfyServerUrl = localStorage.getItem('ntfy_server_url') || 'https://ntfy.sh';
-    
-    console.log('🟡 RENTAL NOTIFICATION DEBUG: localStorage data:', {
-      ntfyConfigsString,
-      ntfyServerUrl,
-      localStorageLength: localStorage.length
-    });
-    
-    // Compatibilidade com formato antigo
-    const legacyNtfyTopic = localStorage.getItem('ntfy_topic');
-    console.log('🟡 RENTAL NOTIFICATION DEBUG: legacyNtfyTopic:', legacyNtfyTopic);
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Buscando configurações NTFY do Supabase...');
     
     let ntfySuccess = false;
-    let ntfyConfigs = [];
+    const notificationSettings = await getNotificationSettings();
+    const { ntfy_configs: ntfyConfigs, ntfy_server_url: ntfyServerUrl } = notificationSettings;
     
-    // Tentar carregar novo formato de configuração
-    if (ntfyConfigsString) {
-      try {
-        ntfyConfigs = JSON.parse(ntfyConfigsString);
-        console.log('🟡 RENTAL NOTIFICATION DEBUG: Configurações NTFY parseadas:', ntfyConfigs);
-      } catch (error) {
-        console.error('🔴 RENTAL NOTIFICATION DEBUG: Erro ao parsear configurações ntfy:', error);
-      }
-    }
-    
-    // Fallback para formato antigo
-    if (ntfyConfigs.length === 0 && legacyNtfyTopic) {
-      ntfyConfigs = [{ topic: legacyNtfyTopic, name: 'Funcionário' }];
-      console.log('🟡 RENTAL NOTIFICATION DEBUG: Usando configuração legacy:', ntfyConfigs);
-    }
+    console.log('🟡 RENTAL NOTIFICATION DEBUG: Configurações carregadas:', {
+      ntfyConfigs,
+      ntfyServerUrl,
+      configsCount: ntfyConfigs.length
+    });
     
     if (ntfyConfigs.length > 0) {
       try {
@@ -352,8 +332,7 @@ export const sendRentalNotification = async (rentalId: string) => {
 
     // === FALLBACK PARA WHATSAPP SE NTFY FALHAR ===
     if (!ntfySuccess) {
-      const whatsappPhone = localStorage.getItem('whatsapp_phone');
-      const whatsappApiKey = localStorage.getItem('whatsapp_api_key');
+      const { whatsapp_phone: whatsappPhone, whatsapp_api_key: whatsappApiKey } = notificationSettings;
       
       if (whatsappPhone && whatsappApiKey) {
         try {

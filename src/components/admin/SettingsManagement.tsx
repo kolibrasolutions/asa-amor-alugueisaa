@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ColorsManagement from './ColorsManagement';
@@ -16,242 +16,97 @@ import { Bell, Globe, Plus, Trash2, Images } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { sendNtfyTest } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 
 interface NtfyConfig {
   topic: string;
   name: string;
 }
 
+// Componente com estado local para evitar re-renderizações
+const NtfyInput = memo(({ 
+  id, 
+  label, 
+  defaultValue, 
+  onChange, 
+  placeholder, 
+  className,
+  icon 
+}: {
+  id: string;
+  label: string;
+  defaultValue: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  icon?: React.ReactNode;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const handleSave = () => {
+    if (inputRef.current) {
+      onChange(inputRef.current.value);
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    }
+  };
+  
+  const handleBlur = () => {
+    handleSave();
+  };
+  
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id} className="flex items-center gap-2 text-sm">
+        {icon}
+        {label}
+      </Label>
+      <Input
+        ref={inputRef}
+        id={id}
+        type="text"
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+        className={className}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize={label.includes('Nome') ? 'words' : 'off'}
+        spellCheck="false"
+        inputMode="text"
+      />
+    </div>
+  );
+});
+
 export const SettingsManagement = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('banners');
   
-  // Ntfy State
-  const [ntfyConfigs, setNtfyConfigs] = useState<NtfyConfig[]>([{ topic: '', name: '' }]);
-  const [ntfyServerUrl, setNtfyServerUrl] = useState('https://ntfy.sh');
-  const [isTestingNtfy, setIsTestingNtfy] = useState<{[key: string]: boolean}>({});
+  // Use the new notification settings hook
+  const {
+    ntfyConfigs,
+    ntfyServerUrl,
+    isTestingNtfy,
+    updateNtfyConfig,
+    addNtfyConfig,
+    removeNtfyConfig,
+    setNtfyServerUrl,
+    handleSaveNtfyConfig,
+    handleExportConfig,
+    handleImportConfig,
+    handleTestNtfy
+  } = useNotificationSettings();
 
-  // Debug visual para mobile - declarar primeiro
-  const showMobileDebug = useCallback((message: string) => {
-    if (window.innerWidth < 768) {
-      toast({
-        title: "📱 Debug Mobile",
-        description: message,
-        duration: 2000,
-      });
-    }
-  }, [toast]);
 
-  // Carregar configurações do localStorage na inicialização
-  useEffect(() => {
-    console.log('🟠 SETTINGS DEBUG: Carregando configurações...');
-    console.log('🟠 SETTINGS DEBUG: URL atual:', window.location.href);
-    console.log('🟠 SETTINGS DEBUG: User Agent:', navigator.userAgent);
-    console.log('🟠 SETTINGS DEBUG: Is Mobile?', window.innerWidth < 768);
-    console.log('🟠 SETTINGS DEBUG: localStorage disponível?', typeof(Storage) !== "undefined");
-    
-    showMobileDebug(`URL: ${window.location.href}`);
-    
-    // Listar TODAS as chaves do localStorage para debug
-    console.log('🟠 SETTINGS DEBUG: TODAS as chaves localStorage:');
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      const value = localStorage.getItem(key);
-      console.log(`  ${key}: ${value}`);
-    }
-    
-    // Ntfy
-    const savedNtfyConfigs = localStorage.getItem('ntfy_configs');
-    const savedNtfyServer = localStorage.getItem('ntfy_server_url');
-    
-    console.log('🟠 SETTINGS DEBUG: savedNtfyConfigs:', savedNtfyConfigs);
-    console.log('🟠 SETTINGS DEBUG: savedNtfyServer:', savedNtfyServer);
-    
-    showMobileDebug(`localStorage: ${localStorage.length} chaves total`);
-    
-    if (savedNtfyConfigs) {
-      try {
-        const parsed = JSON.parse(savedNtfyConfigs);
-        console.log('🟠 SETTINGS DEBUG: Parsed configs:', parsed);
-        setNtfyConfigs(parsed);
-        showMobileDebug(`✅ ${parsed.length} funcionário(s) carregados`);
-      } catch (error) {
-        console.error('🔴 SETTINGS DEBUG: Erro ao parsear configs:', error);
-        setNtfyConfigs([{ topic: '', name: '' }]);
-        showMobileDebug('❌ Erro ao carregar configs');
-      }
-    } else {
-      showMobileDebug('⚠️ Nenhuma config encontrada');
-      
-      // Verificar se há chaves relacionadas ao ntfy com nomes diferentes
-      const allKeys = Object.keys(localStorage);
-      const ntfyRelatedKeys = allKeys.filter(key => key.toLowerCase().includes('ntfy'));
-      if (ntfyRelatedKeys.length > 0) {
-        console.log('🟠 SETTINGS DEBUG: Chaves relacionadas ao NTFY encontradas:', ntfyRelatedKeys);
-        showMobileDebug(`🔍 Encontradas chaves: ${ntfyRelatedKeys.join(', ')}`);
-      }
-    }
-    if (savedNtfyServer) setNtfyServerUrl(savedNtfyServer);
-  }, [showMobileDebug]);
 
-  const handleSaveNtfyConfig = useCallback(() => {
-    console.log('🟠 SETTINGS DEBUG: Salvando configurações...');
-    showMobileDebug('Salvando configurações...');
-    
-    const hasEmptyFields = ntfyConfigs.some(config => !config.topic || !config.name);
-    if (hasEmptyFields) {
-      toast({
-        title: "Erro",
-        description: "Preencha o nome e tópico para todos os funcionários",
-        variant: "destructive",
-      });
-      showMobileDebug('Erro: campos vazios');
-      return;
-    }
 
-    // Salvar no localStorage
-    const configsJson = JSON.stringify(ntfyConfigs);
-    localStorage.setItem('ntfy_configs', configsJson);
-    localStorage.setItem('ntfy_server_url', ntfyServerUrl);
-    
-    // Verificar se foi salvo corretamente
-    const saved = localStorage.getItem('ntfy_configs');
-    console.log('🟠 SETTINGS DEBUG: Verificação pós-save:', saved);
-
-    toast({
-      title: "✅ Configurações salvas",
-      description: "Configurações do ntfy foram salvas com sucesso!",
-    });
-    showMobileDebug('Configurações salvas com sucesso!');
-  }, [ntfyConfigs, ntfyServerUrl, toast, showMobileDebug]);
-
-  // Exportar configurações para sincronização
-  const handleExportConfig = useCallback(() => {
-    const configData = {
-      ntfy_configs: ntfyConfigs,
-      ntfy_server_url: ntfyServerUrl,
-      exported_at: new Date().toISOString(),
-      exported_from: navigator.userAgent,
-      url: window.location.href
-    };
-    
-    const configText = JSON.stringify(configData, null, 2);
-    
-    // Copiar para clipboard
-    navigator.clipboard.writeText(configText).then(() => {
-      toast({
-        title: "📋 Configurações copiadas!",
-        description: "Cole no outro dispositivo e clique em Importar",
-      });
-      showMobileDebug('Configurações copiadas para clipboard');
-    }).catch(() => {
-      // Fallback: mostrar em um alert
-      alert('Copie estas configurações:\n\n' + configText);
-    });
-  }, [ntfyConfigs, ntfyServerUrl, toast, showMobileDebug]);
-
-  // Importar configurações
-  const handleImportConfig = useCallback(() => {
-    const configText = prompt('Cole aqui as configurações exportadas do outro dispositivo:');
-    if (!configText) return;
-
-    try {
-      const configData = JSON.parse(configText);
-      
-      if (configData.ntfy_configs) {
-        setNtfyConfigs(configData.ntfy_configs);
-        console.log('🟠 SETTINGS DEBUG: Configs importadas:', configData.ntfy_configs);
-      }
-      
-      if (configData.ntfy_server_url) {
-        setNtfyServerUrl(configData.ntfy_server_url);
-      }
-
-      toast({
-        title: "✅ Configurações importadas!",
-        description: "Clique em 'Salvar Configurações' para aplicar",
-      });
-      showMobileDebug(`Importadas ${configData.ntfy_configs?.length || 0} configs`);
-      
-    } catch (error) {
-      toast({
-        title: "❌ Erro na importação",
-        description: "Formato inválido. Verifique os dados copiados.",
-        variant: "destructive",
-      });
-      showMobileDebug('Erro ao importar configurações');
-    }
-  }, [toast, showMobileDebug]);
-
-  const handleTestNtfy = useCallback(async (index: number) => {
-    const config = ntfyConfigs[index];
-    if (!config.topic) {
-      toast({
-        title: "Erro",
-        description: "Configure primeiro o tópico do ntfy",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsTestingNtfy(prev => ({ ...prev, [index]: true }));
-
-    try {
-      console.log('Testando ntfy com:', {
-        topic: config.topic,
-        server: ntfyServerUrl
-      });
-
-      const success = await sendNtfyTest({
-        topic: config.topic,
-        serverUrl: ntfyServerUrl
-      });
-
-      if (success) {
-        toast({
-          title: "🎉 Teste enviado!",
-          description: `Mensagem de teste enviada para ${config.name}! Verifique o app em alguns segundos.`,
-        });
-      } else {
-        toast({
-          title: "❌ Erro no teste",
-          description: "Não foi possível enviar a mensagem. Verifique se o tópico está correto.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Erro no teste ntfy:', error);
-      toast({
-        title: "❌ Erro no teste",
-        description: "Erro ao enviar mensagem de teste. Verifique o console para mais detalhes.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTestingNtfy(prev => ({ ...prev, [index]: false }));
-    }
-  }, [ntfyConfigs, ntfyServerUrl, toast]);
-
-  const addNtfyConfig = useCallback(() => {
-    setNtfyConfigs(prev => [...prev, { topic: '', name: '' }]);
-  }, []);
-
-  const removeNtfyConfig = useCallback((index: number) => {
-    setNtfyConfigs(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const updateNtfyConfig = useCallback((index: number, field: keyof NtfyConfig, value: string) => {
-    console.log('🟠 SETTINGS DEBUG: Atualizando config:', { index, field, value });
-    showMobileDebug(`Atualizando ${field}: ${value}`);
-    
-    setNtfyConfigs(prev => {
-      const newConfigs = prev.map((config, i) =>
-        i === index ? { ...config, [field]: value } : config
-      );
-      console.log('🟠 SETTINGS DEBUG: Novas configs:', newConfigs);
-      return newConfigs;
-    });
-  }, [showMobileDebug]);
 
   const NotificationsTab = () => (
     <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
@@ -270,52 +125,26 @@ export const SettingsManagement = () => {
 
       <div className="space-y-4">
         {ntfyConfigs.map((config, index) => (
-          <div key={index} className={`${isMobile ? 'flex flex-col space-y-4 p-3' : 'grid grid-cols-1 md:grid-cols-3 gap-4 p-4'} border rounded-lg`}>
-            <div className="space-y-2">
-              <Label htmlFor={`ntfy-name-${index}`} className="flex items-center gap-2 text-sm">
-                <Bell className="w-4 h-4" />
-                Nome do Funcionário
-              </Label>
-              <Input
-                key={`name-${index}-${config.name}`}
-                id={`ntfy-name-${index}`}
-                placeholder="Maria"
-                value={config.name}
-                onChange={(e) => {
-                  e.preventDefault();
-                  updateNtfyConfig(index, 'name', e.target.value);
-                }}
-                className={`${isMobile ? 'text-base' : ''}`}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="words"
-                spellCheck="false"
-                inputMode="text"
-              />
-            </div>
+          <div key={`ntfy-config-${index}`} className={`${isMobile ? 'flex flex-col space-y-4 p-3' : 'grid grid-cols-1 md:grid-cols-3 gap-4 p-4'} border rounded-lg`}>
+            <NtfyInput
+               id={`ntfy-name-${index}`}
+               label="Nome do Funcionário"
+               defaultValue={config.name}
+               onChange={(value) => updateNtfyConfig(index, 'name', value)}
+               placeholder="Maria"
+               className={`${isMobile ? 'text-base' : ''}`}
+               icon={<Bell className="w-4 h-4" />}
+             />
 
-            <div className="space-y-2">
-              <Label htmlFor={`ntfy-topic-${index}`} className="flex items-center gap-2 text-sm">
-                <Bell className="w-4 h-4" />
-                Tópico do ntfy
-              </Label>
-              <Input
-                key={`topic-${index}-${config.topic}`}
-                id={`ntfy-topic-${index}`}
-                placeholder="noivas-cirlene-maria-2024"
-                value={config.topic}
-                onChange={(e) => {
-                  e.preventDefault();
-                  updateNtfyConfig(index, 'topic', e.target.value);
-                }}
-                className={`${isMobile ? 'text-base' : ''}`}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                inputMode="text"
-              />
-            </div>
+            <NtfyInput
+               id={`ntfy-topic-${index}`}
+               label="Tópico do ntfy"
+               defaultValue={config.topic}
+               onChange={(value) => updateNtfyConfig(index, 'topic', value)}
+               placeholder="noivas-cirlene-maria-2024"
+               className={`${isMobile ? 'text-base' : ''}`}
+               icon={<Globe className="w-4 h-4" />}
+             />
 
             <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'items-end'} gap-2`}>
               <Button 
@@ -356,17 +185,14 @@ export const SettingsManagement = () => {
           <Globe className="w-4 h-4" />
           Servidor ntfy (opcional)
         </Label>
-        <Input
+        <NtfyInput
           id="ntfy-server"
+          label=""
+          defaultValue={ntfyServerUrl}
+          onChange={(value) => setNtfyServerUrl(value)}
           placeholder="https://ntfy.sh"
-                        value={ntfyServerUrl}
-              onChange={(e) => setNtfyServerUrl(e.target.value)}
-              className={`${isMobile ? 'text-base' : ''}`}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
-              inputMode="url"
+          className={`${isMobile ? 'text-base' : ''}`}
+          icon={<Globe className="w-4 h-4" />}
         />
         <p className="text-xs md:text-sm text-gray-500">
           Deixe como ntfy.sh ou use seu próprio servidor
@@ -528,4 +354,4 @@ export const SettingsManagement = () => {
   );
 };
 
-export default SettingsManagement; 
+export default SettingsManagement;
