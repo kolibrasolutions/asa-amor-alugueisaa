@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, X, RefreshCw, Wifi, WifiOff, RotateCw, AlertTriangle } from 'lucide-react';
-import { useRegisterSW } from 'virtual:pwa-register/react';
+// import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useDataSync } from '@/hooks/useDataSync';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -37,18 +37,24 @@ export const PWAInstallPrompt: React.FC = () => {
     clearSyncError
   } = useDataSync();
 
-  const {
-    offlineReady: [offlineReady, setOfflineReady],
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegistered(r) {
-      console.log('SW Registered: ' + r);
-    },
-    onRegisterError(error) {
-      console.log('SW registration error', error);
-    },
-  });
+  // Temporarily commented out to fix module loading errors
+  // const {
+  //   offlineReady: [offlineReady, setOfflineReady],
+  //   needRefresh: [needRefresh, setNeedRefresh],
+  //   updateServiceWorker,
+  // } = useRegisterSW({
+  //   onRegistered(r) {
+  //     console.log('SW Registered: ' + r);
+  //   },
+  //   onRegisterError(error) {
+  //     console.log('SW registration error', error);
+  //   },
+  // });
+  
+  // Temporary fallback values
+   const [offlineReady, setOfflineReady] = useState(false);
+   const [needRefresh, setNeedRefresh] = useState(false);
+   const updateServiceWorker = async () => {};
 
   useEffect(() => {
     const handler = (e: BeforeInstallPromptEvent) => {

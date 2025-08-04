@@ -70,7 +70,7 @@ export const ProductDetailsModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-4xl max-h-[90vh] p-0 rounded-xl ${isMobile ? 'w-[95vw] h-[90vh]' : 'w-full overflow-hidden'} ${isMobile ? '' : ''}`} closeButton={false}>
+      <DialogContent className={`max-w-4xl max-h-[90vh] p-0 rounded-xl ${isMobile ? 'w-[95vw] h-[90vh]' : 'w-full overflow-hidden'} ${isMobile ? '' : ''}`}>
         <div className={`${isMobile ? 'flex flex-col h-full' : 'grid grid-cols-2 min-h-[600px]'}`}>
           {/* Botão de Fechar */}
           <Button variant="ghost" className="absolute top-4 right-4 z-50 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100" onClick={onClose}>
