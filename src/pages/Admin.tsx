@@ -13,6 +13,7 @@ import ColorsManagement from "@/components/admin/ColorsManagement";
 import SizesManagement from "@/components/admin/SizesManagement";
 import { BannersManagement } from "@/components/admin/BannersManagement";
 import { SettingsManagement } from "@/components/admin/SettingsManagement";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAdminAuth();
@@ -74,6 +75,7 @@ const Admin = () => {
           <Route path="settings/*" element={<SettingsManagement />} />
         </Routes>
       </main>
+      <PWAInstallPrompt />
     </div>
   );
 };
