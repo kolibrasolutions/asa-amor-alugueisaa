@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, X, RefreshCw, Wifi, WifiOff, Sync, AlertTriangle } from 'lucide-react';
+import { Download, X, RefreshCw, Wifi, WifiOff, RotateCw, AlertTriangle } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useDataSync } from '@/hooks/useDataSync';
 
@@ -257,7 +257,7 @@ export const PWAInstallPrompt: React.FC = () => {
            <Card className="border-blue-500 bg-blue-50">
              <CardContent className="p-3">
                <div className="flex items-center gap-2 text-blue-700">
-                 <Sync className="h-4 w-4 animate-spin" />
+                 <RotateCw className="h-4 w-4 animate-spin" />
                  <span className="text-sm font-medium">Sincronizando dados...</span>
                </div>
              </CardContent>
