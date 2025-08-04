@@ -70,20 +70,24 @@ export const ProductDetailsModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-hidden p-0 ${isMobile ? 'w-[95vw] h-[85vh]' : 'w-full'}`}>
-        <div className={`grid grid-cols-2 ${isMobile ? 'h-full' : 'min-h-[600px]'}`}>
+      <DialogContent className={`max-w-4xl max-h-[90vh] p-0 rounded-xl ${isMobile ? 'w-[95vw] h-[90vh]' : 'w-full overflow-hidden'} ${isMobile ? '' : ''}`} closeButton={false}>
+        <div className={`${isMobile ? 'flex flex-col h-full' : 'grid grid-cols-2 min-h-[600px]'}`}>
+          {/* Botão de Fechar */}
+          <Button variant="ghost" className="absolute top-4 right-4 z-50 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white/100" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
           {/* Lado Esquerdo - Imagens */}
-          <div className={`relative bg-gray-50 ${isMobile ? 'h-full' : 'h-full'} flex items-center justify-center`}>
+          <div className={`relative bg-gray-50 rounded-t-xl ${isMobile ? 'flex-shrink-0 h-[50vh] z-0 shadow-md overflow-hidden' : 'h-full'} flex items-center justify-center`}>
             {hasMultipleImages ? (
               <Carousel setApi={setApi} className="w-full h-full">
                 <CarouselContent className="h-full">
                   {product.images!.map((image, index) => (
                     <CarouselItem key={index} className="h-full">
-                      <div className="h-full flex items-center justify-center p-4">
+                      <div className={`w-full h-full flex items-center justify-center p-4`}>
                         <img
                           src={image}
                           alt={`${product.name} - imagem ${index + 1}`}
-                          className="max-w-full max-h-full object-contain"
+                          className="w-full h-full object-contain rounded-lg"
                         />
                       </div>
                     </CarouselItem>
@@ -111,7 +115,7 @@ export const ProductDetailsModal = ({
                   <img
                     src={product.images[0]}
                     alt={product.name}
-                    className="max-w-full max-h-full object-contain"
+                    className="w-full h-full object-contain rounded-lg"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -123,7 +127,7 @@ export const ProductDetailsModal = ({
           </div>
 
           {/* Lado Direito - Detalhes */}
-          <div className={`${isMobile ? 'p-3' : 'p-4 md:p-6'} flex flex-col ${isMobile ? 'space-y-3' : 'space-y-4 md:space-y-6'} overflow-y-auto`}>
+          <div className={`${isMobile ? 'p-3 flex-1 overflow-y-auto relative z-10 bg-white' : 'p-4 md:p-6 overflow-y-auto'} flex flex-col ${isMobile ? 'space-y-3' : 'space-y-4 md:space-y-6'}`}>
             <DialogHeader className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
               <DialogTitle className={`${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} font-light text-asa-dark tracking-wide leading-relaxed`}>
                 {product.name}
@@ -212,4 +216,4 @@ export const ProductDetailsModal = ({
       </DialogContent>
     </Dialog>
   );
-}; 
+};

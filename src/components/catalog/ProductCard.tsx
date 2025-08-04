@@ -78,59 +78,59 @@ const ProductCard = ({ product, onCopyId }: ProductCardProps) => {
                     aria-label={`Ir para imagem ${index + 1}`}
                   />
                 ))}
-              </div>
-            )}
-          </Carousel>
-        ) : (
-          <>
-            {product.images && product.images.length > 0 ? (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out cursor-pointer"
-                onClick={handleImageClick}
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <span className="text-gray-400 font-light text-sm">Sem imagem</span>
-              </div>
-            )}
-          </>
-        )}
-        
-        {/* Botão de copy discreto */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-3 right-3 h-8 w-8 bg-white/90 backdrop-blur-sm border-0 shadow-lg text-gray-600 hover:text-asa-dark hover:bg-white opacity-0 group-hover:opacity-100 transition-all duration-300"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCopyId(product.sku || product.id, product.name);
-          }}
-          title="Copiar código do produto"
-        >
-          <Copy className="h-3.5 w-3.5" />
-          <span className="sr-only">Copiar código do produto</span>
-        </Button>
-      </div>
-      
-      <CardContent className="py-6 px-4 bg-white">
-        <div className="text-center">
-          <h3 className="text-lg font-light text-asa-dark tracking-wide leading-relaxed">
-            {product.name}
-          </h3>
+                </div>
+              )}
+            </Carousel>
+          ) : (
+            <>
+              {product.images && product.images.length > 0 ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out cursor-pointer"
+                  onClick={handleImageClick}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400 font-light text-sm">Sem imagem</span>
+                </div>
+              )}
+            </>
+          )}
+          
+          {/* Botão de copy discreto */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 right-3 h-8 w-8 bg-white/90 backdrop-blur-sm border-0 shadow-lg text-gray-600 hover:text-asa-dark hover:bg-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopyId(product.sku || product.id, product.name);
+            }}
+            title="Copiar código do produto"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            <span className="sr-only">Copiar código do produto</span>
+          </Button>
         </div>
-      </CardContent>
-      </Card>
+        
+        <CardContent className="py-6 px-4 bg-white">
+          <div className="text-center">
+            <h3 className="text-lg font-light text-asa-dark tracking-wide leading-relaxed">
+              {product.name}
+            </h3>
+          </div>
+        </CardContent>
+        </Card>
 
-      <ProductDetailsModal
-        product={product}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onCopyId={onCopyId}
-      />
-    </>
-  );
+        <ProductDetailsModal
+          product={product}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onCopyId={onCopyId}
+        />
+      </>
+    );
 };
 
 export default ProductCard;
