@@ -1,26 +1,26 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="64" fill="#8B5A3C"/>
-  <rect x="32" y="32" width="448" height="448" rx="32" fill="#FAF7F4"/>
+  <rect width="512" height="512" rx="64" fill="#E91E63"/>
+  <rect x="32" y="32" width="448" height="448" rx="32" fill="#FFFFFF"/>
   
   <!-- Admin icon -->
-  <circle cx="256" cy="180" r="50" fill="#8B5A3C"/>
-  <path d="M256 260c-55 0-100 25-100 55v25h200v-25c0-30-45-55-100-55z" fill="#8B5A3C"/>
+  <circle cx="256" cy="180" r="50" fill="#E91E63"/>
+  <path d="M256 260c-55 0-100 25-100 55v25h200v-25c0-30-45-55-100-55z" fill="#E91E63"/>
   
   <!-- Settings gear -->
   <g transform="translate(350, 350)">
-    <circle cx="40" cy="40" r="15" fill="#8B5A3C"/>
-    <path d="M40 10c-2.75 0-5 2.25-5 5v5.42l-3.53 2.05c-1.95 1.13-4.45.5-5.58-1.45L24.35 18.98c-1.13-1.95-.5-4.45 1.45-5.58l2.05-1.18V10c0-2.75 2.25-5 5-5h10c2.75 0 5 2.25 5 5v2.22l2.05 1.18c1.95 1.13 2.58 3.63 1.45 5.58l-2.05 3.54c-1.13 1.95-3.63 2.58-5.58 1.45L40 20.42V15c0-2.75-2.25-5-5-5z" fill="#8B5A3C" opacity="0.7"/>
+    <circle cx="40" cy="40" r="15" fill="#E91E63"/>
+    <path d="M40 10c-2.75 0-5 2.25-5 5v5.42l-3.53 2.05c-1.95 1.13-4.45.5-5.58-1.45L24.35 18.98c-1.13-1.95-.5-4.45 1.45-5.58l2.05-1.18V10c0-2.75 2.25-5 5-5h10c2.75 0 5 2.25 5 5v2.22l2.05 1.18c1.95 1.13 2.58 3.63 1.45 5.58l-2.05 3.54c-1.13 1.95-3.63 2.58-5.58 1.45L40 20.42V15c0-2.75-2.25-5-5-5z" fill="#E91E63" opacity="0.7"/>
   </g>
   
   <!-- Calendar icon -->
   <g transform="translate(80, 350)">
-    <rect x="10" y="20" width="60" height="50" rx="5" fill="none" stroke="#8B5A3C" stroke-width="4"/>
-    <path d="M20 15v10M50 15v10M20 35h20M20 45h15" stroke="#8B5A3C" stroke-width="4" stroke-linecap="round"/>
+    <rect x="10" y="20" width="60" height="50" rx="5" fill="none" stroke="#E91E63" stroke-width="4"/>
+    <path d="M20 15v10M50 15v10M20 35h20M20 45h15" stroke="#E91E63" stroke-width="4" stroke-linecap="round"/>
   </g>
   
   <!-- Document/List icon -->
   <g transform="translate(200, 350)">
-    <rect x="10" y="10" width="40" height="50" rx="4" fill="none" stroke="#8B5A3C" stroke-width="3"/>
-    <path d="M18 25h24M18 35h20M18 45h16" stroke="#8B5A3C" stroke-width="2" stroke-linecap="round"/>
+    <rect x="10" y="10" width="40" height="50" rx="4" fill="none" stroke="#E91E63" stroke-width="3"/>
+    <path d="M18 25h24M18 35h20M18 45h16" stroke="#E91E63" stroke-width="2" stroke-linecap="round"/>
   </g>
 </svg>

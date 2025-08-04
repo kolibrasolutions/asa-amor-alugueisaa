@@ -43,8 +43,8 @@ O PWA inclui atalhos para acesso rápido:
 - **Nome Curto**: Admin Noivas
 - **Escopo**: `/admin`
 - **URL Inicial**: `/admin`
-- **Tema**: #8B5A3C (marrom característico)
-- **Fundo**: #FAF7F4 (bege claro)
+- **Tema**: #E91E63 (rosa elegante)
+- **Fundo**: #FFFFFF (branco)
 
 #### Cache Strategy
 - **Supabase**: NetworkFirst (24h cache)

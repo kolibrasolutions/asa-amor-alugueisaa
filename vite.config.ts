@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => ({
         name: 'Noivas Cirlene',
         short_name: 'Noivas Cirlene',
         description: 'Aluguel de vestidos de noiva, trajes e acessórios',
-        theme_color: '#8B5A3C',
+        theme_color: '#E91E63',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
