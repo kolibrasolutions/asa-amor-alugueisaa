@@ -3,8 +3,8 @@ import { MessageCircle } from "lucide-react";
 
 const SustainableSection = () => {
   const handleWhatsAppClick = () => {
-    const phoneNumber = "5531999999999"; // Substitua pelo número real
-    const message = "Olá! Gostaria de saber mais sobre os serviços sustentáveis.";
+    const phoneNumber = "5535991479232";
+    const message = "Olá! Vim através do site noivascirlene.com.br e gostaria de saber mais sobre os serviços sustentáveis.";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -68,4 +68,4 @@ const SustainableSection = () => {
   );
 };
 
-export default SustainableSection; 
+export default SustainableSection;

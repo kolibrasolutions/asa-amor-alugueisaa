@@ -59,7 +59,7 @@ const WhatsAppSection = () => {
               Nossa equipe especializada está à disposição para tirar todas as suas dúvidas e oferecer o melhor atendimento.
             </p>
             <a
-              href="https://wa.me/5535991479232"
+              href="https://wa.me/5535991479232?text=Olá! Vim através do site noivascirlene.com.br e gostaria de agendar uma visita para conhecer os vestidos e ternos disponíveis."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
@@ -73,4 +73,4 @@ const WhatsAppSection = () => {
   );
 };
 
-export default WhatsAppSection; 
+export default WhatsAppSection;

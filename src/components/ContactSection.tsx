@@ -30,7 +30,7 @@ const ContactSection = () => {
               Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.
             </p>
             <a
-              href="https://wa.me/seu_numero"
+              href="https://wa.me/5535991479232?text=Olá! Vim através do site noivascirlene.com.br e gostaria de mais informações sobre os serviços."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"

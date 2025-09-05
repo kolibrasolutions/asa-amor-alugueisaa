@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => ({
         orientation: 'portrait',
         scope: '/admin',
         start_url: '/admin',
+        id: 'https://noivascirlene.com.br/admin',
         icons: [
           {
             src: 'admin-icon-192.svg',
