@@ -94,7 +94,7 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`${isMobile ? 'max-w-[98vw] max-h-[95vh] w-[98vw] p-3' : 'max-w-[95vw] max-h-[95vh] w-auto'} overflow-hidden flex flex-col`}>
+      <DialogContent className={`${isMobile ? 'max-w-[98vw] max-h-[95vh] w-[98vw] p-3' : 'max-w-[95vw] max-h-[95vh] w-auto'} overflow-y-auto flex flex-col`}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className={isMobile ? 'text-base' : ''}>Recortar Imagem do Produto</DialogTitle>
           <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>
@@ -152,4 +152,4 @@ export const ProductImageCrop = ({ isOpen, onClose, onCropComplete, imageFile }:
       </DialogContent>
     </Dialog>
   );
-}; 
+};
